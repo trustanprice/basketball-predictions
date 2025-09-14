@@ -9,27 +9,47 @@ The goal is to analyze team performance trends, identify conditions that lead to
 
 BASKETBALL-PREDICTION
 │
+
 ├── data/ # Datasets
+
 │ ├── raw/ # Original CSVs (e.g., per-season records)
+
 │ └── processed/ # Cleaned & merged data with Year column
+
 │
+
 ├── notebooks/ # Jupyter notebooks
+
 │ ├── 01_data_cleaning.ipynb
+
 │ ├── 02_exploration.ipynb
+
 │ └── 03_failure_model.ipynb
+
 │
+
 ├── src/ # Source code
+
 │ ├── data_loader.py # Load & preprocess datasets
+
 │ ├── features.py # Feature engineering (streaks, margins, etc.)
+
 │ ├── model.py # Failure model implementation
+
 │ └── utils.py # Helper functions
+
 │
+
 ├── outputs/ # Model outputs
+
 │ ├── figures/ # Graphs and plots
-│ └── models/ # Saved models
+
 │
+
 ├── requirements.txt # Python dependencies
+
 ├── .gitignore # Files to ignore in git
+
 └── README.md # Project overview (this file)
 
 ---
