@@ -7,7 +7,7 @@ The goal is to analyze team performance trends, identify conditions that lead to
 
 ## 📂 Project Structure
 
-BASKETBALL-PREDICTION/
+BASKETBALL-PREDICTION
 │
 ├── data/ # Datasets
 │ ├── raw/ # Original CSVs (e.g., per-season records)
