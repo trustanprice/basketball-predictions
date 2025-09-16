@@ -3,4 +3,4 @@ __pycache__/
 .ipynb_checkpoints/
 outputs/
 data/raw/*
-!data/raw/team-records.csv
+!data/raw/team-stats/team-records.csv
