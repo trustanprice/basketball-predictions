@@ -13,12 +13,18 @@ st.header("About Me & This Project")
 
 # Put two images side by side
 col1, col2 = st.columns([1, 1])
-
 with col1:
-    st.image("/Users/trustanprice/Desktop/Personal/Basketball-Predictions/data/raw/fa25-headshot.JPG", caption="Me", width=200)
-
+    st.image(
+        "/Users/trustanprice/Desktop/Personal/Basketball-Predictions/data/raw/fa25-headshot.JPG",
+        caption="Me",
+        width=200,
+    )
 with col2:
-    st.image("/Users/trustanprice/Desktop/Personal/Basketball-Predictions/data/raw/logo.png", caption="My Favorite Team", width=300)
+    st.image(
+        "/Users/trustanprice/Desktop/Personal/Basketball-Predictions/data/raw/logo.png",
+        caption="My Favorite Team",
+        width=300,
+    )
 
 st.write("""
 Hello everyone! My name is **Trustan Price** and I am a Statistics major at the University of Illinois 
@@ -46,10 +52,14 @@ If you also share a love for basketball data, check out the code on my GitHub:
 Go ahead and pick your favorite team from the dropdown menu, and I hope you enjoy!
 """)
 
+# --- Fix: session_state to keep page visible ---
+if "show_predictions" not in st.session_state:
+    st.session_state.show_predictions = False
 
-
-# Button to continue
 if st.button("Start Predicting"):
+    st.session_state.show_predictions = True
+
+if st.session_state.show_predictions:
     st.subheader("🔮 Team Win Predictions")
     st.write("Select a team below to see their predicted wins and the key stats driving the model.")
 
@@ -67,14 +77,12 @@ if st.button("Start Predicting"):
         actual_wins = team_row["W"].values[0]
         predicted_wins = team_row["Pred_NWins"].values[0]
 
-        # Metric card
         st.metric(
             label=f"{team} Predicted Wins ({latest_season})",
             value=int(predicted_wins),
             delta=int(predicted_wins - actual_wins),
         )
 
-        # --- Show important features ---
         st.subheader("📊 Key Features Driving Prediction")
         feature_cols = [
             col
@@ -83,8 +91,6 @@ if st.button("Start Predicting"):
         ]
         feature_data = team_row[feature_cols].T.reset_index()
         feature_data.columns = ["Feature", "Value"]
-
         st.table(feature_data)
-
     else:
         st.warning(f"No data available for {team} in {latest_season}.")
