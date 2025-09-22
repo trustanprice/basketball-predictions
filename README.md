@@ -6,6 +6,7 @@ Using historical data from **2016–2025**, the project integrates multiple dime
 👉 Live Demo: [Streamlit App](https://basketball-predictions-trustanprice.streamlit.app/)
 
 👉 Codebase: [GitHub Repo](https://github.com/trustanprice/basketball-predictions)
+
 ---
 
 ## Project Structure  
