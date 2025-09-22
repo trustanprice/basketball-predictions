@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
+from src.data_loader import load_final_results, HEADSHOT_PATH, LOGO_PATH
 
-# Load your results dataframe
-results_df = pd.read_csv(
-    "/Users/trustanprice/Desktop/Personal/Basketball-Predictions/data/raw/master-stats/results_2025.csv"
-)
+# ----------------------
+# Load data
+# ----------------------
+results_df = load_final_results()
 
+# ----------------------
+# Streamlit App
+# ----------------------
 st.title("🏀 NBA Prediction App")
 
 # --- About Section ---
@@ -14,17 +18,9 @@ st.header("About Me & This Project")
 # Put two images side by side
 col1, col2 = st.columns([1, 1])
 with col1:
-    st.image(
-        "/Users/trustanprice/Desktop/Personal/Basketball-Predictions/data/raw/fa25-headshot.JPG",
-        caption="Me",
-        width=200,
-    )
+    st.image(HEADSHOT_PATH, caption="Me", width=200)
 with col2:
-    st.image(
-        "/Users/trustanprice/Desktop/Personal/Basketball-Predictions/data/raw/logo.png",
-        caption="My Favorite Team",
-        width=300,
-    )
+    st.image(LOGO_PATH, caption="My Favorite Team", width=300)
 
 st.write("""
 Hello everyone! My name is **Trustan Price** and I am a Statistics major at the University of Illinois 
@@ -56,7 +52,9 @@ If you also share a love for basketball data, check out the code on my GitHub:
 Go ahead and pick your favorite team from the dropdown menu, and I hope you enjoy!
 """)
 
-# --- Fix: session_state to keep page visible ---
+# ----------------------
+# Predictions Section
+# ----------------------
 if "show_predictions" not in st.session_state:
     st.session_state.show_predictions = False
 

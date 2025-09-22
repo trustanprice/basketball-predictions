@@ -8,13 +8,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]      # repo root (…/Basketb
 DATA_RAW     = PROJECT_ROOT / "data" / "raw"
 TEAM_STATS_DIR   = DATA_RAW / "team-stats"
 PLAYER_STATS_DIR = DATA_RAW / "player-stats"
+MASTER_STATS_DIR = DATA_RAW / "master-stats"
 
+# TEAM STATS
 TEAM_RECORDS_FILE = TEAM_STATS_DIR / "team-records.csv"
 TEAM_STATS_FILE   = TEAM_STATS_DIR / "team-stats.csv"
 COACH_FILE        = TEAM_STATS_DIR / "coach.csv"
 DRAFT_FILE        = TEAM_STATS_DIR / "draft.csv"
 PAYROLL_FILE      = TEAM_STATS_DIR / "team-payroll.csv"
 SOS_FILE          = TEAM_STATS_DIR / "team-sos.csv"
+
+# STREAMLIT APP
+RESULTS_FILE      = MASTER_STATS_DIR / "results_2025.csv"
+HEADSHOT_PATH     = DATA_RAW / "fa25-headshot.JPG"
+LOGO_PATH         = DATA_RAW / "logo.png"
 
 def _ensure_exists(p: Path, kind="file"):
     if not p.exists():
@@ -35,6 +42,9 @@ def load_team_records(path: str | Path = TEAM_RECORDS_FILE) -> pd.DataFrame:
     return df
 
 def load_team_stats(path: str | Path = TEAM_STATS_FILE) -> pd.DataFrame:
+    p = Path(path); _ensure_exists(p); return pd.read_csv(p)
+
+def load_final_results(path: str | Path = RESULTS_FILE) -> pd.DataFrame:
     p = Path(path); _ensure_exists(p); return pd.read_csv(p)
 
 def merge_team_data(stats_df: pd.DataFrame, records_df: pd.DataFrame) -> pd.DataFrame:
