@@ -1,0 +1,17 @@
+# Core
+pandas
+numpy
+
+# Visualization
+matplotlib
+seaborn
+
+# Modeling
+scikit-learn
+
+# App framework
+streamlit
+
+# Optional but often needed
+altair      
+pyarrow       
