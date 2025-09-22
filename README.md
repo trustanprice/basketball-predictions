@@ -3,9 +3,9 @@
 This project explores NBA team performance and develops predictive models to understand **team success and failure**.  
 Using historical data from **2016–2025**, the project integrates multiple dimensions of team information — from records and payroll to draft picks, coaching, and player stats — to create a comprehensive dataset for analysis and modeling.  
 
-👉 Live Demo: [Streamlit App][https://basketball-predictions-trustanprice.streamlit.app/]
+👉 Live Demo: [Streamlit App](https://basketball-predictions-trustanprice.streamlit.app/)
 
-👉 Codebase: [GitHub Repo][https://github.com/trustanprice/basketball-predictions]
+👉 Codebase: [GitHub Repo](https://github.com/trustanprice/basketball-predictions)
 ---
 
 ## Project Structure  
