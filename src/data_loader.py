@@ -6,6 +6,7 @@ from src.utils import team_map, nba_teams
 # ---------- Project paths (defaults) ----------
 PROJECT_ROOT = Path(__file__).resolve().parents[1]      # repo root (…/Basketball-Predictions)
 DATA_RAW     = PROJECT_ROOT / "data" / "raw"
+DATA_PROCESSED   = PROJECT_ROOT / "data" / "processed"
 TEAM_STATS_DIR   = DATA_RAW / "team-stats"
 PLAYER_STATS_DIR = DATA_RAW / "player-stats"
 MASTER_STATS_DIR = DATA_RAW / "master-stats"
@@ -20,8 +21,8 @@ SOS_FILE          = TEAM_STATS_DIR / "team-sos.csv"
 
 # STREAMLIT APP
 RESULTS_FILE      = MASTER_STATS_DIR / "results_2025.csv"
-HEADSHOT_PATH     = DATA_RAW / "fa25-headshot.JPG"
-LOGO_PATH         = DATA_RAW / "logo.png"
+HEADSHOT_PATH     = DATA_PROCESSED / "fa25-headshot.JPG"
+LOGO_PATH         = DATA_PROCESSED / "logo.png"
 
 def _ensure_exists(p: Path, kind="file"):
     if not p.exists():
