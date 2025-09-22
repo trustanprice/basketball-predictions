@@ -46,6 +46,10 @@ As of now, this webpage is powered by **Streamlit**, while most of the backend c
 and is gradually being moved into Python scripts. All of the data was scraped from **Basketball Reference** 
 and **NBA.com**, then cleaned and preprocessed for us to explore together.  
 
+For the modeling, I used **Elastic Net regression** to perform feature reduction and identify the most important 
+predictors of team success. After narrowing down the features, I applied a **KNN Regressor** to generate the 
+predicted win totals for each team.
+
 If you also share a love for basketball data, check out the code on my GitHub:  
 👉 [trustanprice/basketball-predictions](https://github.com/trustanprice/basketball-predictions)  
 
