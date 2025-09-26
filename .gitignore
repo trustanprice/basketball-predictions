@@ -4,4 +4,4 @@ __pycache__/
 outputs/
 data/raw/*
 !data/raw/team-stats/team-records.csv
-!data/raw/master-stats/results_2025.csv
+!data/raw/master-stats/test_results.csv
