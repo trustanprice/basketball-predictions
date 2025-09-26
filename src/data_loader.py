@@ -24,7 +24,7 @@ PAYROLL_FILE      = TEAM_STATS_DIR / "team-payroll.csv"
 SOS_FILE          = TEAM_STATS_DIR / "team-sos.csv"
 
 # Streamlit app assets
-RESULTS_FILE      = MASTER_STATS_DIR / "results_2025.csv"
+RESULTS_FILE      = MASTER_STATS_DIR / "test_results.csv"
 HEADSHOT_PATH     = DATA_PROCESSED / "fa25-headshot.JPG"
 LOGO_PATH         = DATA_PROCESSED / "logo.png"
 

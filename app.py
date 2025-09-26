@@ -62,7 +62,7 @@ if st.button("Start Predicting"):
     st.session_state.show_predictions = True
 
 if st.session_state.show_predictions:
-    st.subheader("🔮 Team Win Predictions")
+    st.subheader("2026 Team Win Predictions")
     st.write("Select a team below to see their predicted wins and the key stats driving the model.")
 
     # Get unique teams
@@ -85,7 +85,7 @@ if st.session_state.show_predictions:
             delta=int(predicted_wins - actual_wins),
         )
 
-        st.subheader("📊 Key Features Driving Prediction")
+        st.subheader("Key Features Driving Prediction")
         feature_cols = [
             col
             for col in team_row.columns
@@ -96,3 +96,60 @@ if st.session_state.show_predictions:
         st.table(feature_data)
     else:
         st.warning(f"No data available for {team} in {latest_season}.")
+
+# ----------------------
+# Accuracy Section
+# ----------------------
+st.header("Model Accuracy Results")
+st.subheader("GOAL: 85% Accuracy at ±5 Game Threshold")
+
+def display_accuracy(season: int, threshold: int, comments: str):
+    season_df = results_df[results_df["Season"] == season].copy()
+
+    if "Pred_Wins" in season_df.columns:
+        if "within_threshold" not in season_df.columns:
+            # fallback if not precomputed
+            season_df["within_threshold"] = (
+                (season_df["Pred_Wins"] - season_df["W"]).abs() <= threshold
+            )
+        accuracy = season_df["within_threshold"].mean()
+
+        st.subheader(f"{season} Season Accuracy (±{threshold} Wins)")
+        st.metric("Accuracy", f"{accuracy:.2%}")
+        st.dataframe(season_df[["Team", "W", "Pred_Wins", "within_threshold"]])
+
+        st.write(f"✍️ *Comments:* {comments}")
+    else:
+        st.warning(f"No `Pred_Wins` column available for {season}.")
+
+# --- Buttons ---
+if st.button("View 2024 Accuracy"):
+    display_accuracy(
+        2024,
+        threshold=10,
+        comments = (
+    "This is the current performance of the model for 2024. "
+    "One key weakness is that the predictions are not sensitive enough to outliers. "
+    "For example, strong teams are sometimes predicted to regress far too much, "
+    "while weak teams are predicted to double their wins without a realistic factor "
+    "such as acquiring the first overall pick. "
+    "To address this, I plan to use feature engineering to make the data more robust "
+    "to outliers and incorporate context around roster or draft changes."
+)
+    )
+
+if st.button("View 2025 Accuracy"):
+    display_accuracy(
+        2025,
+        threshold=10,
+        comments = (
+    "These are the early 2025 results. "
+    "Like in 2024, I need to make the model more sensitive to outliers so that strong teams "
+    "are not predicted to collapse and weak teams are not predicted to overperform unrealistically. "
+    "In addition, I should include the 2023 dataset in training to maximize the data available "
+    "for the model, while also finding a way to weight recent seasons more heavily so that "
+    "the model reflects current performance trends more accurately."
+)
+
+    )
+
