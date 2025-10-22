@@ -126,7 +126,7 @@ def display_accuracy(season: int, threshold: int, comments: str):
 if st.button("View 2024 Accuracy"):
     display_accuracy(
         2024,
-        threshold=10,
+        threshold=5,
         comments = (
     "This is the current performance of the model for 2024. "
     "One key weakness is that the predictions are not sensitive enough to outliers. "
@@ -141,7 +141,7 @@ if st.button("View 2024 Accuracy"):
 if st.button("View 2025 Accuracy"):
     display_accuracy(
         2025,
-        threshold=10,
+        threshold=5,
         comments = (
     "These are the early 2025 results. "
     "Like in 2024, I need to make the model more sensitive to outliers so that strong teams "

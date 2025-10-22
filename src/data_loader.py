@@ -2,6 +2,7 @@ from pathlib import Path
 import os, glob, itertools
 import pandas as pd
 from src.utils import team_map, nba_teams
+import numpy as np
 
 
 # ====================================
@@ -22,6 +23,10 @@ COACH_FILE        = TEAM_STATS_DIR / "coach.csv"
 DRAFT_FILE        = TEAM_STATS_DIR / "draft.csv"
 PAYROLL_FILE      = TEAM_STATS_DIR / "team-payroll.csv"
 SOS_FILE          = TEAM_STATS_DIR / "team-sos.csv"
+SCHEDULE_FILE     = TEAM_STATS_DIR / "schedule.csv"
+
+TEAM_FILE         = MASTER_STATS_DIR / "team_df.csv"
+PLAYER_FILE       = PLAYER_STATS_DIR / "player-stats.csv"
 
 # Streamlit app assets
 RESULTS_FILE      = MASTER_STATS_DIR / "test_results.csv"
@@ -203,43 +208,119 @@ def calculate_player_features(players_df: pd.DataFrame) -> pd.DataFrame:
 # ---------- Strength of Schedule ----
 # ====================================
 
-def load_sos(path: str | Path = SOS_FILE) -> pd.DataFrame:
-    """Load raw strength of schedule matrix (team vs. opponents)."""
-    p = Path(path); _ensure_exists(p)
-    df = pd.read_csv(p)
+def load_schedule(
+    schedule: str | Path = SCHEDULE_FILE,
+    team_stats: str | Path = TEAM_STATS_FILE,
+    players_df: str | Path = PLAYER_FILE,
+) -> pd.DataFrame:
+    """
+    Load an NBA schedule file and compute Strength of Schedule (SOS) for each team.
 
-    # Rename opponent columns if in team_map
-    rename_subset = {k: v for k, v in team_map.items() if k in df.columns}
-    if rename_subset:
-        df = df.rename(columns=rename_subset)
-    return df
+    The SOS for season N is based on opponent strengths from season N,
+    and is attached to season N-1 (used to predict season N outcomes).
 
+    Args:
+        schedule (str | Path): Path to the raw schedule CSV.
+        team_stats (str | Path): Path to the team stats CSV.
+        players_df (str | Path | pd.DataFrame): Either a path to a CSV or
+            a DataFrame with ['Team', 'Season', 'avg_age'].
 
-def calculate_sos(team_df: pd.DataFrame, team_sos_df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate Strength of Schedule (SOS) based on opponent win percentages."""
-    opp_winpct = dict(zip(zip(team_df["Team"], team_df["Season"]), team_df["WIN%"]))
+    Returns:
+        pd.DataFrame: Columns ['Season', 'Team', 'Opponent', 'Opp_Rk', 'SOS'].
+    """
 
-    sos_list = []
-    for _, row in team_sos_df.iterrows():
-        team = row["Team"]; season = row["Season"]
-        total_weighted, total_games = 0, 0
+    # --- Step 1: Load raw schedule safely ---
+    df = pd.read_csv(
+        schedule,
+        header=None,
+        on_bad_lines="skip",
+        engine="python",
+        sep=",",
+        names=[
+            "Date", "Time", "Team_Away", "AwayScore",
+            "Team_Home", "HomeScore", "BoxScore", "Blank",
+            "Attendance", "Duration", "Arena", "Extra"
+        ],
+    )
+    df = df.dropna(subset=["Date", "Team_Away", "Team_Home"])
+    df = df[(df["Team_Away"].str.strip() != "") & (df["Team_Home"].str.strip() != "")]
 
-        for opp, record in row.items():
-            if opp in ["Rk", "Team", "Season"] or pd.isna(record):
-                continue
-            try:
-                wins, losses = map(int, str(record).split("-"))
-            except ValueError:
-                continue
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce", format="%a %b %d %Y")
+    df = df.dropna(subset=["Date"])
 
-            games = wins + losses
-            key = (opp, season)
+    df["Season"] = df["Date"].dt.year
+    mask_pre_oct = df["Date"].dt.month < 10
+    mask_covid_bubble = (df["Date"].dt.year == 2020) & (df["Date"].dt.month <= 10)
+    df.loc[mask_pre_oct, "Season"] = df.loc[mask_pre_oct, "Season"] - 1
+    df.loc[mask_covid_bubble, "Season"] = 2019
 
-            if key in opp_winpct:
-                total_weighted += opp_winpct[key] * games
-                total_games += games
+    print(f"Schedule loaded for seasons: {sorted(df['Season'].unique().tolist())}")
+    print(f"Shape after cleaning: {df.shape}")
 
-        sos = total_weighted / total_games if total_games > 0 else None
-        sos_list.append([team, season, sos])
+    # --- Step 2: Build (Team, Opponent) pairs ---
+    away_df = df[["Season", "Team_Away", "Team_Home"]].rename(
+        columns={"Team_Away": "Team", "Team_Home": "Opponent"}
+    )
+    home_df = df[["Season", "Team_Home", "Team_Away"]].rename(
+        columns={"Team_Home": "Team", "Team_Away": "Opponent"}
+    )
+    schedule_df = pd.concat([away_df, home_df], ignore_index=True)
 
-    return pd.DataFrame(sos_list, columns=["Team", "Season", "SOS"])
+    # --- Step 3: Load team stats ---
+    team_stats_df = pd.read_csv(team_stats)
+    team_stats_df.columns = team_stats_df.columns.str.strip()
+    team_stats_df = team_stats_df[["Team", "Season", "WIN%", "PLUS_MINUS"]]
+
+    # --- Step 4: Load or use players_df ---
+    if isinstance(players_df, (str, Path)):
+        players_df = pd.read_csv(players_df)
+    players_df.columns = players_df.columns.str.strip()
+    players_df = players_df[["Team", "Season", "avg_age"]]
+
+    # --- Step 5: Compute team strength ---
+    stats = team_stats_df.merge(players_df, on=["Team", "Season"], how="left")
+
+    age_factor = 1 - (abs(stats["avg_age"] - 27) / 27)
+    age_factor = np.clip(age_factor, 0, 1)
+
+    stats["Strength_Score"] = (
+        0.5 * stats["WIN%"] +
+        0.3 * stats["PLUS_MINUS"] +
+        0.2 * age_factor
+    )
+
+    # --- Step 6: Shift season DOWN by one (so 2024 SOS applies to 2023) ---
+    stats_shifted = stats.copy()
+    stats_shifted["Season"] = stats_shifted["Season"] - 1
+
+    # --- Step 7: Merge opponent strengths into schedule ---
+    schedule_strength = schedule_df.merge(
+        stats_shifted[["Team", "Season", "Strength_Score"]],
+        left_on=["Opponent", "Season"],
+        right_on=["Team", "Season"],
+        suffixes=("", "_Opp")
+    ).drop(columns=["Team_Opp"])
+
+    schedule_strength = schedule_strength.rename(columns={"Strength_Score": "Opp_Strength"})
+
+    # --- Step 8: Rank opponents and compute SOS ---
+    schedule_strength["Opp_Rk"] = schedule_strength.groupby("Season")["Opp_Strength"].rank(
+        ascending=False, method="dense"
+    )
+
+    sos_df = (
+        schedule_strength.groupby(["Season", "Team"])["Opp_Strength"]
+        .mean()
+        .reset_index()
+        .rename(columns={"Opp_Strength": "SOS"})
+    )
+
+    # --- Step 9: Merge SOS back and return ---
+    final_df = schedule_strength.merge(sos_df, on=["Season", "Team"], how="left")
+    final_df = final_df[["Season", "Team", "Opponent", "Opp_Rk", "SOS"]]
+
+    print("Strength of Schedule calculated successfully.")
+    print("Final shape:", final_df.shape)
+
+    return final_df
+
