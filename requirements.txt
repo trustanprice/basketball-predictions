@@ -10,8 +10,10 @@ seaborn
 scikit-learn
 
 # App framework
-streamlit
+streamlit==1.31.1
 
-# Optional but often needed
-altair      
-pyarrow       
+# Required for Streamlit charts
+altair==4.2.2
+
+# Optional but useful
+pyarrow
