@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from src.data_loader import load_final_results, HEADSHOT_PATH, LOGO_PATH
+from PIL import Image
+from pathlib import Path
 
 # ----------------------
 # Load data
@@ -15,16 +17,24 @@ st.title("🏀 NBA Prediction App")
 # --- About Section ---
 st.header("About Me & This Project")
 
-# Put two images side by side
 col1, col2 = st.columns([1, 1])
-with col1:
-    st.image(HEADSHOT_PATH, caption="Me", width=200)
-with col2:
-    st.image(LOGO_PATH, caption="My Favorite Team", width=300)
 
+with col1:
+    if Path(HEADSHOT_PATH).exists():
+        st.image(Image.open(HEADSHOT_PATH), caption="Me", width=200)
+    else:
+        st.warning(f"Headshot not found: {HEADSHOT_PATH}")
+
+with col2:
+    if Path(LOGO_PATH).exists():
+        st.image(Image.open(LOGO_PATH), caption="My Favorite Team", width=300)
+    else:
+        st.warning(f"Logo not found: {LOGO_PATH}")
+        
+        
 st.write("""
-Hello everyone! My name is **Trustan Price** and I am a Statistics major at the University of Illinois 
-with minors in Computer Science and Data Science.  
+Hello everyone! My name is **Trustan Price** and I am currently a Master's student in Computer Science 
+at the University of Illinois, with a Bachelor's degree in Statistics and minor in Data Science.
 
 My motivation for this project stems from my love of sports. Having played varsity basketball, football, 
 and baseball all through high school, my passion for sports has always been strong and it still hasn’t left.  

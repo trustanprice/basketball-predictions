@@ -17,3 +17,5 @@ altair==4.2.2
 
 # Optional but useful
 pyarrow
+
+pillow
