@@ -27,9 +27,11 @@ SCHEDULE_FILE     = TEAM_STATS_DIR / "schedule.csv"
 
 TEAM_FILE         = MASTER_STATS_DIR / "team_df.csv"
 PLAYER_FILE       = PLAYER_STATS_DIR / "player-stats.csv"
+MASTER_DF_FILE    = MASTER_STATS_DIR / "master_df.csv"
 
 # Streamlit app assets
 RESULTS_FILE      = MASTER_STATS_DIR / "test_results.csv"
+METADATA_FILE     = MASTER_STATS_DIR / "model_metadata.json"
 HEADSHOT_PATH     = DATA_PROCESSED / "fa25-headshot.JPG"
 LOGO_PATH         = DATA_PROCESSED / "logo.png"
 
@@ -72,6 +74,14 @@ def load_final_results(path: str | Path = RESULTS_FILE) -> pd.DataFrame:
     """Load final season predictions for Streamlit app."""
     p = Path(path); _ensure_exists(p)
     return pd.read_csv(p)
+
+
+def load_model_metadata(path: str | Path = METADATA_FILE) -> dict:
+    """Load the win model's methodology summary (written by win_model.train) for the
+    'how this was calculated' explanation in the Streamlit app."""
+    import json
+    p = Path(path); _ensure_exists(p)
+    return json.loads(p.read_text())
 
 
 def merge_team_data(stats_df: pd.DataFrame, records_df: pd.DataFrame) -> pd.DataFrame:

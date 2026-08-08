@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-08-08T23:10:59.573781+00:00",
+  "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
+  "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
+  "model_comparison": {
+    "candidates": [
+      "KNeighborsRegressor",
+      "HistGradientBoostingRegressor (monotonic)"
+    ],
+    "knn_walk_forward_mae": 8.283,
+    "gbm_walk_forward_mae": 6.781,
+    "winner": "gbm",
+    "n_walk_forward_folds": 8
+  },
+  "winning_model": {
+    "type": "HistGradientBoostingRegressor",
+    "best_params": {
+      "learning_rate": 0.1,
+      "max_leaf_nodes": 7,
+      "min_samples_leaf": 10
+    },
+    "monotonic_increasing_features": [
+      "PLUS_MINUS",
+      "WIN%"
+    ]
+  },
+  "top_feature_importance": [
+    {
+      "feature": "SOS",
+      "importance_mae_increase": 6.6201
+    },
+    {
+      "feature": "E_L",
+      "importance_mae_increase": 1.2841
+    },
+    {
+      "feature": "PLUS_MINUS",
+      "importance_mae_increase": 0.8915
+    },
+    {
+      "feature": "W_W",
+      "importance_mae_increase": 0.7993
+    },
+    {
+      "feature": "Payroll",
+      "importance_mae_increase": 0.517
+    },
+    {
+      "feature": "BLK",
+      "importance_mae_increase": 0.3876
+    },
+    {
+      "feature": "avg_production_score",
+      "importance_mae_increase": 0.384
+    },
+    {
+      "feature": "W",
+      "importance_mae_increase": 0.3818
+    },
+    {
+      "feature": "W_L",
+      "importance_mae_increase": 0.3758
+    },
+    {
+      "feature": "E_W",
+      "importance_mae_increase": 0.3548
+    },
+    {
+      "feature": "PFD",
+      "importance_mae_increase": 0.3501
+    },
+    {
+      "feature": "FT%",
+      "importance_mae_increase": 0.3326
+    },
+    {
+      "feature": "TOV",
+      "importance_mae_increase": 0.2722
+    },
+    {
+      "feature": "avg_age",
+      "importance_mae_increase": 0.2272
+    },
+    {
+      "feature": "injury_rate",
+      "importance_mae_increase": 0.2266
+    }
+  ],
+  "prediction_interval": {
+    "method": "GBM native quantile regression (refits the winning model at the 10th and 90th percentiles)",
+    "coverage": "80% (10th-90th percentile)"
+  },
+  "n_training_rows": 270,
+  "n_teams": 30,
+  "feature_seasons_used": [
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "forecast_target_season": 2026
+}

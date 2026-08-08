@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from backend.win_model.data_loader import load_final_results, HEADSHOT_PATH, LOGO_PATH
+from backend.win_model.data_loader import load_final_results, load_model_metadata, HEADSHOT_PATH, LOGO_PATH
 from PIL import Image
 from pathlib import Path
 
@@ -52,9 +52,11 @@ As of now, this webpage is powered by **Streamlit**, while most of the backend c
 and is gradually being moved into Python scripts. All of the data was scraped from **Basketball Reference** 
 and **NBA.com**, then cleaned and preprocessed for us to explore together.  
 
-For the modeling, I used **Elastic Net regression** to perform feature reduction and identify the most important 
-predictors of team success. After narrowing down the features, I applied a **KNN Regressor** to generate the 
-predicted win totals for each team.
+For the modeling, I benchmark a **KNN Regressor** against a **monotonic-constrained gradient-boosted regressor**
+using season-grouped walk-forward validation (train on seasons ≤ N, validate on season N+1, roll forward — no
+random cross-validation folds, which would leak future seasons into training) and keep whichever wins on
+out-of-sample error. Every prediction ships with an 80% prediction interval and an expandable "how this was
+calculated" breakdown — see the Predictions section below.
 
 If you also share a love for basketball data, check out the code on my GitHub:  
 👉 [trustanprice/basketball-predictions](https://github.com/trustanprice/basketball-predictions)  
@@ -72,38 +74,78 @@ if st.button("Start Predicting"):
     st.session_state.show_predictions = True
 
 if st.session_state.show_predictions:
-    st.subheader("2026 Team Win Predictions")
-    st.write("Select a team below to see their predicted wins and the key stats driving the model.")
+    # Pick latest season — this is always the live forecast row: last season's
+    # completed stats projecting a season that hasn't been played yet, so it has
+    # no actual win total to compare against.
+    latest_season = results_df["Season"].max()
+
+    st.subheader(f"{latest_season} Team Win Predictions")
+    st.write("Select a team below to see their predicted wins, with an 80% prediction interval.")
 
     # Get unique teams
     teams = sorted(results_df["Team"].unique())
     team = st.selectbox("Select a Team:", teams)
 
-    # Pick latest season
-    latest_season = results_df["Season"].max()
     team_row = results_df[
         (results_df["Season"] == latest_season) & (results_df["Team"] == team)
     ]
 
     if not team_row.empty:
+        predicted_wins = team_row["Pred_Wins"].values[0]
+        lower = team_row["Pred_Wins_Lower"].values[0]
+        upper = team_row["Pred_Wins_Upper"].values[0]
         actual_wins = team_row["W"].values[0]
-        predicted_wins = team_row["Pred_NWins"].values[0]
 
         st.metric(
             label=f"{team} Predicted Wins ({latest_season})",
-            value=int(predicted_wins),
-            delta=int(predicted_wins - actual_wins),
+            value=f"{predicted_wins:.0f}",
+            delta=None if pd.isna(actual_wins) else int(predicted_wins - actual_wins),
         )
+        st.caption(f"80% prediction interval: {lower:.0f}–{upper:.0f} wins")
 
-        st.subheader("Key Features Driving Prediction")
-        feature_cols = [
-            col
-            for col in team_row.columns
-            if col not in ["Season", "Team", "W", "Pred_NWins"]
-        ]
-        feature_data = team_row[feature_cols].T.reset_index()
-        feature_data.columns = ["Feature", "Value"]
-        st.table(feature_data)
+        metadata = load_model_metadata()
+        with st.expander("How this was calculated"):
+            mc = metadata["model_comparison"]
+            st.markdown(f"""
+**Validation method:** {metadata['validation_method']}
+
+**Target:** {metadata['target_definition']}
+
+**Model selection:** Two candidates — {mc['candidates'][0]} and {mc['candidates'][1]} —
+were each hyperparameter-tuned using walk-forward CV, then compared on their
+walk-forward mean absolute error (out-of-sample, never in-sample fit) across
+{mc['n_walk_forward_folds']} rolling folds:
+
+| Candidate | Walk-forward MAE |
+|---|---|
+| KNN | {mc['knn_walk_forward_mae']} wins |
+| GBM (monotonic) | {mc['gbm_walk_forward_mae']} wins |
+
+**Winner:** {mc['winner'].upper()}, with hyperparameters
+`{metadata['winning_model']['best_params']}`.
+""")
+            if metadata["winning_model"]["monotonic_increasing_features"]:
+                st.write(
+                    "Monotonic constraint: predicted wins can never *decrease* as "
+                    + " or ".join(metadata["winning_model"]["monotonic_increasing_features"])
+                    + " increases, all else equal — prevents the model from learning a "
+                      "locally spurious inverse relationship out of a small, noisy dataset."
+                )
+
+            st.write(f"**Prediction interval:** {metadata['prediction_interval']['method']} "
+                      f"({metadata['prediction_interval']['coverage']} coverage).")
+
+            st.write("**Top features by permutation importance** (how much walk-forward "
+                      "MAE gets worse when a feature is shuffled — bigger is more important):")
+            importance_df = pd.DataFrame(metadata["top_feature_importance"])
+            st.dataframe(importance_df, hide_index=True)
+
+            st.caption(
+                f"Trained on {metadata['n_training_rows']} team-seasons "
+                f"({metadata['n_teams']} teams, feature seasons "
+                f"{min(metadata['feature_seasons_used'])}–{max(metadata['feature_seasons_used'])}). "
+                f"Generated {metadata['generated_at']}."
+            )
     else:
         st.warning(f"No data available for {team} in {latest_season}.")
 
@@ -138,13 +180,13 @@ if st.button("View 2024 Accuracy"):
         2024,
         threshold=5,
         comments = (
-    "This is the current performance of the model for 2024. "
-    "One key weakness is that the predictions are not sensitive enough to outliers. "
-    "For example, strong teams are sometimes predicted to regress far too much, "
-    "while weak teams are predicted to double their wins without a realistic factor "
-    "such as acquiring the first overall pick. "
-    "To address this, I plan to use feature engineering to make the data more robust "
-    "to outliers and incorporate context around roster or draft changes."
+    "This is walk-forward backtested accuracy: the model was trained only on seasons "
+    "before 2024 and never saw 2024 data during training or tuning. It's noticeably below "
+    "the 85% goal — that's expected and, honestly, more trustworthy than the old number. "
+    "The previous version of this model trained on same-season stats to predict that same "
+    "season's win total, which was close to circular for historical rows and looked far "
+    "more accurate than it really was. This number reflects genuine predictive difficulty, "
+    "not a regression."
 )
     )
 
@@ -153,13 +195,11 @@ if st.button("View 2025 Accuracy"):
         2025,
         threshold=5,
         comments = (
-    "These are the early 2025 results. "
-    "Like in 2024, I need to make the model more sensitive to outliers so that strong teams "
-    "are not predicted to collapse and weak teams are not predicted to overperform unrealistically. "
-    "In addition, I should include the 2023 dataset in training to maximize the data available "
-    "for the model, while also finding a way to weight recent seasons more heavily so that "
-    "the model reflects current performance trends more accurately."
+    "Same walk-forward backtest, for 2025. Next steps for closing the gap toward the 85% "
+    "goal: the current feature set is unchanged from the old model (Phase 1 only fixed "
+    "validation methodology, model choice, and interval estimation) — roster-change context "
+    "(trades, free agency) and the live player ratings from Phase 2+ are the more promising "
+    "levers than further tuning KNN or GBM hyperparameters on this same feature set."
 )
-
     )
 
