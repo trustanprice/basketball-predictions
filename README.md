@@ -11,48 +11,50 @@ Using historical data from **2016–2025**, the project integrates multiple dime
 
 ## Project Structure  
 
-BASKETBALL-PREDICTION
+This project is growing beyond the original win-total model — see [`AGENTS.md`](AGENTS.md) for
+the full module breakdown (win model / live player ratings / coaching evaluation) and the
+per-directory docs it links to.
+
+BASKETBALL-PREDICTIONS
 │
 
-├── data/ # Datasets
+├── data/ # Static, historical (2016–2025) datasets — see data/AGENTS.md
 
-│ ├── raw/ # Original CSVs (e.g., per-season records)
+│ ├── raw/
 
-│ └── processed/ # Cleaned & merged data with Year column
-
-│
-
-├── notebooks/ # Jupyter notebooks
-
-│ ├── 01_data_cleaning.ipynb
-
-│ ├── 02_exploration.ipynb
-
-│ └── 03_failure_model.ipynb
+│ └── processed/
 
 │
 
-├── src/ # Source code
+├── backend/ # All Python — see backend/AGENTS.md
 
-│ ├── data_loader.py # Load & preprocess datasets
+│ ├── win_model/ # Load, features, and the win-total model (formerly src/)
 
-│ ├── features.py # Feature engineering (streaks, margins, etc.)
+│ ├── live_client/ # NBA.com live data client (new)
 
-│ ├── model.py # Failure model implementation
+│ ├── ratings/ # Player power rankings + coaching eval (new)
 
-│ └── utils.py # Helper functions
+│ ├── api/ # API serving the above to the frontend (not yet built)
+
+│ ├── notebooks/ # Jupyter notebooks (data cleaning, exploration, modeling)
+
+│ ├── tests/
+
+│ └── requirements.txt
 
 │
 
-├── outputs/ # Model outputs
-
-│ ├── figures/ # Graphs and plots
+├── frontend/ # Next.js app (not yet scaffolded) — see frontend/AGENTS.md
 
 │
 
-├── requirements.txt # Python dependencies
+├── app.py # Streamlit app — transitional, stays at repo root for the
 
-├── .gitignore # Files to ignore in git
+│ # existing Streamlit Cloud deployment until frontend/ replaces it
+
+├── requirements.txt # Pointer to backend/requirements.txt (keeps Streamlit Cloud working)
+
+├── .gitignore
 
 └── README.md # Project overview (this file)
 
@@ -91,13 +93,17 @@ cd BASKETBALL-PREDICTION
 
 ### 2. Create and activate a virtual environment
 ```bash
+cd backend
 python3 -m venv venv
 source venv/bin/activate      # Mac/Linux
 .\venv\Scripts\activate       # Windows
+cd ..
 ```
 
 ### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
+```
 
 ---
 

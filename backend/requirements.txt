@@ -1,0 +1,24 @@
+# Core
+pandas
+numpy
+
+# Visualization
+matplotlib
+seaborn
+
+# Modeling
+scikit-learn
+
+# App framework
+streamlit==1.31.1
+
+# Required for Streamlit charts
+altair==4.2.2
+
+# Optional but useful
+pyarrow
+
+pillow
+
+# Testing
+pytest

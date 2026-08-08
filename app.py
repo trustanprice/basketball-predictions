@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from src.data_loader import load_final_results, HEADSHOT_PATH, LOGO_PATH
+from backend.win_model.data_loader import load_final_results, HEADSHOT_PATH, LOGO_PATH
 from PIL import Image
 from pathlib import Path
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 import os, glob, itertools
 import pandas as pd
-from src.utils import team_map, nba_teams
+from .utils import team_map, nba_teams
 import numpy as np
 
 
@@ -9,7 +9,7 @@ import numpy as np
 # ---------- Project Paths -----------
 # ====================================
 
-PROJECT_ROOT      = Path(__file__).resolve().parents[1]   # repo root (…/Basketball-Predictions)
+PROJECT_ROOT      = Path(__file__).resolve().parents[2]   # repo root (…/Basketball-Predictions)
 DATA_RAW          = PROJECT_ROOT / "data" / "raw"
 DATA_PROCESSED    = PROJECT_ROOT / "data" / "processed"
 TEAM_STATS_DIR    = DATA_RAW / "team-stats"

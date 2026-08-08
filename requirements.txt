@@ -1,21 +1,4 @@
-# Core
-pandas
-numpy
-
-# Visualization
-matplotlib
-seaborn
-
-# Modeling
-scikit-learn
-
-# App framework
-streamlit==1.31.1
-
-# Required for Streamlit charts
-altair==4.2.2
-
-# Optional but useful
-pyarrow
-
-pillow
+# All Python dependencies live in backend/requirements.txt.
+# This pointer exists so Streamlit Cloud (which looks for requirements.txt
+# at the repo root by default) keeps working without a dashboard change.
+-r backend/requirements.txt
