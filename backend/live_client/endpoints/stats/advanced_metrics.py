@@ -19,13 +19,19 @@ class PlayerAdvancedStats(Endpoint):
     """League-wide advanced metrics for the given season.
 
     Expected schema (subset): PLAYER_ID, PLAYER_NAME, TEAM_ID, OFF_RATING,
-    DEF_RATING, NET_RATING, USG_PCT, TS_PCT, AST_PCT, REB_PCT.
+    DEF_RATING, NET_RATING, USG_PCT, TS_PCT, AST_PCT, REB_PCT, DREB_PCT, TOV_PCT.
+
+    DREB_PCT and TOV_PCT are included because backend/ratings/player_power_rankings
+    reads them directly — without declaring them here, an upstream rename of either
+    column would silently corrupt a rating instead of raising (see backend/AGENTS.md:
+    "an upstream field rename should raise loudly").
     """
 
     result_set_name = "LeagueDashPlayerStats"
     expected_columns = (
         "PLAYER_ID", "PLAYER_NAME", "TEAM_ID",
         "OFF_RATING", "DEF_RATING", "NET_RATING", "USG_PCT", "TS_PCT", "AST_PCT", "REB_PCT",
+        "DREB_PCT", "TOV_PCT",
     )
 
     def __init__(
