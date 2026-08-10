@@ -1,14 +1,32 @@
 import { getPlayerPowerRankings } from "@/lib/api";
 import { RatingBreakdownCard } from "@/components/RatingBreakdownCard";
+import { SectionHeading } from "@/components/SectionHeading";
+import { ScrollSpyNav } from "@/components/ScrollSpyNav";
+
+const SECTIONS = [
+  {
+    id: "offense",
+    number: "01",
+    label: "Offense",
+    description: "Top 5 offensive players league-wide, each expandable into its full formula.",
+  },
+  {
+    id: "defense",
+    number: "02",
+    label: "Defense",
+    description: "Top 5 defensive players league-wide, each expandable into its full formula.",
+  },
+];
 
 export default async function PlayersPage() {
   const rankings = await getPlayerPowerRankings();
 
   if (!rankings) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Player Power Rankings</h1>
-        <div className="rounded-lg border border-neutral-200 bg-white p-6 text-neutral-600">
+      <div>
+        <p className="text-label mb-3 text-xs text-accent">Phase 3-4 — Live Ratings</p>
+        <h1 className="text-headline text-4xl sm:text-5xl">Player Power Rankings</h1>
+        <div className="card--hollow mt-8 text-ink-muted">
           Not available yet — the backend refreshes these on its own schedule from live
           NBA.com data (see backend/AGENTS.md&apos;s refresh strategy). Check back shortly.
         </div>
@@ -17,16 +35,20 @@ export default async function PlayersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Player Power Rankings</h1>
-        <p className="mt-1 text-neutral-600">{rankings.season} season, {rankings.n_qualified_players} qualified players.</p>
-        <p className="mt-2 max-w-3xl text-sm text-neutral-500">{rankings.methodology_note}</p>
+    <div className="md:pl-16">
+      <ScrollSpyNav sections={SECTIONS} />
+      <div className="mb-12">
+        <p className="text-label mb-3 text-xs text-accent">Phase 3-4 — Live Ratings</p>
+        <h1 className="text-headline text-4xl sm:text-5xl">Player Power Rankings</h1>
+        <p className="prose-narrow mt-4 text-ink-muted">
+          {rankings.season} season, {rankings.n_qualified_players} qualified players.{" "}
+          {rankings.methodology_note}
+        </p>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="space-y-16">
         <section>
-          <h2 className="mb-3 font-medium text-neutral-900">Top 5 Offense</h2>
+          <SectionHeading number="01" id="offense" title="Offense" />
           <div className="space-y-3">
             {rankings.offense.map((b, i) => (
               <RatingBreakdownCard key={b.subject_id} rank={i + 1} breakdown={b} />
@@ -34,7 +56,7 @@ export default async function PlayersPage() {
           </div>
         </section>
         <section>
-          <h2 className="mb-3 font-medium text-neutral-900">Top 5 Defense</h2>
+          <SectionHeading number="02" id="defense" title="Defense" />
           <div className="space-y-3">
             {rankings.defense.map((b, i) => (
               <RatingBreakdownCard key={b.subject_id} rank={i + 1} breakdown={b} />
@@ -43,7 +65,7 @@ export default async function PlayersPage() {
         </section>
       </div>
 
-      <p className="text-xs text-neutral-400">
+      <p className="text-label mt-10 text-[11px] text-ink-muted/70">
         Generated {new Date(rankings.generated_at).toLocaleString()}
       </p>
     </div>

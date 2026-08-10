@@ -1,16 +1,40 @@
 import { getMethodology, getPredictions } from "@/lib/api";
 import { PredictionsExplorer } from "@/components/PredictionsExplorer";
+import { ScrollSpyNav } from "@/components/ScrollSpyNav";
+
+const SECTIONS = [
+  {
+    id: "prediction",
+    number: "01",
+    label: "Prediction",
+    description: "Pick any team for its predicted wins, 80% interval, and forecast season.",
+  },
+  {
+    id: "methodology",
+    number: "02",
+    label: "Methodology",
+    description: "Validation method, model comparison, and the top features driving the model.",
+  },
+  {
+    id: "chart",
+    number: "03",
+    label: "Chart",
+    description: "All 30 teams plotted on the two most-influential available features.",
+  },
+];
 
 export default async function PredictionsPage() {
   const [predictions, methodology] = await Promise.all([getPredictions(), getMethodology()]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Team Win Predictions</h1>
-        <p className="mt-1 text-neutral-600">
-          Walk-forward validated, with an 80% prediction interval and the full
-          methodology behind every number.
+    <div className="md:pl-16">
+      <ScrollSpyNav sections={SECTIONS} />
+      <div className="mb-12">
+        <p className="text-label mb-3 text-xs text-accent">Phase 1 — Win Model</p>
+        <h1 className="text-headline text-4xl sm:text-5xl">Team Win Predictions</h1>
+        <p className="prose-narrow mt-4 text-ink-muted">
+          Walk-forward validated, with an 80% prediction interval and the full methodology
+          behind every number.
         </p>
       </div>
       <PredictionsExplorer predictions={predictions} methodology={methodology} />

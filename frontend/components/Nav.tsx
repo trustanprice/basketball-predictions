@@ -1,28 +1,38 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const LINKS = [
   { href: "/predictions", label: "Win Predictions" },
-  { href: "/players", label: "Player Power Rankings" },
-  { href: "/coaching", label: "Coaching Evaluation" },
+  { href: "/players", label: "Power Rankings" },
+  { href: "/coaching", label: "Coaching Eval" },
 ];
 
 export function Nav() {
+  const pathname = usePathname();
+
   return (
-    <nav className="border-b border-neutral-200 bg-white">
-      <div className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-4">
-        <Link href="/" className="font-semibold text-neutral-900">
-          🏀 Basketball Predictions
+    <nav className="border-b border-line/10 bg-page">
+      <div className="mx-auto flex max-w-5xl items-center gap-8 px-4 py-5 sm:px-8">
+        <Link href="/" className="text-headline text-lg tracking-wide text-ink">
+          Basketball Predictions
         </Link>
-        <div className="flex gap-4 text-sm">
-          {LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-neutral-600 hover:text-neutral-900 hover:underline"
-            >
-              {link.label}
-            </Link>
-          ))}
+        <div className="flex gap-6">
+          {LINKS.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-label text-xs transition-colors ${
+                  isActive ? "text-accent" : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>

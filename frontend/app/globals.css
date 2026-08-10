@@ -1,1 +1,112 @@
 @import "tailwindcss";
+
+/**
+ * Design tokens — editorial/technical aesthetic, not a SaaS dashboard.
+ * Color always encodes meaning here, never decoration:
+ *   --color-accent   (amber)  ONLY section numbers, key stat values, primary buttons.
+ *   --color-positive (green)  ONLY "live/validated/positive" — positive wins-above-
+ *                             expectation, positive rating contributions.
+ *   "Hollow" (locked/future/inactive) is a STYLE, not a color — border-only,
+ *   transparent fill. See the .card--hollow utility below.
+ * See frontend/AGENTS.md before adding a new color — there shouldn't be one.
+ */
+@theme {
+  --color-page: #1b1815;
+  --color-card: #252019;
+  --color-line: #f2ede0;
+  --color-ink: #f2ede0;
+  --color-ink-muted: #a89f8e;
+  --color-accent: #e2933f;
+  --color-positive: #7f9a72;
+
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --font-body: var(--font-body);
+
+  /* Refined easing for hover/click micro-interactions — an "ease-out-expo"
+     feel, quick to start and gentle to settle, instead of Tailwind's linear
+     default ease-out. Used via ease-smooth. */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-popover-in: popover-in 160ms var(--ease-smooth);
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+/* Heavy condensed all-caps display type — headlines only. Named text-headline,
+   not font-display, to avoid colliding with the font-display utility Tailwind
+   auto-generates from the --font-display theme token above (that one only sets
+   font-family; this bundles the full look). */
+.text-headline {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+/* Wide-tracked mono — every small label without exception: eyebrows, badges,
+   stat numbers, button text, nav labels, component names. Same reasoning as
+   above re: not colliding with the auto-generated font-mono utility. */
+.text-label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Standard card: fill slightly lighter than page, hairline low-opacity border,
+   generous padding, no shadow, no gradient. */
+.card {
+  background: var(--color-card);
+  border: 1px solid color-mix(in oklab, var(--color-line) 10%, transparent);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition:
+    border-color 200ms var(--ease-smooth),
+    background-color 200ms var(--ease-smooth),
+    transform 200ms var(--ease-smooth);
+}
+
+/* "Locked/future/inactive" — border only, no fill. Never a color on its own;
+   pair with normal text color, not the accent. */
+.card--hollow {
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--color-line) 20%, transparent);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: border-color 200ms var(--ease-smooth);
+}
+
+/* Clickable cards (landing page links, RatingBreakdownCard/MethodologyPanel
+   summaries) get a slightly brighter border and a hair of lift on hover — the
+   "more finish" pass. Kept subtle: no shadow, no scale, matches "no drop
+   shadows" from the base card language. */
+.card-interactive:hover {
+  border-color: color-mix(in oklab, var(--color-line) 25%, transparent);
+  transform: translateY(-1px);
+}
+
+/* Body copy measure — narrow, readable, set in the one non-display/non-mono
+   typeface. Bold inline phrases carry emphasis; no highlight/callout boxes. */
+.prose-narrow {
+  max-width: 42rem;
+  line-height: 1.6;
+}
+.prose-narrow strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
