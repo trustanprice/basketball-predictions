@@ -13,3 +13,9 @@ coaching evaluation module.
   ID↔name reference tables the live client depends on to parse responses. Both are "static, not
   live-fetched," but `data/` is historical backtest data and `lookups/` is a client dependency —
   don't merge them.
+- `data/raw/master-stats/test_results.csv` and `model_metadata.json` are the one exception to
+  "manually curated": they're generated **output**, written by `backend/win_model/train.py` each
+  time it runs, not hand-collected source data. They live here (rather than under `backend/`)
+  only because the app reads them at runtime and Streamlit Cloud has no separate artifact store —
+  don't treat them as frozen/curated the way the rest of this directory is, and don't hand-edit
+  them.

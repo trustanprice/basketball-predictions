@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-08T23:10:59.573781+00:00",
+  "generated_at": "2026-08-09T23:49:16.038102+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -85,6 +85,13 @@
       "feature": "injury_rate",
       "importance_mae_increase": 0.2266
     }
+  ],
+  "feature_values_available": [
+    "SOS",
+    "E_L",
+    "PLUS_MINUS",
+    "W_W",
+    "Payroll"
   ],
   "prediction_interval": {
     "method": "GBM native quantile regression (refits the winning model at the 10th and 90th percentiles)",

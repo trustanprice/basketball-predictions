@@ -1,0 +1,33 @@
+# Render Blueprint for the backend API — see backend/AGENTS.md's "Hosting" and
+# "Player ratings: refresh strategy" sections for the rationale.
+#
+# Deliberately a single web service, no separate cron job: the player-ratings
+# refresh runs as an in-process background loop inside this same service (see
+# backend/api/main.py), not a host-level cron job — a separate cron service
+# doesn't share a filesystem with this one on Render's standard tiers, which
+# would make it unable to hand off its output to the API at all.
+#
+# rootDir is intentionally NOT set on this service — build/start commands stay
+# repo-root-relative to match backend/AGENTS.md's import convention (absolute
+# `backend.X` imports, which only resolve when run from the repo root).
+
+services:
+  - type: web
+    name: basketball-predictions-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      # Comma-separated list of origins allowed to call this API (CORS). Set
+      # this to the deployed Vercel frontend URL once Phase 6 exists —
+      # defaults to local Next.js dev only (see backend/api/main.py).
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Both optional — see backend/AGENTS.md for what they control. Uncomment
+      # to override the defaults (1h check interval, 24h staleness bound).
+      # - key: PLAYER_RATINGS_CHECK_INTERVAL_SECONDS
+      #   value: "3600"
+      # - key: PLAYER_RATINGS_MAX_AGE_SECONDS
+      #   value: "86400"

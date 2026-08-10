@@ -32,6 +32,12 @@ from .validation import SeasonWalkForwardSplit
 
 FEATURE_COLUMNS = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 INTERVAL_ALPHA = 0.2  # 80% interval (10th-90th percentile)
+# How many top-importance features get their raw per-team value carried into the
+# results file (not just named in metadata). 5, not just the 2 the frontend uses
+# today, so a chart tweak doesn't require another backend change. Column names
+# are whatever the top features actually are this run (e.g. "SOS", "E_L") — not
+# hardcoded, since a retrain can change which features rank highest.
+N_FEATURE_VALUES_TO_PERSIST = 5
 
 
 def run_pipeline(master_df_path=None, write_output: bool = True):
@@ -52,20 +58,28 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
 
     splitter = SeasonWalkForwardSplit()
 
+    # Computed here (not after oof/forecast, where it used to live) so the top
+    # feature names are available to attach raw values to both result sets below.
+    importance = compute_feature_importance(fitted_pipeline, X, y, FEATURE_COLUMNS)
+    top_feature_names = list(importance.head(N_FEATURE_VALUES_TO_PERSIST).index)
+
     # ---- Out-of-fold walk-forward predictions across history, for backtest display ----
     oof_frames = []
     for train_idx, test_idx in splitter.split(X, y, groups):
         fold_model = clone(fitted_pipeline)
         fold_model.fit(X.iloc[train_idx], y.iloc[train_idx])
         preds = fold_model.predict(X.iloc[test_idx])
-        oof_frames.append(pd.DataFrame({
+        fold_df = pd.DataFrame({
             "Season": trainable.iloc[test_idx]["Season"].to_numpy() + 1,
             "Team": trainable.iloc[test_idx]["Team"].to_numpy(),
             "W": trainable.iloc[test_idx][TARGET_COLUMN].to_numpy(),
             "Pred_Wins": preds,
             "Pred_Wins_Lower": np.nan,
             "Pred_Wins_Upper": np.nan,
-        }))
+        })
+        for feat in top_feature_names:
+            fold_df[feat] = trainable.iloc[test_idx][feat].to_numpy()
+        oof_frames.append(fold_df)
     oof = pd.concat(oof_frames, ignore_index=True)
     oof["within_threshold"] = (oof["Pred_Wins"] - oof["W"]).abs() <= 5
 
@@ -99,11 +113,10 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
         "Pred_Wins_Upper": upper,
         "within_threshold": np.nan,
     })
+    for feat in top_feature_names:
+        forecast[feat] = forecast_rows[feat].to_numpy()
 
     results = pd.concat([oof, forecast], ignore_index=True).sort_values(["Season", "Team"]).reset_index(drop=True)
-
-    # ---- Explainability ----
-    importance = compute_feature_importance(fitted_pipeline, X, y, FEATURE_COLUMNS)
 
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -136,6 +149,11 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
             {"feature": f, "importance_mae_increase": round(float(v), 4)}
             for f, v in importance.head(15).items()
         ],
+        # Which of the above also have a raw per-team value attached to each row in
+        # the results file (results has 15 ranked names above but only these have a
+        # matching column — see N_FEATURE_VALUES_TO_PERSIST) — e.g. for a chart
+        # plotting the top-2 features against each other, per team.
+        "feature_values_available": top_feature_names,
         "prediction_interval": {
             "method": interval_method,
             "coverage": f"{int((1 - INTERVAL_ALPHA) * 100)}% ({int(INTERVAL_ALPHA / 2 * 100)}th-{int((1 - INTERVAL_ALPHA / 2) * 100)}th percentile)",

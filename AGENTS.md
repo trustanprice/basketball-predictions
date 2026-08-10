@@ -40,6 +40,10 @@ cd ..
 streamlit run app.py          # existing win-model app (transitional — Phase 6 replaces this)
 ```
 
+API (from repo root, separate terminal): `uvicorn backend.api.main:app --reload --port 8000` —
+serves win-model predictions, player power rankings, and coaching evaluation as JSON. See
+`backend/AGENTS.md` for the endpoint list and the player-ratings refresh strategy.
+
 Frontend: see `frontend/AGENTS.md` (not yet scaffolded).
 
 ## Subdirectory docs
@@ -56,5 +60,8 @@ Frontend: see `frontend/AGENTS.md` (not yet scaffolded).
 - Historical data in `data/` is frozen and manually curated in places (payroll, draft, coach
   tenure) — there is no live-fetch replacement for pre-current-season data.
 - The win model and the live ratings engine are architecturally separate (different validation
-  needs, different data freshness) but will be served by one FastAPI app in `backend/api/`
-  eventually — don't merge their internals prematurely.
+  needs, different data freshness) and are served by one FastAPI app in `backend/api/` — that
+  app calls into both and reshapes their output as JSON, it does not merge their internals.
+- The API never calls `live_client` directly on a request — player ratings are refreshed by an
+  in-process background loop and served from a local file. See `backend/AGENTS.md`'s "Player
+  ratings: refresh strategy" before changing anything about how that data gets to the API.

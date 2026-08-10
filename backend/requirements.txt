@@ -22,3 +22,8 @@ pillow
 
 # Testing
 pytest
+pytest-asyncio
+
+# API (backend/api/)
+fastapi
+uvicorn[standard]
