@@ -220,7 +220,15 @@ from the repo root. Endpoints:
   (raw value, z-score, weight, contribution per component). See refresh strategy below —
   503s with an explanatory message if the cache has never been populated.
 - `GET /api/coaches/wins-above-expectation` (optional `season`/`team` query filters) and
-  `GET /api/coaches/career-summary`.
+  `GET /api/coaches/career-summary` — each team-season also carries `pace`/`ast_pct`/
+  `three_pa_rate` (null if `refresh_team_style.py` hasn't run), descriptive context, not a
+  causal claim — see `ratings/team_style.py`.
+- `GET /api/coaches/shot-heatmap?team=&season=` — the **one** endpoint in this API that calls
+  `live_client` directly on a request, not from a scheduled refresh. Deliberate, narrow
+  exception — see the comment on `dependencies.get_team_shot_heatmap` before adding another one
+  like it: it's a single external call (~1.5s, confirmed), backed by `live_client`'s own
+  never-expiring disk cache (so only the *first* request per team+season ever hits NBA.com), for
+  a completed season with no staleness concern a scheduled refresh would even solve.
 
 All routers read their data via FastAPI `Depends()` (see `dependencies.py`) rather than calling
 loaders directly in the route body — this is what makes `backend/tests/api/` able to swap in

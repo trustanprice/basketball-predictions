@@ -5,8 +5,10 @@ from .boxscore import GameBoxScore
 from .career_stats import PlayerCareerStats
 from .play_by_play import GamePlayByPlay
 from .season_totals import PlayerSeasonTotals
-from .shot_chart import PlayerShotChart
+from .shot_chart import PlayerShotChart, TeamShotChart
+from .shot_locations import PlayerShotLocations
 from .team_roster import TeamRoster
+from .team_season_stats import TeamAdvancedStats, TeamSeasonStats
 
 __all__ = [
     "PlayerSeasonTotals",
@@ -14,6 +16,10 @@ __all__ = [
     "GameBoxScore",
     "GamePlayByPlay",
     "PlayerShotChart",
+    "TeamShotChart",
+    "PlayerShotLocations",
     "PlayerAdvancedStats",
     "TeamRoster",
+    "TeamSeasonStats",
+    "TeamAdvancedStats",
 ]

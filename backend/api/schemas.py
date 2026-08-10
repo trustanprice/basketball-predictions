@@ -88,7 +88,13 @@ class PlayerPowerRankings(BaseModel):
 
 class CoachTeamSeason(BaseModel):
     """One team-season: actual win% vs. roster-talent-implied win%, with the
-    talent composite's full breakdown attached."""
+    talent composite's full breakdown attached.
+
+    pace/ast_pct/three_pa_rate are descriptive team-style context (see
+    backend/ratings/team_style.py), null when refresh_team_style.py hasn't
+    covered this team-season — an association/correlation data point to show
+    alongside wins_above_expectation, never a claimed cause of it. Frontend
+    copy must state that distinction plainly, not just imply it."""
     season: int
     team: str
     coach: str
@@ -96,6 +102,32 @@ class CoachTeamSeason(BaseModel):
     implied_win_pct: float
     wins_above_expectation: float
     talent_breakdown: RatingBreakdown
+    pace: float | None = None
+    ast_pct: float | None = None
+    three_pa_rate: float | None = None
+
+
+class ShotHeatmapCell(BaseModel):
+    x: float
+    y: float
+    attempts: int
+    makes: int
+    fg_pct: float
+
+
+class ShotHeatmap(BaseModel):
+    """One team's real shot-location data for one season, binned to a grid —
+    offense (the team's own shots) and defense (shots taken against them,
+    via ShotChartDetail's opponent_team_id) — see
+    backend/ratings/team_style.py's bin_shots_to_heatmap and
+    backend/api/dependencies.py's get_team_shot_heatmap for why this is
+    fetched on demand rather than pre-cached for all 30 teams."""
+    team: str
+    season: str
+    offense_cells: list[ShotHeatmapCell]
+    defense_cells: list[ShotHeatmapCell]
+    n_offense_shots: int
+    n_defense_shots: int
 
 
 class CoachCareerSummary(BaseModel):

@@ -96,6 +96,29 @@ export interface CoachTeamSeason {
   implied_win_pct: number;
   wins_above_expectation: number;
   talent_breakdown: RatingBreakdown;
+  /** Descriptive team-style context (backend/ratings/team_style.py), null
+   * when refresh_team_style.py hasn't covered this team-season. Correlation/
+   * association with wins_above_expectation at most — never render as cause. */
+  pace: number | null;
+  ast_pct: number | null;
+  three_pa_rate: number | null;
+}
+
+export interface ShotHeatmapCell {
+  x: number;
+  y: number;
+  attempts: number;
+  makes: number;
+  fg_pct: number;
+}
+
+export interface ShotHeatmap {
+  team: string;
+  season: string;
+  offense_cells: ShotHeatmapCell[];
+  defense_cells: ShotHeatmapCell[];
+  n_offense_shots: number;
+  n_defense_shots: number;
 }
 
 export interface CoachCareerSummary {

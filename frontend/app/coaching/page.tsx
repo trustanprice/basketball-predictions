@@ -15,6 +15,12 @@ const SECTIONS = [
     label: "WAE Detail",
     description: "Click a coach above for their full team-season breakdown.",
   },
+  {
+    id: "team-style",
+    number: "03",
+    label: "Team Style",
+    description: "Real pace/shot-profile data and shot-location heatmaps — descriptive context, not a causal explanation.",
+  },
 ];
 
 export default async function CoachingPage() {
@@ -34,9 +40,10 @@ export default async function CoachingPage() {
         <p className="text-label mb-3 text-xs text-accent">Phase 4 — Coaching Eval</p>
         <h1 className="text-headline text-4xl sm:text-5xl">Coaching Evaluation</h1>
         <p className="prose-narrow mt-4 text-ink-muted">
-          Actual win% vs. a roster-talent-implied win% — <strong>&quot;wins above roster
-          expectation.&quot;</strong> Click a coach for their full team-season history, and
-          expand any season for the talent composite&apos;s formula.
+          How a coach&apos;s teams actually performed against what their rosters alone would
+          predict — we call the gap <strong>&quot;wins above roster expectation.&quot;</strong>{" "}
+          Click a coach for their full team-season history, and open any season to see exactly
+          how its talent number was built.
         </p>
       </div>
       <CoachingExplorer careerSummary={careerSummary} teamSeasons={teamSeasons} predictions={predictions} />
