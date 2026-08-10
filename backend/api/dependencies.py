@@ -52,12 +52,7 @@ def get_model_metadata() -> dict:
 # ratings: refresh strategy." This only ever reads the file the scheduled
 # refresh job (backend/ratings/refresh_player_ratings.py) wrote.
 
-def get_player_power_rankings(
-    n: int = Query(5, ge=1, le=PLAYER_RANKINGS_MAX_N, description="How many ranked players per side to return."),
-) -> dict:
-    """`n` slices the already-cached top-`PLAYER_RANKINGS_MAX_N` list down to
-    what this request asked for — the cache always stores the max, so "show
-    more" is a response-shaping concern here, never a reason to refresh."""
+def get_player_power_rankings() -> dict:
     if not PLAYER_RANKINGS_FILE.exists():
         raise HTTPException(
             status_code=503,
@@ -68,34 +63,7 @@ def get_player_power_rankings(
             ),
         )
     import json
-    data = json.loads(PLAYER_RANKINGS_FILE.read_text())
-    data["offense"] = data["offense"][:n]
-    data["defense"] = data["defense"][:n]
-    return data
-
-
-# ---- projected player leaders (preseason) ----
-# Same "only ever read the file a scheduled refresh wrote" rule as player
-# power rankings above, and the same reason — see
-# backend/ratings/refresh_player_projections.py.
-
-def get_player_projections(
-    n: int = Query(5, ge=1, le=50, description="How many projected players per side to return."),
-) -> dict:
-    if not PLAYER_PROJECTIONS_FILE.exists():
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "Projected player leaders haven't been computed yet — run "
-                "`python -m backend.ratings.refresh_player_projections` (needs network access "
-                "to NBA.com) or wait for the next scheduled refresh."
-            ),
-        )
-    import json
-    data = json.loads(PLAYER_PROJECTIONS_FILE.read_text())
-    data["offense"] = data["offense"][:n]
-    data["defense"] = data["defense"][:n]
-    return data
+    return json.loads(PLAYER_RANKINGS_FILE.read_text())
 
 
 # ---- coaching evaluation ----
