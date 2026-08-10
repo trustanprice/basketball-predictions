@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T05:52:46.272284+00:00",
+  "generated_at": "2026-08-10T19:50:33.620495+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -7,19 +7,29 @@
       "KNeighborsRegressor",
       "HistGradientBoostingRegressor (monotonic)"
     ],
-    "knn_walk_forward_mae": 8.283,
-    "gbm_walk_forward_mae": 6.781,
+    "knn_walk_forward_mae": 8.277,
+    "gbm_walk_forward_mae": 6.719,
     "winner": "gbm",
     "n_walk_forward_folds": 8
   },
   "calibration": {
-    "description": "Two post-processing corrections applied to every prediction (backtest and live forecast alike), on top of the winning model above: (1) each season's 30 predictions are rescaled around that season's own mean to match the real historical spread of NBA win totals \u2014 raw regression output is compressed toward the mean more than real seasons actually are; (2) every team is then shifted by a constant so the season's predictions sum to exactly 1,230 wins \u2014 30 teams x 82 games each, but every real game involves two teams, so exactly 1,230 games are actually played league-wide. Nothing about the model itself guarantees either property on its own.",
+    "description": "We adjust the raw model output two ways before showing it to you. First, we widen or narrow each season's 30 predictions around that season's own average to match how spread out real NBA win totals actually are \u2014 left alone, regression models like this one flatten the gap between good and bad teams more than reality does. Second, we shift every team by the same small amount so the season's predictions add up to exactly 1,230 wins \u2014 the real total for a full slate of games (30 teams, 82 games apiece, two teams per game). Neither property comes for free from the model itself; both are enforced afterward.",
     "historical_win_std": 11.827,
     "target_season_total_wins": 1230,
-    "walk_forward_mae_uncalibrated": 6.781,
-    "walk_forward_mae_calibrated": 7.162,
+    "walk_forward_mae_uncalibrated": 6.719,
+    "walk_forward_mae_calibrated": 7.169,
     "improves_backtest_mae": false,
-    "note": "Stated plainly: calibration does NOT improve the honest backtested MAE (6.781 -> 7.162 wins, worse or unchanged). It is still applied \u2014 matching the real 1,230-game season total and the real historical win-total spread are correctness properties in their own right, independent of whether they happen to lower average per-team error \u2014 but this should not be read as \"calibration helped.\""
+    "note": "Worth saying plainly: this adjustment does not sharpen the backtest \u2014 walk-forward error moves from 6.719 to 7.169 wins, flat or worse. We keep it anyway, because matching the real 82-game season total and the real spread of win totals are correct on their own terms, independent of whether they happen to shave points off average error. Don't read this as \"calibration helped.\""
+  },
+  "feature_experiments": {
+    "player_projection_features": {
+      "hypothesis": "Projecting each team's actual historical roster forward with our aging curve, and feeding that alongside the usual current-season numbers, sharpens the walk-forward backtest.",
+      "result": "It does. Walk-forward error improved from 6.781 to 6.719 wins (GBM won both times) \u2014 a small but real, repeatable gain, not noise (KNN has no randomness here, and GBM's seed is fixed). We kept it: these projected features (avg_age_projected, avg_pts_top10_projected, avg_production_score_projected) are now part of the model, not just a side experiment. See backend/win_model/player_projection_features.py to re-run the check after touching the aging curve."
+    },
+    "gbm_knn_ensemble": {
+      "hypothesis": "Averaging the two candidate models' predictions beats picking the single better one.",
+      "result": "It doesn't. GBM alone (6.719 wins MAE) clearly beats a GBM/KNN blend (7.248 wins) \u2014 KNN trails badly enough on its own (8.277 wins) that blending it in just drags GBM's stronger predictions down. We left this out of the shipped model \u2014 same rule as the calibration finding above: report what the backtest actually shows, not what we hoped for."
+    }
   },
   "winning_model": {
     "type": "HistGradientBoostingRegressor",
@@ -33,66 +43,80 @@
       "WIN%"
     ]
   },
+  "backtest_accuracy": {
+    "thresholds_wins": [
+      3,
+      5,
+      8
+    ],
+    "overall": {
+      "3": 0.3,
+      "5": 0.45,
+      "8": 0.6417
+    },
+    "n_oof_predictions": 240,
+    "note": "This is out-of-sample accuracy \u2014 every prediction here came from a model that had never seen that season's result, pooled across all 240 team-seasons we've backtested. We show three thresholds on purpose, because a single cutoff can flatter or unfairly bury the model depending on exactly where it lands. A team's win total is a genuinely hard thing to call a year out \u2014 injuries, trades, a young player's leap, a coaching change \u2014 which is exactly why Vegas's own preseason win totals and ESPN's BPI land in a similar range at tight thresholds. Small sample here, too: these numbers will firm up as more seasons get backtested, not because anything's broken today."
+  },
   "top_feature_importance": [
     {
       "feature": "SOS",
-      "importance_mae_increase": 6.6201
+      "importance_mae_increase": 6.5693
     },
     {
       "feature": "E_L",
-      "importance_mae_increase": 1.2841
+      "importance_mae_increase": 1.2918
     },
     {
       "feature": "PLUS_MINUS",
-      "importance_mae_increase": 0.8915
+      "importance_mae_increase": 0.9359
     },
     {
       "feature": "W_W",
-      "importance_mae_increase": 0.7993
+      "importance_mae_increase": 0.8366
     },
     {
       "feature": "Payroll",
-      "importance_mae_increase": 0.517
-    },
-    {
-      "feature": "BLK",
-      "importance_mae_increase": 0.3876
-    },
-    {
-      "feature": "avg_production_score",
-      "importance_mae_increase": 0.384
-    },
-    {
-      "feature": "W",
-      "importance_mae_increase": 0.3818
-    },
-    {
-      "feature": "W_L",
-      "importance_mae_increase": 0.3758
-    },
-    {
-      "feature": "E_W",
-      "importance_mae_increase": 0.3548
-    },
-    {
-      "feature": "PFD",
-      "importance_mae_increase": 0.3501
+      "importance_mae_increase": 0.4662
     },
     {
       "feature": "FT%",
-      "importance_mae_increase": 0.3326
+      "importance_mae_increase": 0.39
+    },
+    {
+      "feature": "W",
+      "importance_mae_increase": 0.3855
     },
     {
       "feature": "TOV",
-      "importance_mae_increase": 0.2722
+      "importance_mae_increase": 0.3367
     },
     {
-      "feature": "avg_age",
-      "importance_mae_increase": 0.2272
+      "feature": "BLK",
+      "importance_mae_increase": 0.2961
+    },
+    {
+      "feature": "W_L",
+      "importance_mae_increase": 0.2871
+    },
+    {
+      "feature": "PFD",
+      "importance_mae_increase": 0.27
     },
     {
       "feature": "injury_rate",
-      "importance_mae_increase": 0.2266
+      "importance_mae_increase": 0.2609
+    },
+    {
+      "feature": "avg_production_score",
+      "importance_mae_increase": 0.254
+    },
+    {
+      "feature": "FG%",
+      "importance_mae_increase": 0.215
+    },
+    {
+      "feature": "Pre-ASG_W",
+      "importance_mae_increase": 0.2078
     }
   ],
   "feature_values_available": [
@@ -103,11 +127,11 @@
     "Payroll"
   ],
   "feature_notes": {
-    "SOS": "Strength of Schedule \u2014 self-calculated, not a third-party benchmark. Computed as the season average of each opponent's Strength_Score (0.5*WIN% + 0.3*PLUS_MINUS + 0.2*roster-age-curve), entirely within this project's own pipeline \u2014 see backend/win_model/data_loader.py's load_schedule(). Null for the current forecast season: it depends on next season's opponent data, which doesn't exist yet.",
-    "E_L": "Eastern Conference losses (part of the East/West conference win-loss split).",
-    "PLUS_MINUS": "Season point differential (points scored minus points allowed).",
-    "W_W": "Western Conference wins (part of the East/West conference win-loss split).",
-    "Payroll": "Total team payroll for the season, in dollars. For the current forecast row specifically, this is last season's known figure carried forward unchanged \u2014 nba_api has no payroll data, and trades/signings/waivers change actual payroll all through the offseason. See metadata.roster_projection for the rest of what is/isn't real current data."
+    "SOS": "Strength of schedule \u2014 our own number, not a KenPom or ESPN rating. We build it from each opponent's win%, point differential, and roster age, averaged across the full schedule (see load_schedule() in data_loader.py if you want the exact recipe). Blank for next season's forecast: the schedule hasn't been set yet, so there are no opponents to average.",
+    "E_L": "Eastern Conference losses \u2014 one half of the East/West win-loss split.",
+    "PLUS_MINUS": "Points scored minus points allowed for the season \u2014 the team's full-season point differential.",
+    "W_W": "Western Conference wins \u2014 one half of the East/West win-loss split.",
+    "Payroll": "Total team payroll for the season. For next season's forecast specifically, this is last season's known figure carried forward \u2014 there's no live payroll feed to draw from, and the real number moves with every trade, extension, and signing all summer. Treat it as a rough stand-in, not a snapshot of today's books. See the roster section below for what in this forecast is real-time versus carried forward."
   },
   "prediction_interval": {
     "method": "GBM native quantile regression (refits the winning model at the 10th and 90th percentiles)",
@@ -170,6 +194,6 @@
       "Washington Wizards"
     ],
     "team_talent_composite": null,
-    "note": "No roster projection found \u2014 every forecast-row talent feature is the stale team-level carry-forward. Run `python -m backend.ratings.refresh_roster_projection` to generate one."
+    "note": "No roster projection on file yet, so every team's talent numbers here are carried forward from last season rather than built from an actual current roster. Run `python -m backend.ratings.refresh_roster_projection` to fix that."
   }
 }

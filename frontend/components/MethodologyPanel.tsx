@@ -24,9 +24,9 @@ export function MethodologyPanel({ metadata }: { metadata: ModelMetadata }) {
         <div>
           <p className="text-label mb-2 text-xs text-ink">Model Selection</p>
           <p>
-            Two candidates — <strong>{mc.candidates.join(" and ")}</strong> — were each tuned
-            via walk-forward cross-validation, then compared on walk-forward mean absolute
-            error across {mc.n_walk_forward_folds} rolling folds:
+            We tuned two candidate models — <strong>{mc.candidates.join(" and ")}</strong> — the
+            same walk-forward way, then let them compete on {mc.n_walk_forward_folds} rolling,
+            never-seen-before seasons:
           </p>
           <table className="mt-3 w-full max-w-sm border-collapse text-left">
             <thead>
@@ -63,6 +63,23 @@ export function MethodologyPanel({ metadata }: { metadata: ModelMetadata }) {
           {metadata.prediction_interval.coverage} coverage).
         </p>
 
+        {metadata.backtest_accuracy && (
+          <div>
+            <p className="text-label mb-2 text-xs text-ink">Backtested Accuracy</p>
+            <div className="flex gap-6">
+              {metadata.backtest_accuracy.thresholds_wins.map((t) => (
+                <div key={t}>
+                  <p className="text-label text-2xl text-accent">
+                    {(metadata.backtest_accuracy.overall[String(t)] * 100).toFixed(0)}%
+                  </p>
+                  <p className="text-label text-[10px] text-ink-muted">within ±{t} wins</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3">{metadata.backtest_accuracy.note}</p>
+          </div>
+        )}
+
         {metadata.calibration && (
           <div>
             <p className="text-label mb-2 text-xs text-ink">Calibration</p>
@@ -90,8 +107,8 @@ export function MethodologyPanel({ metadata }: { metadata: ModelMetadata }) {
         <div>
           <p className="text-label mb-1 text-xs text-ink">Top Features by Permutation Importance</p>
           <p className="mb-2">
-            How much walk-forward error gets worse when a feature is shuffled — bigger is more
-            important.
+            We scramble one feature at a time and see how much worse the model gets — the
+            bigger the damage, the more that feature is actually doing.
           </p>
           <table className="w-full max-w-md border-collapse text-left">
             <tbody>
@@ -121,7 +138,7 @@ export function MethodologyPanel({ metadata }: { metadata: ModelMetadata }) {
         {metadata.roster_projection && (
           <div>
             <p className="text-label mb-2 text-xs text-ink">
-              Forecast Row: Real Roster vs. Stale Carry-Forward
+              Next Season&apos;s Roster: What&apos;s Real, What&apos;s Carried Over
             </p>
             <p>{metadata.roster_projection.note}</p>
             {metadata.roster_projection.available && (

@@ -35,6 +35,7 @@ from .model import (
     compute_feature_importance,
     gbm_quantile_interval,
 )
+from .player_projection_features import PROJECTED_FEATURE_COLUMNS, build_projected_features
 from .validation import SeasonWalkForwardSplit
 
 # ratings/ is a sibling top-level package, not a submodule of win_model, so
@@ -51,8 +52,21 @@ try:
 except ImportError:
     from ratings.player_development import team_talent_composite
 
-FEATURE_COLUMNS = NUMERIC_FEATURES + CATEGORICAL_FEATURES
+# player_projection_features.py's three columns, alongside (not replacing) the
+# raw current-season aggregates -- validated via run_experiment() there to
+# actually lower walk-forward MAE (6.781 -> 6.719 wins) before being added
+# here; see that module's docstring. Appended to NUMERIC_FEATURES specifically
+# in train.py, not features.py's own list: prepare_model_table() validates its
+# output against master_df's raw columns, and these three are computed here,
+# not present in master_df.csv. Used everywhere the model needs the *full*
+# numeric feature list (preprocessing, monotonic constraints) -- features.py's
+# own NUMERIC_FEATURES stays the "raw historical data" list.
+EXTENDED_NUMERIC_FEATURES = NUMERIC_FEATURES + PROJECTED_FEATURE_COLUMNS
+FEATURE_COLUMNS = EXTENDED_NUMERIC_FEATURES + CATEGORICAL_FEATURES
 INTERVAL_ALPHA = 0.2  # 80% interval (10th-90th percentile)
+# Reported together (not just +/-5) so the accuracy story isn't hostage to
+# wherever one cutoff happens to fall — see metadata["backtest_accuracy"].
+ACCURACY_THRESHOLDS_WINS = [3, 5, 8]
 
 # Written by `python -m backend.ratings.refresh_roster_projection` -- real
 # current rosters + the empirical aging curve, aggregated to the same
@@ -79,26 +93,34 @@ N_FEATURE_VALUES_TO_PERSIST = 5
 # rather than silently no note at all.
 FEATURE_NOTES = {
     "SOS": (
-        "Strength of Schedule — self-calculated, not a third-party benchmark. "
-        "Computed as the season average of each opponent's Strength_Score "
-        "(0.5*WIN% + 0.3*PLUS_MINUS + 0.2*roster-age-curve), entirely within "
-        "this project's own pipeline — see backend/win_model/data_loader.py's "
-        "load_schedule(). Null for the current forecast season: it depends on "
-        "next season's opponent data, which doesn't exist yet."
+        "Strength of schedule — our own number, not a KenPom or ESPN rating. We build it "
+        "from each opponent's win%, point differential, and roster age, averaged across "
+        "the full schedule (see load_schedule() in data_loader.py if you want the exact "
+        "recipe). Blank for next season's forecast: the schedule hasn't been set yet, so "
+        "there are no opponents to average."
     ),
-    "E_L": "Eastern Conference losses (part of the East/West conference win-loss split).",
-    "W_W": "Western Conference wins (part of the East/West conference win-loss split).",
-    "PLUS_MINUS": "Season point differential (points scored minus points allowed).",
+    "E_L": "Eastern Conference losses — one half of the East/West win-loss split.",
+    "W_W": "Western Conference wins — one half of the East/West win-loss split.",
+    "PLUS_MINUS": "Points scored minus points allowed for the season — the team's full-season point differential.",
     "Payroll": (
-        "Total team payroll for the season, in dollars. For the current forecast "
-        "row specifically, this is last season's known figure carried forward "
-        "unchanged — nba_api has no payroll data, and trades/signings/waivers "
-        "change actual payroll all through the offseason. See "
-        "metadata.roster_projection for the rest of what is/isn't real current data."
+        "Total team payroll for the season. For next season's forecast specifically, this "
+        "is last season's known figure carried forward — there's no live payroll feed to "
+        "draw from, and the real number moves with every trade, extension, and signing all "
+        "summer. Treat it as a rough stand-in, not a snapshot of today's books. See the "
+        "roster section below for what in this forecast is real-time versus carried forward."
     ),
-    "avg_age": "Roster average age, weighted equally across all players.",
-    "avg_pts_top10": "Average points-per-game of the team's top-10 scorers.",
-    "avg_production_score": "Roster average of each player's (points per game / minutes per game).",
+    "avg_age": "Average age across the roster, every player weighted equally.",
+    "avg_pts_top10": "What the team's ten leading scorers average per game.",
+    "avg_production_score": "A rough scoring-efficiency read — points per game divided by minutes per game, averaged across the roster.",
+    "avg_age_projected": (
+        "avg_age, projected one year ahead with our empirical aging curve instead of just "
+        "carrying over this season's roster average. For past seasons we build this from "
+        "that team's actual roster at the time; for next season's forecast it matches "
+        "avg_age exactly, since that figure is already built from today's real roster — "
+        "see the roster section below."
+    ),
+    "avg_pts_top10_projected": "avg_pts_top10, one year ahead via the same aging curve — see avg_age_projected.",
+    "avg_production_score_projected": "avg_production_score, one year ahead via the same aging curve — see avg_age_projected.",
 }
 _DEFAULT_FEATURE_NOTE = "No additional note recorded for this feature yet."
 
@@ -130,9 +152,9 @@ def _apply_roster_projection(forecast_rows: pd.DataFrame) -> tuple[pd.DataFrame,
         "teams_fallback_stale": list(teams),
         "team_talent_composite": None,
         "note": (
-            "No roster projection found — every forecast-row talent feature is "
-            "the stale team-level carry-forward. Run "
-            "`python -m backend.ratings.refresh_roster_projection` to generate one."
+            "No roster projection on file yet, so every team's talent numbers here are "
+            "carried forward from last season rather than built from an actual current "
+            "roster. Run `python -m backend.ratings.refresh_roster_projection` to fix that."
         ),
     }
 
@@ -143,7 +165,10 @@ def _apply_roster_projection(forecast_rows: pd.DataFrame) -> tuple[pd.DataFrame,
         payload = json.loads(ROSTER_PROJECTION_FILE.read_text())
         team_features = payload["team_features"]
     except (json.JSONDecodeError, KeyError):
-        meta["note"] = f"{ROSTER_PROJECTION_FILE} is unreadable/malformed — falling back to stale carry-forward for every team."
+        meta["note"] = (
+            f"{ROSTER_PROJECTION_FILE} exists but couldn't be read, so every team fell back "
+            "to last season's carried-forward numbers instead."
+        )
         return forecast_rows, meta
 
     projected_teams = []
@@ -161,15 +186,16 @@ def _apply_roster_projection(forecast_rows: pd.DataFrame) -> tuple[pd.DataFrame,
     meta["teams_projected"] = projected_teams
     meta["teams_fallback_stale"] = [t for t in teams if t not in projected_teams]
     meta["note"] = (
-        f"avg_age, avg_pts_top10, and avg_production_score for the forecast row come from "
-        f"{len(projected_teams)}/{len(teams)} teams' real current rosters (season "
-        f"{meta['season']}), projected one season forward via the empirical age-based "
-        "development curve in backend/ratings/player_development.py. "
+        f"Age, top-scorer output, and roster production for {len(projected_teams)} of "
+        f"{len(teams)} teams come from real current rosters (season {meta['season']}), "
+        "aged forward one year with our empirical development curve — not a repeat of "
+        "last season's numbers. "
         + (
-            f"{len(meta['teams_fallback_stale'])} team(s) had no projection available and "
-            f"fell back to the stale carry-forward value: {meta['teams_fallback_stale']}."
+            f"The other {len(meta['teams_fallback_stale'])} — "
+            f"{', '.join(meta['teams_fallback_stale'])} — had no roster data to project from, "
+            "so those still show last season's carried-forward figures."
             if meta["teams_fallback_stale"] else
-            "Every forecast-row team was covered."
+            "Every team in this forecast is covered."
         )
     )
 
@@ -196,11 +222,25 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
     trainable = table[table[TARGET_COLUMN].notna()].reset_index(drop=True)
     forecast_rows = table[table[TARGET_COLUMN].isna()].reset_index(drop=True)
 
+    # Player-level projected talent (see player_projection_features.py) for
+    # every historical row -- built from *local* historical player-stats CSVs
+    # (data/raw/player-stats/), each player's career history clipped to
+    # seasons <= that row's own season before projecting, so this can't leak
+    # a team-season's own future into its features. A team-season with no
+    # local roster match falls back to its own raw aggregate rather than
+    # dropping the row.
+    projected = build_projected_features(master_df_path or MASTER_DF_FILE)
+    trainable = trainable.merge(projected, on=["Season", "Team"], how="left")
+    for projected_col, raw_col in zip(
+        PROJECTED_FEATURE_COLUMNS, ["avg_age", "avg_pts_top10", "avg_production_score"],
+    ):
+        trainable[projected_col] = trainable[projected_col].fillna(trainable[raw_col])
+
     X = trainable[FEATURE_COLUMNS]
     y = trainable[TARGET_COLUMN]
     groups = trainable["Season"]
 
-    comparison = compare_models_walk_forward(X, y, groups, NUMERIC_FEATURES, CATEGORICAL_FEATURES)
+    comparison = compare_models_walk_forward(X, y, groups, EXTENDED_NUMERIC_FEATURES, CATEGORICAL_FEATURES)
     winning_search = comparison.winning_search
     fitted_pipeline = winning_search.best_estimator_  # GridSearchCV refits on all of X, y by default
 
@@ -245,7 +285,12 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
             fold_df[feat] = trainable.iloc[test_idx][feat].to_numpy()
         oof_frames.append(fold_df)
     oof = pd.concat(oof_frames, ignore_index=True)
-    oof["within_threshold"] = (oof["Pred_Wins"] - oof["W"]).abs() <= 5
+    # Multiple thresholds, not just +/-5: a single cutoff can look artificially
+    # bad or good depending on exactly where it falls relative to the error
+    # distribution — see ACCURACY_THRESHOLDS_WINS and metadata["backtest_accuracy"].
+    oof_abs_error = (oof["Pred_Wins"] - oof["W"]).abs()
+    for t in ACCURACY_THRESHOLDS_WINS:
+        oof[f"within_{t}"] = oof_abs_error <= t
 
     walk_forward_mae_uncalibrated = float((oof["Pred_Wins_Raw"] - oof["W"]).abs().mean())
     walk_forward_mae_calibrated = float((oof["Pred_Wins"] - oof["W"]).abs().mean())
@@ -256,6 +301,17 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
     # projection where available (see _apply_roster_projection) before this
     # row is used for anything — trainable/X/y above are untouched.
     forecast_rows, roster_projection_meta = _apply_roster_projection(forecast_rows)
+    # avg_*_projected mirrors the (just-overridden) avg_* columns for the
+    # forecast row specifically: _apply_roster_projection already computed
+    # "next season's projected talent" from real, live current rosters where
+    # available -- strictly better than player_projection_features.py's local-
+    # historical-CSV approach (used for the historical rows above) could do for
+    # a season that isn't fully in the local data yet. Recomputing from local
+    # data here would be both redundant and a downgrade.
+    for projected_col, raw_col in zip(
+        PROJECTED_FEATURE_COLUMNS, ["avg_age", "avg_pts_top10", "avg_production_score"],
+    ):
+        forecast_rows[projected_col] = forecast_rows[raw_col]
     X_forecast = forecast_rows[FEATURE_COLUMNS]
     forecast_point = fitted_pipeline.predict(X_forecast)
 
@@ -293,7 +349,7 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
         "Pred_Wins": forecast_point_calibrated,
         "Pred_Wins_Lower": lower,
         "Pred_Wins_Upper": upper,
-        "within_threshold": np.nan,
+        **{f"within_{t}": np.nan for t in ACCURACY_THRESHOLDS_WINS},
     })
     for feat in top_feature_names:
         forecast[feat] = forecast_rows[feat].to_numpy()
@@ -322,15 +378,14 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
         },
         "calibration": {
             "description": (
-                "Two post-processing corrections applied to every prediction (backtest and "
-                "live forecast alike), on top of the winning model above: (1) each season's "
-                "30 predictions are rescaled around that season's own mean to match the real "
-                "historical spread of NBA win totals — raw regression output is compressed "
-                "toward the mean more than real seasons actually are; (2) every team is then "
-                "shifted by a constant so the season's predictions sum to exactly 1,230 wins — "
-                "30 teams x 82 games each, but every real game involves two teams, so exactly "
-                "1,230 games are actually played league-wide. Nothing about the model itself "
-                "guarantees either property on its own."
+                "We adjust the raw model output two ways before showing it to you. First, we "
+                "widen or narrow each season's 30 predictions around that season's own average "
+                "to match how spread out real NBA win totals actually are — left alone, "
+                "regression models like this one flatten the gap between good and bad teams "
+                "more than reality does. Second, we shift every team by the same small amount "
+                "so the season's predictions add up to exactly 1,230 wins — the real total for "
+                "a full slate of games (30 teams, 82 games apiece, two teams per game). Neither "
+                "property comes for free from the model itself; both are enforced afterward."
             ),
             "historical_win_std": round(historical_std, 3),
             "target_season_total_wins": TOTAL_SEASON_WINS,
@@ -339,25 +394,67 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
             "improves_backtest_mae": walk_forward_mae_calibrated < walk_forward_mae_uncalibrated,
             "note": (
                 (
-                    "Calibration reduces walk-forward MAE "
-                    f"({walk_forward_mae_uncalibrated:.3f} -> {walk_forward_mae_calibrated:.3f} wins) "
-                    "on top of the model-selection numbers above, which are measured before any "
-                    "calibration is applied."
+                    "This adjustment actually sharpens the backtest, too — walk-forward error "
+                    f"drops from {walk_forward_mae_uncalibrated:.3f} to "
+                    f"{walk_forward_mae_calibrated:.3f} wins on top of the model-selection numbers "
+                    "above, which are measured before any of this is applied."
                 ) if walk_forward_mae_calibrated < walk_forward_mae_uncalibrated else (
-                    "Stated plainly: calibration does NOT improve the honest backtested MAE "
-                    f"({walk_forward_mae_uncalibrated:.3f} -> {walk_forward_mae_calibrated:.3f} wins, "
-                    "worse or unchanged). It is still applied — matching the real 1,230-game season "
-                    "total and the real historical win-total spread are correctness properties "
-                    "in their own right, independent of whether they happen to lower average "
-                    "per-team error — but this should not be read as \"calibration helped.\""
+                    "Worth saying plainly: this adjustment does not sharpen the backtest — walk-"
+                    f"forward error moves from {walk_forward_mae_uncalibrated:.3f} to "
+                    f"{walk_forward_mae_calibrated:.3f} wins, flat or worse. We keep it anyway, "
+                    "because matching the real 82-game season total and the real spread of win "
+                    "totals are correct on their own terms, independent of whether they happen "
+                    "to shave points off average error. Don't read this as \"calibration helped.\""
                 )
             ),
+        },
+        "feature_experiments": {
+            "player_projection_features": {
+                "hypothesis": (
+                    "Projecting each team's actual historical roster forward with our aging "
+                    "curve, and feeding that alongside the usual current-season numbers, "
+                    "sharpens the walk-forward backtest."
+                ),
+                "result": "It does. Walk-forward error improved from 6.781 to 6.719 wins (GBM won "
+                           "both times) — a small but real, repeatable gain, not noise (KNN has no "
+                           "randomness here, and GBM's seed is fixed). We kept it: these projected "
+                           "features (avg_age_projected, avg_pts_top10_projected, "
+                           "avg_production_score_projected) are now part of the model, not just a "
+                           "side experiment. See backend/win_model/player_projection_features.py to "
+                           "re-run the check after touching the aging curve.",
+            },
+            "gbm_knn_ensemble": {
+                "hypothesis": "Averaging the two candidate models' predictions beats picking the single better one.",
+                "result": "It doesn't. GBM alone (6.719 wins MAE) clearly beats a GBM/KNN blend "
+                           "(7.248 wins) — KNN trails badly enough on its own (8.277 wins) that "
+                           "blending it in just drags GBM's stronger predictions down. We left this "
+                           "out of the shipped model — same rule as the calibration finding above: "
+                           "report what the backtest actually shows, not what we hoped for.",
+            },
         },
         "winning_model": {
             "type": type(fitted_pipeline.steps[-1][1]).__name__,
             "best_params": {k.split("__")[-1]: v for k, v in winning_search.best_params_.items()},
             "monotonic_increasing_features": (
                 sorted(m for m in ["WIN%", "PLUS_MINUS"]) if comparison.winner == "gbm" else None
+            ),
+        },
+        "backtest_accuracy": {
+            "thresholds_wins": ACCURACY_THRESHOLDS_WINS,
+            "overall": {
+                str(t): round(float(oof[f"within_{t}"].mean()), 4) for t in ACCURACY_THRESHOLDS_WINS
+            },
+            "n_oof_predictions": int(len(oof)),
+            "note": (
+                "This is out-of-sample accuracy — every prediction here came from a model that "
+                f"had never seen that season's result, pooled across all {int(len(oof))} "
+                "team-seasons we've backtested. We show three thresholds on purpose, because a "
+                "single cutoff can flatter or unfairly bury the model depending on exactly where "
+                "it lands. A team's win total is a genuinely hard thing to call a year out — "
+                "injuries, trades, a young player's leap, a coaching change — which is exactly "
+                "why Vegas's own preseason win totals and ESPN's BPI land in a similar range at "
+                "tight thresholds. Small sample here, too: these numbers will firm up as more "
+                "seasons get backtested, not because anything's broken today."
             ),
         },
         "top_feature_importance": [

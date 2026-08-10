@@ -27,6 +27,12 @@ export interface ModelMetadata {
   forecast_target_season: number | null;
   feature_values_available: string[];
   feature_notes: Record<string, string>;
+  backtest_accuracy: {
+    thresholds_wins: number[];
+    overall: Record<string, number>;
+    n_oof_predictions: number;
+    note: string;
+  };
   calibration: {
     description: string;
     historical_win_std: number;

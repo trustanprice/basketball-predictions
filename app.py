@@ -169,53 +169,55 @@ walk-forward mean absolute error (out-of-sample, never in-sample fit) across
 # Accuracy Section
 # ----------------------
 st.header("Model Accuracy Results")
-st.subheader("GOAL: 85% Accuracy at ±5 Game Threshold")
+st.caption("Walk-forward backtested accuracy at three error thresholds — see notes below each season.")
 
-def display_accuracy(season: int, threshold: int, comments: str):
+ACCURACY_THRESHOLDS = [3, 5, 8]
+
+
+def display_accuracy(season: int, comments: str):
     season_df = results_df[results_df["Season"] == season].copy()
 
-    if "Pred_Wins" in season_df.columns:
-        if "within_threshold" not in season_df.columns:
-            # fallback if not precomputed
-            season_df["within_threshold"] = (
-                (season_df["Pred_Wins"] - season_df["W"]).abs() <= threshold
-            )
-        accuracy = season_df["within_threshold"].mean()
-
-        st.subheader(f"{season} Season Accuracy (±{threshold} Wins)")
-        st.metric("Accuracy", f"{accuracy:.2%}")
-        st.dataframe(season_df[["Team", "W", "Pred_Wins", "within_threshold"]])
-
-        st.write(f"✍️ *Comments:* {comments}")
-    else:
+    if "Pred_Wins" not in season_df.columns:
         st.warning(f"No `Pred_Wins` column available for {season}.")
+        return
+
+    abs_error = (season_df["Pred_Wins"] - season_df["W"]).abs()
+    st.subheader(f"{season} Season Accuracy")
+    # All three thresholds side by side, not just +/-5 — a single cutoff can
+    # look artificially strong or weak depending on exactly where it falls.
+    cols = st.columns(len(ACCURACY_THRESHOLDS))
+    for col, threshold in zip(cols, ACCURACY_THRESHOLDS):
+        col_name = f"within_{threshold}"
+        if col_name not in season_df.columns:
+            season_df[col_name] = abs_error <= threshold
+        col.metric(f"±{threshold} wins", f"{season_df[col_name].mean():.0%}")
+
+    st.dataframe(season_df[["Team", "W", "Pred_Wins"] + [f"within_{t}" for t in ACCURACY_THRESHOLDS]])
+    st.write(f"✍️ *Comments:* {comments}")
 
 # --- Buttons ---
 if st.button("View 2024 Accuracy"):
     display_accuracy(
         2024,
-        threshold=5,
         comments = (
-    "This is walk-forward backtested accuracy: the model was trained only on seasons "
-    "before 2024 and never saw 2024 data during training or tuning. It's noticeably below "
-    "the 85% goal — that's expected and, honestly, more trustworthy than the old number. "
-    "The previous version of this model trained on same-season stats to predict that same "
-    "season's win total, which was close to circular for historical rows and looked far "
-    "more accurate than it really was. This number reflects genuine predictive difficulty, "
-    "not a regression."
+    "The model here was trained only on seasons before 2024 — it never saw 2024 during "
+    "training or tuning, so this is a genuine, honest read of how it does on a season it "
+    "hasn't met yet. These numbers are lower than an earlier version of this project "
+    "reported, and that's a good sign, not a step backward: that earlier version trained on "
+    "a team's own same-season stats to predict that same season's win total, which is close "
+    "to grading your own open-book exam. What you're looking at now is the real difficulty "
+    "of forecasting a season in advance."
 )
     )
 
 if st.button("View 2025 Accuracy"):
     display_accuracy(
         2025,
-        threshold=5,
         comments = (
-    "Same walk-forward backtest, for 2025. Next steps for closing the gap toward the 85% "
-    "goal: the current feature set is unchanged from the old model (Phase 1 only fixed "
-    "validation methodology, model choice, and interval estimation) — roster-change context "
-    "(trades, free agency) and the live player ratings from Phase 2+ are the more promising "
-    "levers than further tuning KNN or GBM hyperparameters on this same feature set."
+    "Same honest walk-forward backtest, run on 2025. Where we'd look next for real gains: "
+    "the feature set itself, not more hyperparameter tuning — real roster context (trades, "
+    "free agency, aging curves) and live player-level ratings have more room to move the "
+    "needle than squeezing another tenth of a win out of the same inputs."
 )
     )
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { ModelMetadata, TeamPrediction } from "@/lib/types";
 import { getSafeTeamAccentColor } from "@/lib/teamColors";
+import { teamLogoUrl } from "@/lib/teamIds";
 
 const WIDTH = 560;
 const HEIGHT = 380;
@@ -10,6 +11,14 @@ const PADDING = { top: 16, right: 16, bottom: 40, left: 56 };
 
 const LINE_COLOR = "#f2ede0";
 const INK_MUTED_COLOR = "#a89f8e";
+
+// "Small, 24-32px" per spec: unselected logos sit at the low end so a cluster
+// of teams plotted close together stays legible; the selected (or hovered)
+// team gets the high end plus a colored halo behind it, and is always drawn
+// last (SVG paints in DOM order — there's no z-index for siblings) so it
+// sits on top of anything it overlaps rather than getting buried.
+const LOGO_SIZE = 24;
+const EMPHASIZED_LOGO_SIZE = 32;
 
 /**
  * Scatter of two of the win model's top-importance features, one point per
@@ -24,12 +33,16 @@ const INK_MUTED_COLOR = "#a89f8e";
  * uses the "hollow/locked" treatment (border only, no fill) — it's describing
  * data that isn't available yet, not a status worth the accent color.
  *
- * Points are real click (and keyboard) targets, not hover-only — clicking or
- * pressing Enter/Space on one calls onSelectTeam, syncing back to the team
- * selector/forecast card above. The selected point is colored with that
- * team's own safe accent color (identity), not the site's amber (status) —
- * every other point stays neutral/muted so 30 simultaneous team colors don't
- * turn the chart into noise.
+ * Points are each team's real logo (cdn.nba.com), not a plain dot — falls
+ * back to a colored dot (lib/teamColors.ts) for any team ID whose logo fails
+ * to load, tracked per-team via each <image>'s onError. Real click (and
+ * keyboard) targets, not hover-only — clicking or pressing Enter/Space on one
+ * calls onSelectTeam, syncing back to the team selector/forecast card above.
+ * The selected team's logo is drawn larger, at full opacity, on top of
+ * everything else (last in paint order), with a colored halo behind it using
+ * that team's own safe accent color (identity, not the site's amber status
+ * color) — every other logo stays small and dimmed so a cluster of teams
+ * plotted close together doesn't turn illegible.
  */
 export function FeatureScatterChart({
   predictions,
@@ -43,6 +56,7 @@ export function FeatureScatterChart({
   onSelectTeam?: (team: string) => void;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const [failedLogos, setFailedLogos] = useState<Set<string>>(new Set());
 
   const axisChoice = useMemo(() => {
     const rankedNames = metadata.top_feature_importance.map((f) => f.feature);
@@ -79,8 +93,6 @@ export function FeatureScatterChart({
   const xMax = Math.max(...xValues);
   const yMin = Math.min(...yValues);
   const yMax = Math.max(...yValues);
-  const winsMin = Math.min(...points.map((p) => p.predictedWins));
-  const winsMax = Math.max(...points.map((p) => p.predictedWins));
 
   const plotWidth = WIDTH - PADDING.left - PADDING.right;
   const plotHeight = HEIGHT - PADDING.top - PADDING.bottom;
@@ -89,10 +101,19 @@ export function FeatureScatterChart({
     PADDING.left + (xMax === xMin ? plotWidth / 2 : ((v - xMin) / (xMax - xMin)) * plotWidth);
   const scaleY = (v: number) =>
     PADDING.top + plotHeight - (yMax === yMin ? plotHeight / 2 : ((v - yMin) / (yMax - yMin)) * plotHeight);
-  const scaleRadius = (wins: number) =>
-    winsMax === winsMin ? 5 : 4 + ((wins - winsMin) / (winsMax - winsMin)) * 6;
 
   const hoveredPoint = points.find((p) => p.team === hovered);
+  // Emphasized (larger, full-opacity, drawn last so it's never buried under a
+  // neighbor) team is whichever the user is actively interacting with —
+  // hover takes priority for immediate feedback, falling back to the
+  // sitewide selection.
+  const emphasizedTeam = hovered ?? selectedTeam ?? null;
+  // Draw order: emphasized team last (SVG has no z-index for siblings —
+  // paint order is the only way to guarantee it sits on top of anything it
+  // overlaps).
+  const orderedPoints = [...points].sort((a, b) =>
+    a.team === emphasizedTeam ? 1 : b.team === emphasizedTeam ? -1 : 0
+  );
 
   return (
     <div className="card">
@@ -100,15 +121,16 @@ export function FeatureScatterChart({
         <h3 className="text-headline text-xl">
           {xFeature} <span className="text-ink-muted">vs.</span> {yFeature}
         </h3>
-        <span className="text-label text-[10px] text-ink-muted">Click a point to select · size = predicted wins</span>
+        <span className="text-label text-[10px] text-ink-muted">Click a logo to select</span>
       </div>
 
       {!axisChoice.isTrueTop2 && (
         <p className="prose-narrow mb-4 rounded-md border border-line/20 bg-transparent p-3 text-xs text-ink-muted">
-          Showing <strong className="text-ink">{xFeature}</strong> vs.{" "}
-          <strong className="text-ink">{yFeature}</strong>, not the true top-2 by importance (
-          {axisChoice.topTwoByImportance.join(", ")}) — one or both aren&apos;t available for
-          every team right now. See{" "}
+          We&apos;d rather plot <strong className="text-ink">{axisChoice.topTwoByImportance.join(" and ")}</strong>{" "}
+          — the two features that actually matter most — but at least one of them isn&apos;t
+          available for every team right now, so this chart shows{" "}
+          <strong className="text-ink">{xFeature}</strong> vs.{" "}
+          <strong className="text-ink">{yFeature}</strong> instead. See{" "}
           <strong className="text-ink">
             {metadata.feature_notes[axisChoice.topTwoByImportance[0]]
               ? axisChoice.topTwoByImportance[0]
@@ -159,21 +181,21 @@ export function FeatureScatterChart({
           {yFeature.toUpperCase()}
         </text>
 
-        {points.map((p) => {
+        {orderedPoints.map((p) => {
           const isSelected = p.team === selectedTeam;
-          const selectedFill = isSelected ? getSafeTeamAccentColor(p.team) : INK_MUTED_COLOR;
+          const isEmphasized = p.team === emphasizedTeam;
+          const cx = scaleX(p.x);
+          const cy = scaleY(p.y);
+          const size = isEmphasized ? EMPHASIZED_LOGO_SIZE : LOGO_SIZE;
+          const half = size / 2;
+          const accentColor = getSafeTeamAccentColor(p.team);
+          const logoUrl = teamLogoUrl(p.team);
+          const showFallbackDot = !logoUrl || failedLogos.has(p.team);
+
           return (
-            <circle
+            <g
               key={p.team}
-              cx={scaleX(p.x)}
-              cy={scaleY(p.y)}
-              r={scaleRadius(p.predictedWins)}
-              fill={selectedFill}
-              fillOpacity={isSelected ? 1 : 0.35}
-              stroke={isSelected ? selectedFill : "none"}
-              strokeOpacity={0.3}
-              strokeWidth={isSelected ? 5 : 0}
-              className="cursor-pointer outline-none transition-[fill-opacity,stroke-width] duration-200 ease-out focus-visible:stroke-accent focus-visible:stroke-2"
+              className="cursor-pointer outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               tabIndex={0}
               role="button"
               aria-label={`${p.team}: ${xFeature} ${p.x.toFixed(2)}, ${yFeature} ${p.y.toFixed(2)}, predicted wins ${p.predictedWins.toFixed(1)}`}
@@ -189,7 +211,39 @@ export function FeatureScatterChart({
               onMouseLeave={() => setHovered((h) => (h === p.team ? null : h))}
               onFocus={() => setHovered(p.team)}
               onBlur={() => setHovered((h) => (h === p.team ? null : h))}
-            />
+            >
+              {isSelected && (
+                // Colored halo behind the selected team's logo — carries the
+                // same "team identity color" cue the old plain-dot version
+                // had, and helps the selected point read clearly even where
+                // several logos cluster close together.
+                <circle cx={cx} cy={cy} r={half + 6} fill={accentColor} fillOpacity={0.25} />
+              )}
+              {showFallbackDot ? (
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={half}
+                  fill={isEmphasized ? accentColor : INK_MUTED_COLOR}
+                  fillOpacity={isEmphasized ? 1 : 0.45}
+                  className="transition-[fill-opacity] duration-200 ease-out"
+                />
+              ) : (
+                <image
+                  href={logoUrl}
+                  x={cx - half}
+                  y={cy - half}
+                  width={size}
+                  height={size}
+                  opacity={isEmphasized ? 1 : 0.55}
+                  className="transition-opacity duration-200 ease-out"
+                  onError={() => setFailedLogos((prev) => new Set(prev).add(p.team))}
+                />
+              )}
+              {/* Larger invisible hit target — the visible logo/dot can be
+                  smaller than a comfortable click/tap area. */}
+              <circle cx={cx} cy={cy} r={Math.max(half, 16)} fill="transparent" />
+            </g>
           );
         })}
       </svg>
