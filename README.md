@@ -1,121 +1,127 @@
-# 🏀 Basketball Prediction Project  
+# 🏀 Basketball Predictions
 
-This project explores NBA team performance and develops predictive models to understand **team success and failure**.  
-Using historical data from **2016–2025**, the project integrates multiple dimensions of team information — from records and payroll to draft picks, coaching, and player stats — to create a comprehensive dataset for analysis and modeling.  
+An NBA analytics project that started as a single team win-total model and has grown into
+three connected pieces: a walk-forward-validated win predictor, a live player power-rankings
+engine, and a coaching evaluation model — all built to be transparent about *how* every number
+was produced, not just what it is.
 
-👉 Live Demo: [Streamlit App](https://basketball-predictions-trustanprice.streamlit.app/)
+👉 Transitional Streamlit demo (being replaced by the Next.js frontend below):
+[Streamlit App](https://basketball-predictions-trustanprice.streamlit.app/)
 
 👉 Codebase: [GitHub Repo](https://github.com/trustanprice/basketball-predictions)
 
 ---
 
-## Project Structure  
+## What's here
 
-This project is growing beyond the original win-total model — see [`AGENTS.md`](AGENTS.md) for
-the full module breakdown (win model / live player ratings / coaching evaluation) and the
-per-directory docs it links to.
+- **Win-total model** (`backend/win_model/`) — predicts each team's next-season win total.
+  Walk-forward validated (trained only on past seasons, never randomly shuffled), compares a
+  KNN regressor against a monotonic-constrained gradient-boosted model, and ships every
+  prediction with an interval and a plain-language "how this was calculated" explanation
+  rather than a bare number. Honest backtested accuracy — not an inflated same-season
+  number — is reported directly in the app.
+- **Live data client** (`backend/live_client/`) — pulls real NBA.com data (season stats,
+  advanced metrics, rosters) through `nba_api`, wrapped in this project's own retry, disk
+  cache, and schema-validation layer so a silent upstream column rename fails loudly instead
+  of quietly corrupting a rating.
+- **Player power rankings** (`backend/ratings/`) — top offensive/defensive players, computed
+  as a transparent weighted composite (z-scored inputs, documented weights) rather than a
+  black-box model. Every rating expands into its exact formula, raw inputs, z-scores, and
+  per-component contribution.
+- **Coaching evaluation** (`backend/ratings/coaching_eval.py`) — actual win% vs.
+  roster-talent-implied win%, tracked per coach across every team and season they've coached,
+  using the same transparency standard as the player ratings.
+- **API** (`backend/api/`) — a FastAPI app serving all of the above as JSON, with live-data
+  results refreshed on a background schedule rather than fetched on every request.
+- **Frontend** (`frontend/`) — a Next.js (App Router, TypeScript, Tailwind) app that reads
+  exclusively from the API above; no direct dataframe or CSV access from the frontend.
 
-BASKETBALL-PREDICTIONS
-│
-
-├── data/ # Static, historical (2016–2025) datasets — see data/AGENTS.md
-
-│ ├── raw/
-
-│ └── processed/
-
-│
-
-├── backend/ # All Python — see backend/AGENTS.md
-
-│ ├── win_model/ # Load, features, and the win-total model (formerly src/)
-
-│ ├── live_client/ # NBA.com live data client (new)
-
-│ ├── ratings/ # Player power rankings + coaching eval (new)
-
-│ ├── api/ # API serving the above to the frontend (not yet built)
-
-│ ├── notebooks/ # Jupyter notebooks (data cleaning, exploration, modeling)
-
-│ ├── tests/
-
-│ └── requirements.txt
-
-│
-
-├── frontend/ # Next.js app (not yet scaffolded) — see frontend/AGENTS.md
-
-│
-
-├── app.py # Streamlit app — transitional, stays at repo root for the
-
-│ # existing Streamlit Cloud deployment until frontend/ replaces it
-
-├── requirements.txt # Pointer to backend/requirements.txt (keeps Streamlit Cloud working)
-
-├── .gitignore
-
-└── README.md # Project overview (this file)
+See [`AGENTS.md`](AGENTS.md) for the full module breakdown and the per-directory docs it
+links to ([`backend/AGENTS.md`](backend/AGENTS.md), [`data/AGENTS.md`](data/AGENTS.md),
+[`frontend/AGENTS.md`](frontend/AGENTS.md)).
 
 ---
 
+## Project structure
 
----
-
-## Data Sources  
-
-The project integrates multiple cleaned datasets into a **master dataframe**:  
-
-- **Team stats & records** (`team-stats.csv`, `team-records.csv`)  
-  - Season results, home/road splits, pre/post All-Star splits, win %  
-- **Payroll data** (`team-payroll.csv`)  
-  - Team salary data from 2016–2025  
-- **Coaching data** (`coach.csv`)  
-  - Coaching tenure, win/loss records, and number of coaches per season  
-- **Draft data** (`draft.csv`)  
-  - Draft picks with season/year alignment  
-- **Strength of Schedule (SOS)** (`team-sos.csv`)  
-  - Calculated using opponent win percentages  
-- **Player stats (top 10 players per team)**  
-  - Includes GP (games played) to infer injuries and availability  
-
----
-
-## Setup  
-
-### 1. Clone the repo
-```bash
-git clone https://github.com/your-username/BASKETBALL-PREDICTION.git
-cd BASKETBALL-PREDICTION
 ```
+Basketball-Predictions/
+├── data/                  # Static, historical (2016–2025) datasets — see data/AGENTS.md
+│   ├── raw/
+│   └── processed/
+│
+├── backend/                # All Python — see backend/AGENTS.md
+│   ├── win_model/           # Data loading, features, and the win-total model
+│   ├── live_client/         # NBA.com data client (nba_api underneath, own cache/validation)
+│   ├── ratings/              # Player power rankings + coaching evaluation
+│   ├── api/                   # FastAPI app serving the above to the frontend
+│   ├── notebooks/              # Jupyter notebooks (data cleaning, exploration, early modeling)
+│   ├── tests/
+│   └── requirements.txt
+│
+├── frontend/                # Next.js app — see frontend/AGENTS.md
+│
+├── app.py                   # Streamlit app — transitional, stays at repo root for the
+│                             # existing Streamlit Cloud deployment until frontend/ fully replaces it
+├── requirements.txt         # Pointer to backend/requirements.txt (keeps Streamlit Cloud working)
+├── render.yaml               # Backend hosting config
+├── .gitignore
+└── README.md
+```
+
 ---
 
-### 2. Create and activate a virtual environment
+## Data sources
+
+- **Team stats & records** — season results, home/road splits, pre/post All-Star splits, win %
+  (historical, 2016–2025, curated in `data/`).
+- **Payroll** — team salary data, 2016–2025 (curated; current-season payroll isn't available
+  from any free live source, so the app labels it explicitly as last-known, not live).
+- **Coaching data** — tenure, win/loss records, coach counts per season.
+- **Draft data** — picks aligned by season/year.
+- **Strength of Schedule (SOS)** — self-calculated from opponent win%. The app labels this
+  explicitly as a self-calculated metric, not a third-party benchmark, and notes when it's
+  unavailable for the current forecast season.
+- **Live player/team data** — season totals, advanced metrics, and rosters, fetched from
+  NBA.com through `backend/live_client/`.
+
+---
+
+## Running it locally
+
+### Backend (API + win model)
+
 ```bash
 cd backend
 python3 -m venv venv
 source venv/bin/activate      # Mac/Linux
-.\venv\Scripts\activate       # Windows
-cd ..
-```
-
-### 3. Install Dependencies
-```bash
 pip install -r requirements.txt
+cd ..
+uvicorn backend.api.main:app --port 8000 --reload
 ```
 
----
+### Frontend
 
-## Usage
-
-- Data Cleaning: Run 01_data_cleaning.ipynb to check for NaN values, duplicates, and validate team/season consistency.
-- Exploration: Use 02_exploration.ipynb to generate summary statistics and exploratory visualizations to understand data trends.
-- Modeling: Train predictive models in 03_failure_model.ipynb to analyze team success/failure using regression and machine learning.
-- Outputs: Figures, reports, and model artifacts are stored in outputs/.
-
-To run Jupyter notebooks:
 ```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open `http://localhost:3000`. The frontend expects the API running at
+`http://localhost:8000` (see `frontend/.env.example`).
+
+### Transitional Streamlit app
+
+```bash
+source backend/venv/bin/activate
+streamlit run app.py
+```
+
+### Notebooks
+
+```bash
+cd backend
 jupyter notebook
 ```
 
@@ -123,30 +129,30 @@ jupyter notebook
 
 ## Goals
 
-- Analyze win/loss trends across multiple seasons
-- Incorporate front office factors (payroll, draft, coaches)
-- Integrate player stats to capture injuries/availability
-- Build a failure model to predict team underperformance (e.g., missing playoffs, low win totals)
-- Visualize and interpret the results
+- Predict team win totals with honestly validated accuracy, not an inflated same-season number
+- Surface a live, explainable view of who's actually playing well, offense and defense, as the
+  season unfolds
+- Evaluate coaching staffs against the roster talent they've had, not in isolation
+- Make every number's methodology visible, not just the number itself
 
 ---
 
-## Tech Stack
+## Tech stack
 
-- Python 3.9+
-- pandas, numpy
-- matplotlib, seaborn
-- scikit-learn (for modeling)
-- Jupyter Notebook
+- **Backend:** Python 3.11+, pandas, scikit-learn, FastAPI, `nba_api`, pytest
+- **Frontend:** Next.js (App Router), TypeScript, Tailwind
+- **Transitional:** Streamlit (being phased out in favor of the Next.js frontend)
 
 ---
 
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you’d like to change.
+Pull requests are welcome! For major changes, please open an issue first to discuss what you'd
+like to change.
 
 ---
 
 ## License & Attribution
 
-Data collected from basketball-reference.com and nba.com for educational purposes.
+Historical data collected from basketball-reference.com and nba.com for educational purposes.
+Live data via NBA.com's stats endpoints, through the `nba_api` package.
