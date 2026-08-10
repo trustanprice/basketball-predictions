@@ -10,7 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 
 from backend.api import schemas
-from backend.api.dependencies import get_player_power_rankings
+from backend.api.dependencies import get_player_power_rankings, get_player_projections
 
 router = APIRouter(prefix="/api/players", tags=["players"])
 
@@ -21,4 +21,14 @@ def power_rankings(data: dict = Depends(get_player_power_rankings)):
     (raw value, z-score, weight, contribution per component) — the transparency
     requirement is satisfied by the API response itself, not just how a frontend
     happens to render it."""
+    return data
+
+
+@router.get("/projected-leaders", response_model=schemas.PlayerProjectedLeaders)
+def projected_leaders(data: dict = Depends(get_player_projections)):
+    """PRESEASON PROJECTION — see schemas.PlayerProjectedLeaders and
+    backend/ratings/refresh_player_projections.py. A distinct endpoint, not a
+    query param on /power-rankings: genuinely different data (projected, not
+    actual, stats) and methodology, not just a different filter on the same
+    numbers."""
     return data

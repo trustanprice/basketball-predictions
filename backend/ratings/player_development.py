@@ -187,6 +187,167 @@ def project_team_talent_features(projected_players: pd.DataFrame) -> dict:
     }
 
 
+# ==========================================================================
+# Archetype-segmented multi-stat curves (Players page "Projected 26-27
+# Leaders"). Same empirical median-%-change-by-age-bin methodology as
+# build_aging_curve/project_player_next_season above (kept untouched --
+# win_model's roster-projection pipeline depends on those exact functions),
+# extended two ways: (1) more than one stat (the offense/defense composites
+# in player_power_rankings.py need TS%, usage%, AST%, TOV%, STL+BLK rate,
+# DREB%, and defensive rating -- none of which is "points"), and
+# (2) segmented by a simple, explainable scoring archetype, since aging
+# patterns genuinely differ by playstyle (rim-reliant bigs/slashers peak
+# earlier and decline faster than perimeter shooters, a documented pattern,
+# not a guess) -- see refresh_player_projections.py for where the
+# league-wide panel this needs actually gets fetched.
+# ==========================================================================
+
+# Rule-based, not a clustering model -- per backend/AGENTS.md's ratings/
+# transparency requirement, a reader must be able to say plainly which
+# bucket a player falls into and why. Checked in this order (rim-reliant
+# first): a big who rarely shoots 3s AND rarely gets to the rim would
+# otherwise fall through to "Perimeter" by elimination, which is wrong.
+RIM_RATE_THRESHOLD = 0.35
+THREE_PT_RATE_THRESHOLD = 0.45
+ALL_ARCHETYPES_FALLBACK = "All"
+
+
+def classify_archetype(rim_rate: float, three_pt_rate: float) -> str:
+    """rim_rate/three_pt_rate: this player-season's (Restricted Area FGA) /
+    FGA and (3PA) / FGA. Unknown (NaN) shot profile classifies as
+    "Balanced" -- the neutral middle bucket, not a guess at either extreme.
+    """
+    if pd.isna(rim_rate) or pd.isna(three_pt_rate):
+        return "Balanced"
+    if rim_rate >= RIM_RATE_THRESHOLD:
+        return "Rim-Reliant"
+    if three_pt_rate >= THREE_PT_RATE_THRESHOLD:
+        return "Perimeter"
+    return "Balanced"
+
+
+# The composite stats player_power_rankings.py's OFFENSE_COMPONENTS/
+# DEFENSE_COMPONENTS actually consume (plus PTS, needed to derive
+# USAGE_ADJ_PTS the same way build_player_table() does) -- each projected
+# the same way: median %/pt change by (archetype, age) bin. STL_BLK_PER36
+# is derived before curve-building (see _historical_panel_with_archetypes in
+# refresh_player_projections.py), the rest are already per-game rate/pct
+# stats straight from PlayerAdvancedStats.
+MULTISTAT_RATE_COLUMNS = (
+    "PTS", "TS_PCT", "USG_PCT", "AST_PCT", "TM_TOV_PCT", "STL_BLK_PER36", "DREB_PCT", "DEF_RATING",
+)
+MIN_OBSERVATIONS_PER_ARCHETYPE_AGE_BIN = 5
+
+
+def build_archetype_curves(
+    panel: pd.DataFrame, stat_columns: tuple[str, ...] = MULTISTAT_RATE_COLUMNS,
+) -> dict[str, pd.DataFrame]:
+    """One archetype-segmented aging curve per stat in `stat_columns`.
+
+    `panel`: one row per (player, season) with columns PLAYER_ID, SEASON_ID,
+    PLAYER_AGE, GP, ARCHETYPE, and every column in `stat_columns`.
+
+    Returns {stat: DataFrame indexed by (archetype, age) with n_observations/
+    median_pct_change}. Each stat's curve also carries an `"All"` archetype
+    row per age (pooling every archetype together) -- project_player_multistat
+    falls back to this when a specific (archetype, age) cell has too few
+    real transitions to trust, the same "don't fabricate a trend you don't
+    have enough data for" principle as MIN_TOTAL_SEASONS_FOR_ADJUSTMENT above.
+    """
+    curves: dict[str, pd.DataFrame] = {}
+    for stat in stat_columns:
+        transitions = []
+        for _, player_history in panel.groupby("PLAYER_ID"):
+            g = player_history.sort_values("SEASON_ID").reset_index(drop=True)
+            g = g[g["GP"] >= MIN_GP_FOR_CURVE].reset_index(drop=True)
+            if len(g) < 2:
+                continue
+            for i in range(len(g) - 1):
+                start_val, end_val = g.loc[i, stat], g.loc[i + 1, stat]
+                start_age = g.loc[i, "PLAYER_AGE"]
+                archetype = g.loc[i, "ARCHETYPE"]
+                if pd.isna(start_val) or pd.isna(end_val) or pd.isna(start_age) or start_val == 0:
+                    continue
+                transitions.append({
+                    "age": int(round(start_age)),
+                    "archetype": archetype,
+                    "pct_change": (end_val - start_val) / abs(start_val),
+                })
+
+        if not transitions:
+            curves[stat] = pd.DataFrame(columns=["n_observations", "median_pct_change"])
+            continue
+
+        t = pd.DataFrame(transitions)
+        by_archetype_age = t.groupby(["archetype", "age"])["pct_change"].agg(
+            n_observations="count", median_pct_change="median",
+        )
+        by_age_pooled = t.groupby("age")["pct_change"].agg(n_observations="count", median_pct_change="median")
+        by_age_pooled.index = pd.MultiIndex.from_product(
+            [[ALL_ARCHETYPES_FALLBACK], by_age_pooled.index], names=["archetype", "age"],
+        )
+        combined = pd.concat([by_archetype_age, by_age_pooled])
+        curves[stat] = combined[combined["n_observations"] >= MIN_OBSERVATIONS_PER_ARCHETYPE_AGE_BIN]
+
+    return curves
+
+
+def project_player_multistat(
+    player_history: pd.DataFrame,
+    curves: dict[str, pd.DataFrame],
+    archetype: str,
+    stat_columns: tuple[str, ...] = MULTISTAT_RATE_COLUMNS,
+) -> dict:
+    """Projects every stat in `stat_columns` one season forward for one
+    player, using their own archetype's curve where there's enough data,
+    falling back to the all-archetype curve, falling back to unadjusted --
+    same three-tier honesty as project_player_next_season, just per-stat
+    instead of once.
+
+    `player_history`: one player's own multi-season panel rows (same shape
+    build_archetype_curves takes, filtered to this player), sorted or not.
+    """
+    if player_history is None or len(player_history) == 0:
+        raise ValueError("project_player_multistat needs at least one season of history")
+
+    h = player_history.sort_values("SEASON_ID").reset_index(drop=True)
+    last = h.iloc[-1]
+    last_age = last["PLAYER_AGE"]
+    n_total_seasons = len(h)
+    age_bin = int(round(last_age)) if pd.notna(last_age) else None
+
+    result = {
+        "player_id": last.get("PLAYER_ID"),
+        "archetype": archetype,
+        "projected_age": (float(last_age) + 1) if pd.notna(last_age) else None,
+    }
+    notes = {}
+    for stat in stat_columns:
+        last_val = last.get(stat)
+        applied, pct_change, used_fallback_archetype = False, None, False
+
+        if n_total_seasons < MIN_TOTAL_SEASONS_FOR_ADJUSTMENT or age_bin is None or pd.isna(last_val):
+            pass  # not enough personal history, or nothing to project from -- stays unadjusted
+        else:
+            curve = curves.get(stat, pd.DataFrame())
+            if (archetype, age_bin) in curve.index:
+                pct_change = float(curve.loc[(archetype, age_bin), "median_pct_change"])
+                applied = True
+            elif (ALL_ARCHETYPES_FALLBACK, age_bin) in curve.index:
+                pct_change = float(curve.loc[(ALL_ARCHETYPES_FALLBACK, age_bin), "median_pct_change"])
+                applied = True
+                used_fallback_archetype = True
+
+        projected_val = last_val * (1 + pct_change) if applied and pd.notna(last_val) else last_val
+        result[f"projected_{stat}"] = projected_val
+        result[f"{stat}_adjustment_applied"] = applied
+        if used_fallback_archetype:
+            notes[stat] = f"Not enough {archetype} data at age {age_bin} -- used the all-archetype curve instead."
+
+    result["development_notes"] = notes
+    return result
+
+
 def team_talent_composite(team_features: pd.DataFrame):
     """The explainable, hand-reproducible summary of every team's *projected*
     roster talent -- reuses backend.ratings.coaching_eval's exact Component

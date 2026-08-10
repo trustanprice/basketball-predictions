@@ -19,6 +19,7 @@ import pytest
 from live_client.client import NBAStatsClient
 from live_client.endpoints.stats.advanced_metrics import PlayerAdvancedStats
 from live_client.endpoints.stats.season_totals import PlayerSeasonTotals
+from live_client.endpoints.stats.shot_locations import PlayerShotLocations
 from live_client.endpoints.stats.team_roster import TeamRoster
 from live_client.lookups.loader import load_teams
 from ratings.player_power_rankings import build_player_table, top_defensive_players, top_offensive_players
@@ -115,3 +116,23 @@ def test_team_roster_real_fetch_is_current_not_last_season():
     assert len(df) >= 10
     assert (df["AGE"].dropna() >= 18).all()
     assert (df["AGE"].dropna() <= 45).all()
+
+
+@requires_network
+def test_player_shot_locations_real_fetch_has_zone_columns():
+    """The specific regression this test exists to catch: the two-level
+    header shape (see shot_locations.py's module docstring) parsed
+    correctly once already on a hand-built fixture and then WRONG on the
+    first live attempt (header group roles were reversed) -- only a real
+    fetch catches that, a fixture built from the same wrong assumption as
+    the code can't."""
+    client = NBAStatsClient()
+    df = PlayerShotLocations(season="2023-24", client=client).fetch().to_dataframe()
+
+    assert len(df) > 100
+    assert set(PlayerShotLocations.expected_columns) <= set(df.columns)
+    assert "Above the Break 3_FGA" in df.columns
+    # Real shot-attempt rates: non-negative, and no player attempting more
+    # than a full game's worth of shots at the rim alone (per-game mode).
+    assert (df["Restricted Area_FGA"].dropna() >= 0).all()
+    assert (df["Restricted Area_FGA"].dropna() <= 40).all()

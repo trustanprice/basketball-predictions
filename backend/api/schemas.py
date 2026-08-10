@@ -86,6 +86,23 @@ class PlayerPowerRankings(BaseModel):
     defense: list[RatingBreakdown]
 
 
+class PlayerProjectedLeaders(BaseModel):
+    """A PRESEASON PROJECTION, not a live in-season ranking — `note` states
+    that plainly and must always be surfaced alongside these numbers, not
+    just carried in the payload. Same RatingBreakdown shape/composite as
+    PlayerPowerRankings (see backend/ratings/refresh_player_projections.py:
+    projected numbers run through the exact same top_offensive_players/
+    top_defensive_players composite, not a second ranking system)."""
+    season: str
+    generated_at: str
+    note: str
+    historical_seasons_used: list[str]
+    n_players_projected: int
+    n_qualified_players: int
+    offense: list[RatingBreakdown]
+    defense: list[RatingBreakdown]
+
+
 class CoachTeamSeason(BaseModel):
     """One team-season: actual win% vs. roster-talent-implied win%, with the
     talent composite's full breakdown attached."""

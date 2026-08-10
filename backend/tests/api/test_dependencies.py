@@ -48,3 +48,47 @@ def test_get_player_power_rankings_503s_when_never_refreshed():
     with pytest.raises(HTTPException) as exc_info:
         dependencies.get_player_power_rankings()
     assert exc_info.value.status_code == 503
+
+
+def test_get_player_projections_503s_when_never_refreshed():
+    if dependencies.PLAYER_PROJECTIONS_FILE.exists():
+        pytest.skip("player_projections.json exists in this environment — nothing to assert here")
+    with pytest.raises(HTTPException) as exc_info:
+        dependencies.get_player_projections()
+    assert exc_info.value.status_code == 503
+
+
+def test_get_player_projections_reads_real_output_when_present():
+    """This environment's network access varies run to run (see module
+    docstring) — when refresh_player_projections.py has actually run here,
+    exercise the real file instead of skipping past it."""
+    if not dependencies.PLAYER_PROJECTIONS_FILE.exists():
+        pytest.skip("player_projections.json not present in this environment")
+    data = dependencies.get_player_projections(n=3)
+    assert "PRESEASON PROJECTION" in data["note"]
+    assert len(data["offense"]) <= 3
+    assert len(data["defense"]) <= 3
+
+
+def test_get_player_power_rankings_n_slices_the_cached_max(monkeypatch, tmp_path):
+    """The cache always stores up to MAX_N players per side (see
+    refresh_player_ratings.py); `n` trims that down at request time rather
+    than triggering a re-fetch — this is pure response-shaping, testable
+    without any real cache file or network access."""
+    import json
+
+    fake_file = tmp_path / "player_power_rankings.json"
+    fake_file.write_text(json.dumps({
+        "season": "2025-26",
+        "generated_at": "2026-08-08T00:00:00+00:00",
+        "methodology_note": "...",
+        "n_qualified_players": 10,
+        "offense": [{"subject_id": i, "subject_name": f"Player {i}"} for i in range(10)],
+        "defense": [{"subject_id": i, "subject_name": f"Player {i}"} for i in range(10)],
+    }))
+    monkeypatch.setattr(dependencies, "PLAYER_RANKINGS_FILE", fake_file)
+
+    result = dependencies.get_player_power_rankings(n=3)
+    assert len(result["offense"]) == 3
+    assert len(result["defense"]) == 3
+    assert [p["subject_id"] for p in result["offense"]] == [0, 1, 2]

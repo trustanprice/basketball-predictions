@@ -88,6 +88,17 @@ export interface PlayerPowerRankings {
   defense: RatingBreakdown[];
 }
 
+export interface PlayerProjectedLeaders {
+  season: string;
+  generated_at: string;
+  note: string;
+  historical_seasons_used: string[];
+  n_players_projected: number;
+  n_qualified_players: number;
+  offense: RatingBreakdown[];
+  defense: RatingBreakdown[];
+}
+
 export interface CoachTeamSeason {
   season: number;
   team: string;
