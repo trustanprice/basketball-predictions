@@ -26,6 +26,8 @@ class ModelMetadata(BaseModel):
     forecast_target_season: int | None = None
     feature_values_available: list[str] = []
     feature_notes: dict[str, str] = {}
+    roster_projection: dict = {}
+    calibration: dict = {}
 
 
 class TeamPrediction(BaseModel):

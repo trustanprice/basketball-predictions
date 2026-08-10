@@ -1,4 +1,5 @@
 import type { RatingBreakdown } from "@/lib/types";
+import { PlayerHeadshot } from "./PlayerHeadshot";
 
 /**
  * Renders one composite score with its full breakdown, expandable via native
@@ -16,8 +17,9 @@ export function RatingBreakdownCard({
   return (
     <details className="card card-interactive">
       <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
-        <span className="flex items-baseline gap-3">
+        <span className="flex items-center gap-3">
           <span className="text-label text-xs text-ink-muted">{String(rank).padStart(2, "0")}</span>
+          <PlayerHeadshot playerId={breakdown.subject_id} name={breakdown.subject_name} size={36} />
           <span className="text-headline text-xl">{breakdown.subject_name}</span>
         </span>
         <span className="text-label shrink-0 text-sm text-accent">

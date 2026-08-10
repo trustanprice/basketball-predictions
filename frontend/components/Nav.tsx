@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NavTeamSelector } from "./NavTeamSelector";
 
 const LINKS = [
   { href: "/predictions", label: "Win Predictions" },
@@ -34,6 +35,7 @@ export function Nav() {
             );
           })}
         </div>
+        <NavTeamSelector />
       </div>
     </nav>
   );

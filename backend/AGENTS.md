@@ -42,6 +42,20 @@ namespace packages) — this keeps imports unambiguous as more subpackages get a
   these files (e.g. `refresh_player_ratings.py` importing its own `player_power_rankings.py`)
   still use relative imports, matching the rest of the codebase. `backend/tests/conftest.py` adds
   *both* `backend/` and the repo root to `sys.path` so tests can exercise either import style.
+- A **dual-context file that needs a sibling top-level package** (not just its own package's
+  siblings) is the one case neither rule above covers cleanly: relative dots (`..ratings.X`)
+  only resolve from the repo-root context; plain top-level (`ratings.X`) only resolves from the
+  notebook-style context (or tests, via `conftest.py`'s sys.path). `win_model/train.py` importing
+  `ratings.player_development` (for the roster-projection wiring) is the first place this came
+  up — resolved with a try/relative-except/plain-fallback:
+  ```python
+  try:
+      from ..ratings.player_development import team_talent_composite
+  except ImportError:
+      from ratings.player_development import team_talent_composite
+  ```
+  Reach for this only when a dual-context file genuinely needs a sibling package; same-package
+  imports still just use relative dots.
 
 ## Data client conventions (`live_client/`)
 
@@ -84,7 +98,17 @@ hand-rolled URLs/params. What stays ours on top of it:
      column going missing, not a column that was never right to begin with).
 4. **`cache.py`** — disk cache keyed by endpoint name + sorted params, used during
    development. Every fetch path needs an easy force-refresh flag; don't build a fetcher that
-   can only ever read cache or only ever hit the network.
+   can only ever read cache or only ever hit the network. Default TTL is `None` (never expires
+   on its own) — an endpoint whose data actually changes over time (see `TeamRoster` below)
+   overrides this per-instance rather than changing the shared default.
+5. **Request pacing matters, separately from per-request retry.** `client.py`'s retry/backoff is
+   about one request's transient failure; it does nothing for sustained request *volume* against
+   a rate limit. Confirmed directly while building the roster-projection pipeline (below): firing
+   ~60 `PlayerCareerStats` calls back-to-back with no delay between them started producing read
+   timeouts partway through, and retrying each one individually didn't help — the fix was pacing
+   the *loop*, not the client (see `REQUEST_PACING_SECONDS` in `refresh_roster_projection.py`).
+   Any new script that fires more than a handful of requests in a loop needs an explicit
+   inter-request delay; don't assume `client.py`'s retry alone is enough at that volume.
 
 Static player/team ID↔name lookups live in `live_client/lookups/`, sourced from
 `nba_api.stats.static` (`teams.get_teams()` / `players.get_players()` — bundled with the
@@ -122,6 +146,63 @@ This module is a consumer of `live_client/`, not part of it — it never makes H
 - `coaching_eval.py` lives here (not a separate top-level package) because it's tightly
   coupled to `core.py`'s engine and reuses `win_model`'s talent features — it isn't
   architecturally separate the way `win_model` and `live_client` are.
+- `player_development.py` follows the same rule as `coaching_eval.py`: it never calls
+  `live_client` itself (`refresh_roster_projection.py` does the fetching and hands it
+  dataframes) and never imports `win_model` — see "Roster projection" below for how the two
+  actually connect, which is the reverse direction (`win_model` reads `ratings`' output, not
+  the other way around).
+
+### Roster projection: empirical aging curve + team-talent projection
+
+Real current rosters, projected one season forward via an empirical (not fitted-ML) aging curve,
+feeding `win_model`'s **forecast row only** — historical (already-completed) seasons are
+untouched. Same transparency bar as the rest of `ratings/`: the curve is "age-X players
+historically see a median Y% change in scoring rate the next season," reproducible by grouping
+real player-seasons and taking a median — not a trained model.
+
+- **`live_client/endpoints/stats/team_roster.py`** (`TeamRoster`, via nba_api's
+  `CommonTeamRoster`) is the one endpoint in this project with a **short cache TTL** (6h)
+  instead of the default never-expires — a roster moves through trades/signings/waivers all
+  offseason, unlike a completed season's box score, which never changes once written.
+- **`ratings/player_development.py`** — pure computation, no network:
+  - `build_aging_curve(career_histories)`: pools every player-season-to-season transition across
+    the input careers, computes % change in PTS-per-36, bins by the age at the *start* of the
+    transition, takes the median. Drops a transition if either season has fewer than
+    `MIN_GP_FOR_CURVE` (10) games played (a 2-game stretch at an extreme rate is noise, not
+    signal), and drops an entire age bin if it has fewer than `MIN_OBSERVATIONS_PER_AGE_BIN` (5)
+    real transitions (an untrustworthy median is worse than no adjustment).
+  - `project_player_next_season(career_df, aging_curve)`: applies that curve to one player's real
+    most recent season. Players with ≤2 total recorded seasons ("0-1 prior seasons") get **no
+    adjustment** — their actual most-recent-season stats are carried forward unadjusted and the
+    result is flagged (`development_adjustment_applied=False`) — this project doesn't fabricate a
+    trend it has no real personal history to support. Same for a player landing on an age with no
+    curve data. Minutes-per-game are carried forward unchanged (projecting playing time is a
+    separate problem this curve doesn't attempt); only the per-36 scoring rate gets adjusted.
+  - `project_team_talent_features(projected_players)`: aggregates to the exact same
+    `avg_age`/`avg_pts_top10`/`avg_production_score` shape `win_model/data_loader.py`'s
+    `calculate_player_features()` produces from historical data — so these values are drop-in
+    replacements for `win_model`'s existing feature columns, not a new/different feature.
+  - `team_talent_composite(team_features)`: the explainable, hand-reproducible "how this team's
+    projected talent compares league-wide" summary — reuses `coaching_eval.compute_team_season_talent`
+    and its `TALENT_COMPONENTS` directly rather than a second parallel composite system. This is a
+    **methodology-panel transparency artifact only** — it is *not* what `win_model` reads (that's
+    the raw recomputed feature columns above, the same columns the model was already trained on).
+- **`ratings/refresh_roster_projection.py`** — the fetch/orchestration script, same shape as
+  `refresh_player_ratings.py`: fetches every team's real roster + every roster player's career
+  history (one `PlayerCareerStats` call each, reused for both "most recent season" and the pooled
+  aging-curve sample — "reachable history" means *current NBA players*, not an exhaustive fetch of
+  league history, which would be substantial extra load for marginal curve accuracy), builds the
+  curve, projects, aggregates, and writes `backend/outputs/roster_projection.json` (gitignored).
+  `win_model/train.py` only ever reads this file — same refresh/consumer split as player ratings,
+  same reason (this fetch is 400-500 real HTTP calls; it can never happen inside a request or
+  inside `win_model`'s own training run). Run manually:
+  `python -m backend.ratings.refresh_roster_projection`.
+- **Payroll is deliberately untouched by any of this.** nba_api has no payroll endpoint, and a
+  team's actual payroll changes with every offseason transaction — there's no live source to
+  project it from. `win_model/train.py` keeps using `master_df`'s last-known payroll value for
+  the forecast row (exactly as before) and labels it explicitly stale in both
+  `FEATURE_NOTES["Payroll"]` and `metadata.roster_projection` — same honesty standard as the SOS
+  null-for-forecast-season caveat.
 
 ## API (`api/`)
 
@@ -219,6 +300,13 @@ import convention above, e.g. `uvicorn backend.api.main:app`, not `uvicorn api.m
 - Every prediction surfaced in the app needs a "how this was calculated" explanation — same
   transparency spirit as `ratings/`, even though this module is allowed to use real ML
   (ElasticNet / gradient-boosted regressor) rather than a hand-reproducible formula.
+- The **forecast row only** (the current, not-yet-played season) has its `avg_age`/
+  `avg_pts_top10`/`avg_production_score` overridden from `ratings/`'s roster-projection output
+  when available (`train.py`'s `_apply_roster_projection`) — real current rosters instead of the
+  stale team-level carry-forward every other row uses. `trainable` (historical seasons) is never
+  touched by this; see "Roster projection" under Ratings/computation conventions above for the
+  full pipeline, and `metadata.roster_projection` for which teams actually got a real projection
+  vs. fell back to the stale value in a given run.
 
 ## Testing
 

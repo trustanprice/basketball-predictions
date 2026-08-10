@@ -27,6 +27,25 @@ export interface ModelMetadata {
   forecast_target_season: number | null;
   feature_values_available: string[];
   feature_notes: Record<string, string>;
+  calibration: {
+    description: string;
+    historical_win_std: number;
+    target_season_total_wins: number;
+    walk_forward_mae_uncalibrated: number;
+    walk_forward_mae_calibrated: number;
+    improves_backtest_mae: boolean;
+    note: string;
+  };
+  roster_projection: {
+    available: boolean;
+    season: string | null;
+    generated_at: string | null;
+    features_overridden: string[];
+    teams_projected: string[];
+    teams_fallback_stale: string[];
+    team_talent_composite: Record<string, RatingBreakdown> | null;
+    note: string;
+  };
 }
 
 export interface TeamPrediction {

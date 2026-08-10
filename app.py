@@ -135,6 +135,15 @@ walk-forward mean absolute error (out-of-sample, never in-sample fit) across
             st.write(f"**Prediction interval:** {metadata['prediction_interval']['method']} "
                       f"({metadata['prediction_interval']['coverage']} coverage).")
 
+            calibration = metadata.get("calibration")
+            if calibration:
+                st.write("**Calibration:**", calibration["description"])
+                st.write(
+                    f"Walk-forward MAE — uncalibrated: {calibration['walk_forward_mae_uncalibrated']} wins, "
+                    f"calibrated: {calibration['walk_forward_mae_calibrated']} wins."
+                )
+                st.caption(calibration["note"])
+
             st.write("**Top features by permutation importance** (how much walk-forward "
                       "MAE gets worse when a feature is shuffled — bigger is more important):")
             importance_df = pd.DataFrame(metadata["top_feature_importance"])

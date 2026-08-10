@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bebas_Neue, IBM_Plex_Mono, Inter } from "next/font/google";
 import { Nav } from "@/components/Nav";
 import { GlobalEscapeToClose } from "@/components/GlobalEscapeToClose";
+import { TeamThemeProvider } from "@/components/TeamThemeProvider";
 import "./globals.css";
 
 const displayFont = Bebas_Neue({
@@ -30,9 +31,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${displayFont.variable} ${monoFont.variable} ${bodyFont.variable}`}>
       <body className="min-h-screen bg-page text-ink antialiased">
-        <GlobalEscapeToClose />
-        <Nav />
-        <main className="mx-auto max-w-5xl px-4 py-12 sm:px-8">{children}</main>
+        <TeamThemeProvider>
+          <GlobalEscapeToClose />
+          <Nav />
+          <main className="mx-auto max-w-5xl px-4 py-12 sm:px-8">{children}</main>
+        </TeamThemeProvider>
       </body>
     </html>
   );

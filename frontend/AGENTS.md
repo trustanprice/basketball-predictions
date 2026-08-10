@@ -12,9 +12,20 @@ from this subdirectory.
   bundle. Don't add a client-side fetch unless the feature genuinely needs live browser-side
   interactivity that server rendering can't provide — none of the current views do.
 - **Client components (`"use client"`) are small, interactive islands**, not data-fetching
-  wrappers: `PredictionsExplorer` (team dropdown), `FeatureScatterChart` (hover tooltips),
-  `CoachingExplorer` (click-to-expand coach history). Each receives already-fetched data as
-  props from its parent Server Component page — it never calls `lib/api.ts` itself.
+  wrappers: `PredictionsExplorer` (forecast card), `FeatureScatterChart` (hover tooltips + click
+  to select), `CoachingExplorer` (click-to-expand coach history). Each receives already-fetched
+  data as props from its parent Server Component page — it never calls `lib/api.ts` itself.
+- **Team selection is global, not per-page.** `TeamThemeProvider` (wraps the whole app in
+  `layout.tsx`) holds the one `selectedTeam` used everywhere, persisted to `localStorage`.
+  `NavTeamSelector` (in the nav, every page) is the only picker — pages don't have their own.
+  `PredictionsExplorer`'s forecast card and `FeatureScatterChart`'s clickable points both read/
+  write this same context (`useTeamTheme()`); clicking a scatter point isn't "a second picker,"
+  it's another way to change the one global selection. Team color is scoped to identity chrome
+  only (a border, dot, or underline) — never the amber section/key-stat accent or the green
+  positive/hollow-locked status colors, see `lib/teamColors.ts`. Players/Coaching pages
+  deliberately don't re-theme their content on selection (only the nav selector itself shows the
+  color) — they aren't team-specific views, and re-theming league-wide tables/rankings by a
+  selected team would misleadingly imply a filter that doesn't exist.
 - **Expand/collapse uses native `<details>`/`<summary>`** (`MethodologyPanel`,
   `RatingBreakdownCard`, and the per-season blocks in `CoachingExplorer`) instead of client
   state where the interaction is just open/closed — zero extra client JS. Reach for
@@ -26,6 +37,12 @@ from this subdirectory.
   built-in ISR. Don't add one without revisiting that reasoning first.
 - **No charting library** — `FeatureScatterChart` is hand-rolled inline SVG. ~30 points and one
   tooltip doesn't justify a new dependency; revisit if a future chart needs more than that.
+- **Player headshots** (`lib/headshots.ts`) come straight from NBA.com's own CDN
+  (`cdn.nba.com/headshots/nba/latest/1040x760/{PLAYER_ID}.png`) — no API key, no new dependency.
+  `PlayerHeadshot` is a plain `<img>`, not `next/image` (the CDN isn't in `next.config.ts`'s
+  image domains, and it's not worth configuring for one external host); its `onError` swaps to
+  an initials placeholder for the IDs that 404 (recent draftees, players with no headshot on
+  file) rather than showing a broken image icon.
 - **`lib/types.ts` mirrors `backend/api/schemas.py` by hand** — there's no shared schema
   generation between the two projects. When a Pydantic model changes, update the matching
   TypeScript interface in the same change; nothing will catch a drift automatically.

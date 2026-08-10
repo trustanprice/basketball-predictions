@@ -39,7 +39,7 @@ export function FeatureScatterChart({
 }: {
   predictions: TeamPrediction[];
   metadata: ModelMetadata;
-  selectedTeam?: string;
+  selectedTeam?: string | null;
   onSelectTeam?: (team: string) => void;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);

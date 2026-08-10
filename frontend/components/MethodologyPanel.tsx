@@ -63,6 +63,30 @@ export function MethodologyPanel({ metadata }: { metadata: ModelMetadata }) {
           {metadata.prediction_interval.coverage} coverage).
         </p>
 
+        {metadata.calibration && (
+          <div>
+            <p className="text-label mb-2 text-xs text-ink">Calibration</p>
+            <p>{metadata.calibration.description}</p>
+            <table className="mt-3 w-full max-w-sm border-collapse text-left">
+              <tbody>
+                <tr className="border-b border-line/5">
+                  <td className="py-1.5 pr-4">Walk-forward MAE, uncalibrated</td>
+                  <td className="text-label py-1.5 text-xs">
+                    {metadata.calibration.walk_forward_mae_uncalibrated} wins
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 pr-4">Walk-forward MAE, calibrated</td>
+                  <td className="text-label py-1.5 text-xs">
+                    {metadata.calibration.walk_forward_mae_calibrated} wins
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p className="mt-3">{metadata.calibration.note}</p>
+          </div>
+        )}
+
         <div>
           <p className="text-label mb-1 text-xs text-ink">Top Features by Permutation Importance</p>
           <p className="mb-2">
@@ -91,6 +115,23 @@ export function MethodologyPanel({ metadata }: { metadata: ModelMetadata }) {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {metadata.roster_projection && (
+          <div>
+            <p className="text-label mb-2 text-xs text-ink">
+              Forecast Row: Real Roster vs. Stale Carry-Forward
+            </p>
+            <p>{metadata.roster_projection.note}</p>
+            {metadata.roster_projection.available && (
+              <p className="text-label mt-2 text-[11px] text-ink-muted">
+                Roster season {metadata.roster_projection.season} —{" "}
+                {metadata.roster_projection.teams_projected.length} team(s) from real current
+                rosters, {metadata.roster_projection.teams_fallback_stale.length} on stale
+                carry-forward.
+              </p>
+            )}
           </div>
         )}
 

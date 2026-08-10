@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T00:55:27.933177+00:00",
+  "generated_at": "2026-08-10T05:52:46.272284+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -11,6 +11,15 @@
     "gbm_walk_forward_mae": 6.781,
     "winner": "gbm",
     "n_walk_forward_folds": 8
+  },
+  "calibration": {
+    "description": "Two post-processing corrections applied to every prediction (backtest and live forecast alike), on top of the winning model above: (1) each season's 30 predictions are rescaled around that season's own mean to match the real historical spread of NBA win totals \u2014 raw regression output is compressed toward the mean more than real seasons actually are; (2) every team is then shifted by a constant so the season's predictions sum to exactly 1,230 wins \u2014 30 teams x 82 games each, but every real game involves two teams, so exactly 1,230 games are actually played league-wide. Nothing about the model itself guarantees either property on its own.",
+    "historical_win_std": 11.827,
+    "target_season_total_wins": 1230,
+    "walk_forward_mae_uncalibrated": 6.781,
+    "walk_forward_mae_calibrated": 7.162,
+    "improves_backtest_mae": false,
+    "note": "Stated plainly: calibration does NOT improve the honest backtested MAE (6.781 -> 7.162 wins, worse or unchanged). It is still applied \u2014 matching the real 1,230-game season total and the real historical win-total spread are correctness properties in their own right, independent of whether they happen to lower average per-team error \u2014 but this should not be read as \"calibration helped.\""
   },
   "winning_model": {
     "type": "HistGradientBoostingRegressor",
@@ -98,7 +107,7 @@
     "E_L": "Eastern Conference losses (part of the East/West conference win-loss split).",
     "PLUS_MINUS": "Season point differential (points scored minus points allowed).",
     "W_W": "Western Conference wins (part of the East/West conference win-loss split).",
-    "Payroll": "Total team payroll for the season, in dollars."
+    "Payroll": "Total team payroll for the season, in dollars. For the current forecast row specifically, this is last season's known figure carried forward unchanged \u2014 nba_api has no payroll data, and trades/signings/waivers change actual payroll all through the offseason. See metadata.roster_projection for the rest of what is/isn't real current data."
   },
   "prediction_interval": {
     "method": "GBM native quantile regression (refits the winning model at the 10th and 90th percentiles)",
@@ -117,5 +126,50 @@
     2023,
     2024
   ],
-  "forecast_target_season": 2026
+  "forecast_target_season": 2026,
+  "roster_projection": {
+    "available": false,
+    "season": null,
+    "generated_at": null,
+    "features_overridden": [
+      "avg_age",
+      "avg_pts_top10",
+      "avg_production_score"
+    ],
+    "teams_projected": [],
+    "teams_fallback_stale": [
+      "Atlanta Hawks",
+      "Boston Celtics",
+      "Brooklyn Nets",
+      "Charlotte Hornets",
+      "Chicago Bulls",
+      "Cleveland Cavaliers",
+      "Dallas Mavericks",
+      "Denver Nuggets",
+      "Detroit Pistons",
+      "Golden State Warriors",
+      "Houston Rockets",
+      "Indiana Pacers",
+      "Los Angeles Clippers",
+      "Los Angeles Lakers",
+      "Memphis Grizzlies",
+      "Miami Heat",
+      "Milwaukee Bucks",
+      "Minnesota Timberwolves",
+      "New Orleans Pelicans",
+      "New York Knicks",
+      "Oklahoma City Thunder",
+      "Orlando Magic",
+      "Philadelphia 76ers",
+      "Phoenix Suns",
+      "Portland Trail Blazers",
+      "Sacramento Kings",
+      "San Antonio Spurs",
+      "Toronto Raptors",
+      "Utah Jazz",
+      "Washington Wizards"
+    ],
+    "team_talent_composite": null,
+    "note": "No roster projection found \u2014 every forecast-row talent feature is the stale team-level carry-forward. Run `python -m backend.ratings.refresh_roster_projection` to generate one."
+  }
 }
