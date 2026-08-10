@@ -1,21 +1,22 @@
 """backend/live_client/endpoints/stats/shot_chart.py
 
-Shot-location detail for a player (optionally scoped to one season) — `shotchartdetail`.
+Shot-location detail for a player (optionally scoped to one season) — built via
+nba_api's ShotChartDetail.
 """
 
 from __future__ import annotations
 
-from ...client import STATS_BASE_URL
-from ..base import Endpoint
+from nba_api.stats.endpoints import ShotChartDetail as _NbaApiShotChartDetail
 
-URL = f"{STATS_BASE_URL}/shotchartdetail"
+from ..base import Endpoint
 
 
 class PlayerShotChart(Endpoint):
     """Every logged shot attempt for one player in one season.
 
     Expected schema (subset): GAME_ID, PLAYER_ID, TEAM_ID, PERIOD, LOC_X, LOC_Y,
-    SHOT_DISTANCE, SHOT_MADE_FLAG, SHOT_TYPE, ACTION_TYPE.
+    SHOT_DISTANCE, SHOT_MADE_FLAG, SHOT_TYPE, ACTION_TYPE. Verified live against
+    stats.nba.com — see backend/tests/live_client/test_integration_real_network.py.
     """
 
     result_set_name = "Shot_Chart_Detail"
@@ -47,28 +48,17 @@ class PlayerShotChart(Endpoint):
         self.player_id = player_id
         self.season = season
         self.params = {
-            "PlayerID": player_id,
-            "TeamID": team_id,
-            "GameID": "",
-            "Season": season,
-            "SeasonType": season_type,
-            "ContextMeasure": "FGA",
-            "LeagueID": "00",
-            "PlayerPosition": "",
-            "Outcome": "",
-            "Location": "",
-            "Month": 0,
-            "SeasonSegment": "",
-            "DateFrom": "",
-            "DateTo": "",
-            "OpponentTeamID": 0,
-            "VsConference": "",
-            "VsDivision": "",
-            "RookieYear": "",
-            "GameSegment": "",
-            "Period": 0,
-            "LastNGames": 0,
+            "PlayerID": player_id, "TeamID": team_id, "Season": season, "SeasonType": season_type,
         }
 
     def _request(self) -> dict:
-        return self.client.get_json(URL, params=self.params)
+        endpoint = _NbaApiShotChartDetail(
+            team_id=self.params["TeamID"],
+            player_id=self.params["PlayerID"],
+            season_nullable=self.params["Season"],
+            season_type_all_star=self.params["SeasonType"],
+            context_measure_simple="FGA",
+            timeout=self.client.timeout,
+            get_request=False,
+        )
+        return self.client.get_via_nba_api(endpoint)

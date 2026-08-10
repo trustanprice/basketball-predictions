@@ -32,7 +32,13 @@ BROKEN_SEASON_TOTALS_PAYLOAD = {
 
 
 def _fake_client(payload):
+    """endpoints/stats/*.py now build an nba_api endpoint object and send it
+    through client.get_via_nba_api() (see backend/AGENTS.md's nba_api
+    integration notes); endpoints/live/*.py still call client.get_json()
+    directly, unchanged. Wiring both to the same payload keeps this one helper
+    usable for tests of either kind of endpoint."""
     client = MagicMock()
+    client.get_via_nba_api.return_value = payload
     client.get_json.return_value = payload
     return client
 
@@ -76,7 +82,7 @@ def test_fetch_uses_cache_on_second_call():
     endpoint = PlayerSeasonTotals(season="2023-24", client=client, cache=_RecordingCache())
     endpoint.fetch()
     endpoint.fetch()
-    assert client.get_json.call_count == 1  # second fetch was served from cache
+    assert client.get_via_nba_api.call_count == 1  # second fetch was served from cache
 
 
 def test_force_refresh_bypasses_cache_and_hits_client_again():
@@ -95,7 +101,7 @@ def test_force_refresh_bypasses_cache_and_hits_client_again():
     endpoint = PlayerSeasonTotals(season="2023-24", client=client, cache=_RecordingCache())
     endpoint.fetch()
     endpoint.fetch(force_refresh=True)
-    assert client.get_json.call_count == 2
+    assert client.get_via_nba_api.call_count == 2
 
 
 LIVE_SCOREBOARD_PAYLOAD = {

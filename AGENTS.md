@@ -44,7 +44,8 @@ API (from repo root, separate terminal): `uvicorn backend.api.main:app --reload 
 serves win-model predictions, player power rankings, and coaching evaluation as JSON. See
 `backend/AGENTS.md` for the endpoint list and the player-ratings refresh strategy.
 
-Frontend: see `frontend/AGENTS.md` (not yet scaffolded).
+Frontend (separate terminal): `cd frontend && npm install && npm run dev` — see `frontend/AGENTS.md`
+for env setup (needs `API_BASE_URL` pointed at the API above).
 
 ## Subdirectory docs
 

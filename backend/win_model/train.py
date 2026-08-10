@@ -39,6 +39,30 @@ INTERVAL_ALPHA = 0.2  # 80% interval (10th-90th percentile)
 # hardcoded, since a retrain can change which features rank highest.
 N_FEATURE_VALUES_TO_PERSIST = 5
 
+# Plain-language notes for features that would otherwise be a bare, easy-to-
+# misread column name in the API/UI. SOS is the one that actually matters here:
+# it looks like it could be a third-party rating (the way ESPN/KenPom SOS
+# numbers are), but it's entirely self-calculated by this project (see
+# load_schedule() in data_loader.py) — worth being explicit about so nobody
+# mistakes it for an external benchmark. Covers whatever's in
+# feature_values_available; anything not listed here gets a generic fallback
+# rather than silently no note at all.
+FEATURE_NOTES = {
+    "SOS": (
+        "Strength of Schedule — self-calculated, not a third-party benchmark. "
+        "Computed as the season average of each opponent's Strength_Score "
+        "(0.5*WIN% + 0.3*PLUS_MINUS + 0.2*roster-age-curve), entirely within "
+        "this project's own pipeline — see backend/win_model/data_loader.py's "
+        "load_schedule(). Null for the current forecast season: it depends on "
+        "next season's opponent data, which doesn't exist yet."
+    ),
+    "E_L": "Eastern Conference losses (part of the East/West conference win-loss split).",
+    "W_W": "Western Conference wins (part of the East/West conference win-loss split).",
+    "PLUS_MINUS": "Season point differential (points scored minus points allowed).",
+    "Payroll": "Total team payroll for the season, in dollars.",
+}
+_DEFAULT_FEATURE_NOTE = "No additional note recorded for this feature yet."
+
 
 def run_pipeline(master_df_path=None, write_output: bool = True):
     """Returns (results_df, metadata_dict); optionally writes both to disk."""
@@ -154,6 +178,9 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
         # matching column — see N_FEATURE_VALUES_TO_PERSIST) — e.g. for a chart
         # plotting the top-2 features against each other, per team.
         "feature_values_available": top_feature_names,
+        # Plain-language caveats for the features above — SOS in particular is
+        # easy to mistake for a third-party rating; see FEATURE_NOTES.
+        "feature_notes": {f: FEATURE_NOTES.get(f, _DEFAULT_FEATURE_NOTE) for f in top_feature_names},
         "prediction_interval": {
             "method": interval_method,
             "coverage": f"{int((1 - INTERVAL_ALPHA) * 100)}% ({int(INTERVAL_ALPHA / 2 * 100)}th-{int((1 - INTERVAL_ALPHA / 2) * 100)}th percentile)",

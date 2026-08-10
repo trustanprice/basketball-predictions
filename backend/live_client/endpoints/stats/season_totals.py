@@ -1,22 +1,25 @@
 """backend/live_client/endpoints/stats/season_totals.py
 
-League-wide player season totals — `leaguedashplayerstats` (MeasureType=Base).
-Historical/season data: one row per player for the given season.
+League-wide player season totals — built via nba_api's LeagueDashPlayerStats
+(MeasureType=Base), sent through our own retrying client and schema-validated
+response wrapper (see backend/live_client/client.py's module docstring for why
+nba_api alone isn't enough). Historical/season data: one row per player for the
+given season.
 """
 
 from __future__ import annotations
 
-from ...client import STATS_BASE_URL
-from ..base import Endpoint
+from nba_api.stats.endpoints import LeagueDashPlayerStats
 
-URL = f"{STATS_BASE_URL}/leaguedashplayerstats"
+from ..base import Endpoint
 
 
 class PlayerSeasonTotals(Endpoint):
     """Season totals for every player who logged minutes in `season`.
 
     Expected schema (subset): PLAYER_ID, PLAYER_NAME, TEAM_ID, TEAM_ABBREVIATION,
-    GP, MIN, PTS, REB, AST, STL, BLK, TOV, FG_PCT, FG3_PCT, FT_PCT.
+    GP, MIN, PTS, REB, AST, STL, BLK, TOV, FG_PCT, FG3_PCT, FT_PCT. Verified live
+    against stats.nba.com — see backend/tests/live_client/test_integration_real_network.py.
     """
 
     result_set_name = "LeagueDashPlayerStats"
@@ -46,33 +49,18 @@ class PlayerSeasonTotals(Endpoint):
         """
         super().__init__(client, cache)
         self.season = season
-        self.params = {
-            "Season": season,
-            "SeasonType": season_type,
-            "PerMode": per_mode,
-            "MeasureType": "Base",
-            "LeagueID": "00",
-            "PlayerExperience": "",
-            "PlayerPosition": "",
-            "StarterBench": "",
-            "TeamID": 0,
-            "Outcome": "",
-            "Location": "",
-            "Month": 0,
-            "SeasonSegment": "",
-            "DateFrom": "",
-            "DateTo": "",
-            "OpponentTeamID": 0,
-            "VsConference": "",
-            "VsDivision": "",
-            "GameSegment": "",
-            "Period": 0,
-            "LastNGames": 0,
-            "PORound": 0,
-            "PaceAdjust": "N",
-            "PlusMinus": "N",
-            "Rank": "N",
-        }
+        # Kept minimal (just the identifying params) for the cache key — nba_api
+        # fills in the other ~40 NBA.com params with its own current defaults,
+        # see _request().
+        self.params = {"Season": season, "SeasonType": season_type, "PerMode": per_mode}
 
     def _request(self) -> dict:
-        return self.client.get_json(URL, params=self.params)
+        endpoint = LeagueDashPlayerStats(
+            season=self.params["Season"],
+            season_type_all_star=self.params["SeasonType"],
+            per_mode_detailed=self.params["PerMode"],
+            measure_type_detailed_defense="Base",
+            timeout=self.client.timeout,
+            get_request=False,
+        )
+        return self.client.get_via_nba_api(endpoint)

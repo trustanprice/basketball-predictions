@@ -45,26 +45,62 @@ namespace packages) — this keeps imports unambiguous as more subpackages get a
 
 ## Data client conventions (`live_client/`)
 
-Modeled loosely on `nba_api`'s patterns (not its code). When adding a new data source, all four
-layers are required — don't shortcut with a bare `requests.get()` anywhere outside `client.py`:
+`endpoints/stats/*.py` build their requests via the `nba_api` package (a real dependency, not
+just a pattern reference — added after confirming two things by reading its source: it makes
+exactly one request attempt with no retry, and it does zero schema validation), rather than
+hand-rolled URLs/params. What stays ours on top of it:
 
-1. **`client.py`** — the one `requests.Session`-holding client class. Headers, timeout, retry,
-   and error handling live here, once.
-2. **`response.py`** — every endpoint's raw JSON gets wrapped before it leaves the client layer.
-   `to_dict()` / `to_json()` / `to_dataframe()`. Nothing downstream touches raw parsed JSON.
+1. **`client.py`** — the one `requests.Session`-holding client class, PLUS `get_via_nba_api()`:
+   a retry/backoff wrapper around an already-built (`get_request=False`) nba_api endpoint
+   instance — this is the retry nba_api itself doesn't have. `DEFAULT_HEADERS` is a **verified**
+   working header set for stats.nba.com (confirmed live, not guessed — a request with a
+   plausible-but-incomplete header set gets a 200 that just hangs to the read timeout; the
+   missing pieces were `Sec-Ch-Ua*`, `Sec-Fetch-Dest`, `Accept-Encoding`, `Pragma`,
+   `Cache-Control` — this is also nba_api's own default header set, so `endpoints/stats/*.py`
+   mostly don't even need to pass headers explicitly). `endpoints/live/` (cdn.nba.com) still
+   calls `get_json()` directly — out of scope for the nba_api migration, and cdn.nba.com's 403
+   here is a CDN-level block unrelated to headers, not something either client fixes.
+2. **`response.py`** — every endpoint's raw JSON/dataframe gets wrapped before it leaves the
+   client layer. `to_dict()` / `to_json()` / `to_dataframe()`. Nothing downstream touches raw
+   parsed JSON — nba_api hands back whatever columns come back with no check at all.
 3. **`endpoints/`** — one class per data source, with typed constructor args, a documented
    expected schema, and `fetch()`. Validate the schema at parse time — an upstream field
-   rename should raise loudly, not silently produce a dataframe with a NaN column.
+   rename (or a wrong assumption about the schema in the first place — see `TM_TOV_PCT` below)
+   should raise loudly, not silently produce a dataframe with a NaN column.
    `endpoints/stats/` = historical/season data (season totals, career stats, shot charts,
    advanced metrics, box scores). `endpoints/live/` = in-game feeds (scoreboard, live box
    score). Keep these separate — different freshness guarantees, different schemas, don't
    let a "generic" endpoint class quietly serve both.
+   - `boxscore.py`/`play_by_play.py` use nba_api's V3 endpoints (`BoxScoreTraditionalV3`,
+     `PlayByPlayV3`), not V2 — nba_api's own source flags V2 as deprecated and no longer
+     returning data as of the 2025-26 season. V3's response is nested JSON (camelCase, a
+     `statistics` sub-object per player), not the classic `resultSets`/`rowSet` table, so
+     these two override `_build_response()` to use nba_api's own dataframe flattening
+     (`endpoint.player_stats.get_data_frame()` / `.play_by_play.get_data_frame()`) instead of
+     `response.py`'s generic parser — same pattern `endpoints/live/*.py` already used.
+   - `PlayerAdvancedStats`'s real turnover-rate column is `TM_TOV_PCT`, not `TOV_PCT` — an
+     assumption that was simply wrong from the start (not an upstream rename), caught by the
+     real-network integration test below, not by schema validation (which only catches a
+     column going missing, not a column that was never right to begin with).
 4. **`cache.py`** — disk cache keyed by endpoint name + sorted params, used during
    development. Every fetch path needs an easy force-refresh flag; don't build a fetcher that
    can only ever read cache or only ever hit the network.
 
-Static player/team ID↔name lookups live in `live_client/lookups/`, not fetched live. See root
-`AGENTS.md` for how this differs from `data/`.
+Static player/team ID↔name lookups live in `live_client/lookups/`, sourced from
+`nba_api.stats.static` (`teams.get_teams()` / `players.get_players()` — bundled with the
+package, no network call, confirmed 30 teams / 5,103 players), not hand-maintained CSVs. Note
+`players.get_players()` has no `team_id` — a player's team is a roster/season fact, not a
+static one; that's the separate not-yet-built roster/schedule unit of work, not this lookup.
+See root `AGENTS.md` for how `lookups/` differs from `data/`.
+
+**Testing**: `tests/live_client/test_endpoints.py` mocks `client.get_via_nba_api`/`get_json`
+directly (schema-validation-on-malformed-response tests — cheap, deterministic, no network).
+`tests/live_client/test_integration_real_network.py` is different on purpose: no mocks, actually
+hits stats.nba.com, skips cleanly (doesn't fail the suite) if unreachable. Both matter — mocked
+tests catch a response *shape* regression; the real-network test is what actually caught
+`TM_TOV_PCT`, which no amount of mock-based testing could have, since the mock's payload was
+built from the same wrong assumption as the code. Re-run the real one after touching any
+`endpoints/stats/*.py` file, don't trust mocked-only green.
 
 Storage for cached/computed output beyond local disk (Postgres vs. DuckDB) is an open decision,
 deferred to Phase 6 when backend hosting is chosen. Don't wire a specific database into

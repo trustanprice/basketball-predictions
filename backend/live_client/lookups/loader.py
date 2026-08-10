@@ -3,37 +3,46 @@
 Static player/team ID<->name tables. Not fetched live — see backend/AGENTS.md and
 data/AGENTS.md for why this is a client dependency, not historical backtest data.
 
-teams.csv is hand-populated (30 rows, IDs stable for decades — low risk of typos
-mattering enough to hand-verify against stats.nba.com before relying on them in
-anything beyond local development). players.csv ships as an empty, schema-only
-file on purpose: NBA.com has thousands of historical player IDs, and hand-writing
-even a sample risks silently wrong IDs corrupting downstream ratings joins. Run
-`refresh_players_lookup()` once (needs network) to populate it for real from
-NBA.com's own `commonallplayers` endpoint — the actual source of truth.
+Sourced from nba_api.stats.static (teams/players), not hand-maintained CSVs —
+nba_api ships this data bundled with the package (5,103 players, 30 teams,
+confirmed by inspection), so keeping a second hand-written copy would just be a
+duplicate that can drift. This is genuinely static (no network call — it's data
+shipped inside the nba_api package itself), unlike everything else under
+live_client/, which is why it's fine to import at module load rather than behind
+an Endpoint/fetch()/cache() path.
+
+Note: nba_api's static player records do NOT include team_id (a player's team
+affiliation isn't a "static" fact — it's a roster/season fact, which is a
+separate, not-yet-built unit of work — see backend/AGENTS.md). Only team_id,
+abbreviation, full_name, and player_id, full_name, is_active are covered here.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
-
-LOOKUPS_DIR = Path(__file__).resolve().parent
-TEAMS_FILE = LOOKUPS_DIR / "teams.csv"
-PLAYERS_FILE = LOOKUPS_DIR / "players.csv"
+from nba_api.stats.static import players as _nba_api_players
+from nba_api.stats.static import teams as _nba_api_teams
 
 
 def load_teams() -> pd.DataFrame:
     """Returns columns: team_id, abbreviation, full_name (30 rows)."""
-    return pd.read_csv(TEAMS_FILE)
+    raw = _nba_api_teams.get_teams()
+    return pd.DataFrame({
+        "team_id": [t["id"] for t in raw],
+        "abbreviation": [t["abbreviation"] for t in raw],
+        "full_name": [t["full_name"] for t in raw],
+    })
 
 
 def load_players() -> pd.DataFrame:
-    """Returns columns: player_id, full_name, team_id, is_active.
-
-    Empty until `refresh_players_lookup()` has been run once — see module docstring.
-    """
-    return pd.read_csv(PLAYERS_FILE)
+    """Returns columns: player_id, full_name, is_active (~5,100 rows, active and
+    historical). No team_id — see module docstring."""
+    raw = _nba_api_players.get_players()
+    return pd.DataFrame({
+        "player_id": [p["id"] for p in raw],
+        "full_name": [p["full_name"] for p in raw],
+        "is_active": [p["is_active"] for p in raw],
+    })
 
 
 def team_id_for_abbreviation(abbreviation: str) -> int:
@@ -52,31 +61,9 @@ def team_name_for_id(team_id: int) -> str:
     return match.iloc[0]
 
 
-def refresh_players_lookup(client=None) -> pd.DataFrame:
-    """Populate players.csv from NBA.com's `commonallplayers` endpoint (the same
-    source nba_api's own player-index tooling uses). Requires network access —
-    not run automatically by anything in this package; call it manually when the
-    lookup needs updating (e.g. after a season's roster moves settle)."""
-    from ..client import NBAStatsClient
-    from ..response import NBAResponse
-
-    owned_client = client is None
-    client = client or NBAStatsClient()
-    try:
-        raw = client.get_json(
-            "https://stats.nba.com/stats/commonallplayers",
-            params={"LeagueID": "00", "Season": "2024-25", "IsOnlyCurrentSeason": "0"},
-        )
-    finally:
-        if owned_client:
-            client.close()
-
-    df = NBAResponse(raw, result_set_name="CommonAllPlayers").to_dataframe()
-    players = pd.DataFrame({
-        "player_id": df["PERSON_ID"],
-        "full_name": df["DISPLAY_FIRST_LAST"],
-        "team_id": df["TEAM_ID"],
-        "is_active": df["ROSTERSTATUS"].astype(int) == 1,
-    })
-    players.to_csv(PLAYERS_FILE, index=False)
-    return players
+def player_id_for_name(full_name: str) -> int:
+    players = load_players()
+    match = players.loc[players["full_name"] == full_name, "player_id"]
+    if match.empty:
+        raise KeyError(f"Unknown player full_name: {full_name!r}")
+    return int(match.iloc[0])

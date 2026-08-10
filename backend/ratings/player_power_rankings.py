@@ -37,7 +37,11 @@ OFFENSE_COMPONENTS = [
     # for having more plays run for them.
     Component("Usage-Adjusted Scoring", "USAGE_ADJ_PTS", weight=0.35, higher_is_better=True),
     Component("Playmaking (AST%)", "AST_PCT", weight=0.25, higher_is_better=True),
-    Component("Turnover Rate (TOV%)", "TOV_PCT", weight=0.10, higher_is_better=False),
+    # NBA.com's real column is TM_TOV_PCT, not TOV_PCT — this originally said
+    # TOV_PCT, a wrong assumption from before this was ever hit live (caught by
+    # actually calling the endpoint, not by schema validation catching an
+    # upstream rename — the name was simply never right to begin with).
+    Component("Turnover Rate (TOV%)", "TM_TOV_PCT", weight=0.10, higher_is_better=False),
 ]
 
 DEFENSE_COMPONENTS = [
@@ -54,7 +58,7 @@ DEFENSE_COMPONENTS = [
 
 _JOIN_COLS = ["PLAYER_ID", "PLAYER_NAME", "TEAM_ID"]
 _REQUIRED_TOTALS_COLS = {"GP", "MIN", "PTS", "STL", "BLK"}
-_REQUIRED_ADVANCED_COLS = {"USG_PCT", "TS_PCT", "AST_PCT", "TOV_PCT", "DREB_PCT", "DEF_RATING"}
+_REQUIRED_ADVANCED_COLS = {"USG_PCT", "TS_PCT", "AST_PCT", "TM_TOV_PCT", "DREB_PCT", "DEF_RATING"}
 
 
 def build_player_table(season_totals: pd.DataFrame, advanced_stats: pd.DataFrame) -> pd.DataFrame:

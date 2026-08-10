@@ -27,3 +27,6 @@ pytest-asyncio
 # API (backend/api/)
 fastapi
 uvicorn[standard]
+
+# NBA.com stats requests/params — see backend/live_client/client.py
+nba_api

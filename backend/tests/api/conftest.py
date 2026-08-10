@@ -39,6 +39,10 @@ MODEL_METADATA = {
     "feature_seasons_used": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
     "forecast_target_season": 2026,
     "feature_values_available": ["SOS", "E_L"],
+    "feature_notes": {
+        "SOS": "Strength of Schedule — self-calculated, not a third-party benchmark.",
+        "E_L": "Eastern Conference losses.",
+    },
 }
 
 _SAMPLE_COMPONENT = {

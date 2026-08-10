@@ -20,11 +20,11 @@ SEASON_TOTALS = pd.DataFrame([
 ])
 
 ADVANCED_STATS = pd.DataFrame([
-    {"PLAYER_ID": 1, "PLAYER_NAME": "Player One", "TEAM_ID": 100, "USG_PCT": 0.30, "TS_PCT": 0.60, "AST_PCT": 0.25, "TOV_PCT": 0.10, "DREB_PCT": 0.15, "DEF_RATING": 110},
-    {"PLAYER_ID": 2, "PLAYER_NAME": "Player Two", "TEAM_ID": 101, "USG_PCT": 0.18, "TS_PCT": 0.55, "AST_PCT": 0.15, "TOV_PCT": 0.08, "DREB_PCT": 0.25, "DEF_RATING": 100},
-    {"PLAYER_ID": 3, "PLAYER_NAME": "Player Three", "TEAM_ID": 102, "USG_PCT": 0.35, "TS_PCT": 0.70, "AST_PCT": 0.05, "TOV_PCT": 0.05, "DREB_PCT": 0.05, "DEF_RATING": 120},
-    {"PLAYER_ID": 4, "PLAYER_NAME": "Player Four", "TEAM_ID": 100, "USG_PCT": 0.15, "TS_PCT": 0.50, "AST_PCT": 0.10, "TOV_PCT": 0.12, "DREB_PCT": 0.10, "DEF_RATING": 115},
-    {"PLAYER_ID": 5, "PLAYER_NAME": "Player Five", "TEAM_ID": 103, "USG_PCT": 0.22, "TS_PCT": 0.58, "AST_PCT": 0.20, "TOV_PCT": 0.09, "DREB_PCT": 0.30, "DEF_RATING": 95},
+    {"PLAYER_ID": 1, "PLAYER_NAME": "Player One", "TEAM_ID": 100, "USG_PCT": 0.30, "TS_PCT": 0.60, "AST_PCT": 0.25, "TM_TOV_PCT": 0.10, "DREB_PCT": 0.15, "DEF_RATING": 110},
+    {"PLAYER_ID": 2, "PLAYER_NAME": "Player Two", "TEAM_ID": 101, "USG_PCT": 0.18, "TS_PCT": 0.55, "AST_PCT": 0.15, "TM_TOV_PCT": 0.08, "DREB_PCT": 0.25, "DEF_RATING": 100},
+    {"PLAYER_ID": 3, "PLAYER_NAME": "Player Three", "TEAM_ID": 102, "USG_PCT": 0.35, "TS_PCT": 0.70, "AST_PCT": 0.05, "TM_TOV_PCT": 0.05, "DREB_PCT": 0.05, "DEF_RATING": 120},
+    {"PLAYER_ID": 4, "PLAYER_NAME": "Player Four", "TEAM_ID": 100, "USG_PCT": 0.15, "TS_PCT": 0.50, "AST_PCT": 0.10, "TM_TOV_PCT": 0.12, "DREB_PCT": 0.10, "DEF_RATING": 115},
+    {"PLAYER_ID": 5, "PLAYER_NAME": "Player Five", "TEAM_ID": 103, "USG_PCT": 0.22, "TS_PCT": 0.58, "AST_PCT": 0.20, "TM_TOV_PCT": 0.09, "DREB_PCT": 0.30, "DEF_RATING": 95},
 ])
 
 

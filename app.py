@@ -140,6 +140,13 @@ walk-forward mean absolute error (out-of-sample, never in-sample fit) across
             importance_df = pd.DataFrame(metadata["top_feature_importance"])
             st.dataframe(importance_df, hide_index=True)
 
+            feature_notes = metadata.get("feature_notes", {})
+            if feature_notes:
+                st.write("**Notes on specific features** (so a bare column name isn't mistaken "
+                          "for something it isn't):")
+                for feature, note in feature_notes.items():
+                    st.caption(f"**{feature}** — {note}")
+
             st.caption(
                 f"Trained on {metadata['n_training_rows']} team-seasons "
                 f"({metadata['n_teams']} teams, feature seasons "
