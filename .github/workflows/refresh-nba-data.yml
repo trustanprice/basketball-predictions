@@ -73,7 +73,33 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add backend/outputs/player_power_rankings.json backend/outputs/team_style.json backend/outputs/player_projections.json
+
+          # refresh_team_style.py catches per-season fetch failures
+          # internally ("partial coverage beats none") rather than raising,
+          # so a total NBA.com outage doesn't crash the script — it just
+          # writes a technically-valid 0-season file instead. That's the
+          # right call for a live read, but wrong for something we're about
+          # to commit as source: a committed 0-season file would silently
+          # wipe out real historical data on diff. Only ever commit it with
+          # at least one real team-season in it; any nonzero count (even a
+          # genuinely partial one) is left alone, matching the script's own
+          # "partial beats none" principle.
+          if [ -f backend/outputs/team_style.json ]; then
+            N_SEASONS=$(python3 -c "import json; print(json.load(open('backend/outputs/team_style.json'))['n_team_seasons'])")
+            if [ "$N_SEASONS" -eq 0 ]; then
+              echo "team_style.json has 0 team-seasons (every historical season's fetch failed this run) — not committing it."
+              rm backend/outputs/team_style.json
+            fi
+          fi
+
+          # A refresh step that failed outright (see continue-on-error
+          # above) never wrote its output file at all — `git add` on a path
+          # that doesn't exist errors out ("did not match any files"), so
+          # only add files that are actually present, rather than assuming
+          # all three ran.
+          for f in backend/outputs/player_power_rankings.json backend/outputs/team_style.json backend/outputs/player_projections.json; do
+            [ -f "$f" ] && git add "$f"
+          done
           if git diff --cached --quiet; then
             echo "No data changes since last successful refresh — nothing to commit."
           else
