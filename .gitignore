@@ -16,3 +16,14 @@ data/raw/master-stats/*
 !data/raw/master-stats/test_results.csv
 !data/raw/master-stats/model_metadata.json
 !data/raw/master-stats/master_df.csv
+# Same cascade, same reason — backend/outputs/ is otherwise a gitignored build
+# artifact directory (line 4 above), but these three files are now written by
+# .github/workflows/refresh-nba-data.yml and committed as source of truth for
+# the API to read (Step 3 of the NBA.com connectivity fix — Render's network
+# can't reach stats.nba.com, see backend/AGENTS.md's "Player ratings: refresh
+# strategy"). Every other file under backend/outputs/ stays ignored.
+!backend/outputs/
+backend/outputs/*
+!backend/outputs/player_power_rankings.json
+!backend/outputs/team_style.json
+!backend/outputs/player_projections.json

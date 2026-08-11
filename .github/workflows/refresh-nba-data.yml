@@ -1,0 +1,93 @@
+# Step 3 of the NBA.com connectivity fix — see backend/AGENTS.md's "Player
+# ratings: refresh strategy". Render's own network cannot reach stats.nba.com
+# (confirmed with two independent data points: Oregon and Ohio Render regions
+# both hard-fail identically after 4 retries at 40s each — not a regional
+# issue, NBA.com is blocking cloud/datacenter IP ranges broadly). GitHub-hosted
+# runners' network is the workaround: run the three refresh scripts here
+# instead, commit their output as source (see .gitignore's backend/outputs/
+# cascade), and let the API's existing in-process background loop
+# (backend/api/main.py) fall back to being a harmless no-op once its own
+# fetch attempts fail — it still checks/retries hourly, so if Render's network
+# situation ever changes, that loop starts working again on its own with no
+# code change needed.
+#
+# Does NOT touch refresh_player_ratings.py / refresh_team_style.py /
+# refresh_player_projections.py — those are unchanged, already proven correct
+# against real NBA.com data. This workflow only changes WHERE they run.
+name: Scheduled NBA Data Refresh
+
+on:
+  schedule:
+    # Every 6 hours (00:00/06:00/12:00/18:00 UTC). backend/AGENTS.md's own
+    # staleness bound for this data is 24h, and the reasoning there
+    # ("who's playing well this season" doesn't change hour to hour) still
+    # applies — 6h gives 4 chances/day to land a successful fetch, well
+    # inside that 24h bound, without refreshing so often it's wasteful.
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # No version pin exists elsewhere in the repo (no runtime.txt/
+          # .python-version) — 3.11 matches what's been used and verified
+          # locally throughout this project, not an explicit requirement.
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      # Each refresh step is independent (continue-on-error) — matching
+      # backend/api/main.py's refresh_if_stale, one source failing (e.g.
+      # NBA.com rate-limits team_style's 10-season loop) must not stop the
+      # others from refreshing and being committed. The final step below
+      # still fails the job (visibly, in the Actions tab) if any of the
+      # three failed, so a real problem doesn't go silent.
+      - name: Refresh player power rankings
+        id: refresh_player_ratings
+        continue-on-error: true
+        run: python -m backend.ratings.refresh_player_ratings
+
+      - name: Refresh team style
+        id: refresh_team_style
+        continue-on-error: true
+        run: python -m backend.ratings.refresh_team_style
+
+      - name: Refresh player projections
+        id: refresh_player_projections
+        continue-on-error: true
+        run: python -m backend.ratings.refresh_player_projections
+
+      - name: Commit and push if data changed
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add backend/outputs/player_power_rankings.json backend/outputs/team_style.json backend/outputs/player_projections.json
+          if git diff --cached --quiet; then
+            echo "No data changes since last successful refresh — nothing to commit."
+          else
+            git commit -m "Scheduled NBA data refresh [skip ci]"
+            git push
+          fi
+
+      - name: Fail job if any refresh script failed
+        if: always()
+        run: |
+          if [ "${{ steps.refresh_player_ratings.outcome }}" = "failure" ] || \
+             [ "${{ steps.refresh_team_style.outcome }}" = "failure" ] || \
+             [ "${{ steps.refresh_player_projections.outcome }}" = "failure" ]; then
+            echo "At least one refresh script failed this run — see its step above for the traceback."
+            echo "Any scripts that succeeded were still committed/pushed."
+            exit 1
+          fi
