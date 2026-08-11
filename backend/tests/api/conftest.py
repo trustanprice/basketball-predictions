@@ -63,6 +63,21 @@ PLAYER_POWER_RANKINGS = {
     ],
 }
 
+PLAYER_PROJECTIONS = {
+    "season": "2026-27",
+    "generated_at": "2026-08-08T00:00:00+00:00",
+    "note": "PRESEASON PROJECTION, not a live in-season ranking...",
+    "historical_seasons_used": ["2025-26", "2024-25"],
+    "n_players_projected": 505,
+    "n_qualified_players": 344,
+    "offense": [
+        {"subject_id": 3, "subject_name": "Player Three", "composite_score": 1.9, "components": [_SAMPLE_COMPONENT]},
+    ],
+    "defense": [
+        {"subject_id": 4, "subject_name": "Player Four", "composite_score": 2.6, "components": [_SAMPLE_COMPONENT]},
+    ],
+}
+
 COACH_TEAM_SEASONS = pd.DataFrame([
     {
         "Season": 2016, "Team": "San Antonio Spurs", "Coach": "Gregg Popovich", "WIN%": 0.817,
@@ -89,6 +104,7 @@ def client():
     app.dependency_overrides[dependencies.get_predictions_df] = lambda: PREDICTIONS_DF
     app.dependency_overrides[dependencies.get_model_metadata] = lambda: MODEL_METADATA
     app.dependency_overrides[dependencies.get_player_power_rankings] = lambda: PLAYER_POWER_RANKINGS
+    app.dependency_overrides[dependencies.get_player_projections] = lambda: PLAYER_PROJECTIONS
     app.dependency_overrides[dependencies.get_coach_team_seasons] = lambda: COACH_TEAM_SEASONS
     app.dependency_overrides[dependencies.get_coach_career_summary] = lambda: COACH_CAREER_SUMMARY
     try:

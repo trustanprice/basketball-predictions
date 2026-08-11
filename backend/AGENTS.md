@@ -204,6 +204,50 @@ real player-seasons and taking a median — not a trained model.
   `FEATURE_NOTES["Payroll"]` and `metadata.roster_projection` — same honesty standard as the SOS
   null-for-forecast-season caveat.
 
+### Projected player leaders (Players page, preseason)
+
+A second, independent use of the aging-curve idea above, for the players page's "Projected
+Offense/Defense" tabs — reuses `player_power_rankings.py`'s exact composite (not a second
+ranking system), fed *projected* stats instead of actual ones.
+
+- **Archetype-segmented, not one universal curve.** `player_development.py`'s
+  `classify_archetype()` buckets a player-season into `Rim-Reliant` / `Perimeter` / `Balanced`
+  from real shot-location data (rim-attempt rate, 3PA rate — simple, statable thresholds, not a
+  clustering model). `build_archetype_curves()`/`project_player_multistat()` compute the same
+  median-%-change-by-age-bin curve as `build_aging_curve()` above, just segmented by
+  `(archetype, age)` and applied to every stat `OFFENSE_COMPONENTS`/`DEFENSE_COMPONENTS` actually
+  need (`TS_PCT`, `USG_PCT`, `AST_PCT`, `TM_TOV_PCT`, `STL_BLK_PER36`, `DREB_PCT`, `DEF_RATING`,
+  plus `PTS`) — not just scoring. A thin `(archetype, age)` cell (fewer than
+  `MIN_OBSERVATIONS_PER_ARCHETYPE_AGE_BIN` real transitions) falls back to the pooled
+  all-archetype curve for that age and says so in `development_notes`, same "don't fabricate a
+  trend you don't have data for" principle as the win-model roster projection. These functions
+  are additive, not a change to `build_aging_curve()`/`project_player_next_season()` — those stay
+  exactly as win_model's roster-projection pipeline depends on them.
+- **`ratings/refresh_player_projections.py`** — fetches real current rosters (`TeamRoster`) plus
+  a `N_HISTORICAL_SEASONS`-season league-wide panel (`PlayerSeasonTotals` + `PlayerAdvancedStats`
+  + the new `PlayerShotLocations`, three calls *per season*, not per player — a deliberately
+  different, cheaper shape than `refresh_roster_projection.py`'s per-player `PlayerCareerStats`
+  calls, chosen specifically to avoid the real rate-limiting that approach already hit once at
+  volume), projects every current-roster player, reshapes the projected numbers into the exact
+  input shape `build_player_table()` expects, and runs the *unmodified*
+  `top_offensive_players`/`top_defensive_players` on them. Writes
+  `backend/outputs/player_projections.json` (gitignored). Run manually:
+  `python -m backend.ratings.refresh_player_projections`.
+- **`live_client/endpoints/stats/shot_locations.py`** (`PlayerShotLocations`, via nba_api's
+  `LeagueDashPlayerShotLocations`) — league-wide shot attempts by court zone for one season.
+  Its raw response shape is genuinely unusual even by this project's "non-standard shape"
+  standards (see boxscore/play_by_play): confirmed live, `resultSets` here is a single dict,
+  and its two header groups' *names* are misleading — the one named `"columns"` is actually the
+  full flat 30-column list, and the other (`"SHOT_CATEGORY"`) holds the zone labels plus
+  `columnsToSkip`/`columnSpan` metadata describing how to slice that flat list. Read this file's
+  module docstring in full before touching it again — an earlier version had the two groups'
+  roles reversed and only the real-network test caught it, not the mocked fixture (built from
+  the same wrong assumption as the code, which is exactly the failure mode
+  `test_integration_real_network.py` exists to catch).
+- **Every payload carries an explicit "PRESEASON PROJECTION, not a live in-season ranking" note**
+  (`refresh_player_projections.PROJECTED_LEADERS_NOTE`) — surfaced directly in the API response
+  and rendered in the frontend, not just implied by a tab label.
+
 ## API (`api/`)
 
 FastAPI app wrapping `win_model` and `ratings` as JSON — it must not duplicate their logic,
@@ -216,11 +260,25 @@ from the repo root. Endpoints:
 - `GET /api/win-model/predictions/{team}` — one team + the full methodology inline (validation
   method, model comparison, feature importances) — self-contained, no second call needed.
 - `GET /api/win-model/methodology` — the methodology on its own.
-- `GET /api/players/power-rankings` — top-5 offense/defense, each with a full `RatingBreakdown`
-  (raw value, z-score, weight, contribution per component). See refresh strategy below —
-  503s with an explanatory message if the cache has never been populated.
+- `GET /api/players/power-rankings?n=` — top-`n` (default 5, max `MAX_N`=50) offense/defense,
+  each with a full `RatingBreakdown` (raw value, z-score, weight, contribution per component).
+  `n` slices the already-cached top-50 list at request time — the refresh script always
+  computes/caches the max, so "show more" on the frontend never needs a re-fetch. See refresh
+  strategy below — 503s with an explanatory message if the cache has never been populated.
+- `GET /api/players/projected-leaders?n=` — same shape and `n` behavior as power-rankings, but
+  every number is a **preseason projection** (real current rosters, aging-curve-adjusted), not
+  actual in-season stats — see "Projected player leaders" below. A separate endpoint, not a
+  query param on power-rankings: genuinely different data and methodology, not a filter.
 - `GET /api/coaches/wins-above-expectation` (optional `season`/`team` query filters) and
-  `GET /api/coaches/career-summary`.
+  `GET /api/coaches/career-summary` — each team-season also carries `pace`/`ast_pct`/
+  `three_pa_rate` (null if `refresh_team_style.py` hasn't run), descriptive context, not a
+  causal claim — see `ratings/team_style.py`.
+- `GET /api/coaches/shot-heatmap?team=&season=` — the **one** endpoint in this API that calls
+  `live_client` directly on a request, not from a scheduled refresh. Deliberate, narrow
+  exception — see the comment on `dependencies.get_team_shot_heatmap` before adding another one
+  like it: it's a single external call (~1.5s, confirmed), backed by `live_client`'s own
+  never-expiring disk cache (so only the *first* request per team+season ever hits NBA.com), for
+  a completed season with no staleness concern a scheduled refresh would even solve.
 
 All routers read their data via FastAPI `Depends()` (see `dependencies.py`) rather than calling
 loaders directly in the route body — this is what makes `backend/tests/api/` able to swap in

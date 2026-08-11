@@ -23,8 +23,19 @@ const bodyFont = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://basketball-predictions.vercel.app"),
   title: "Basketball Predictions",
   description: "Win predictions, player power rankings, and coaching evaluation.",
+  icons: {
+    icon: "/basketball-world.jpg",
+    shortcut: "/basketball-world.jpg",
+    apple: "/basketball-world.jpg",
+  },
+  openGraph: {
+    title: "Basketball Predictions",
+    description: "Win predictions, player power rankings, and coaching evaluation.",
+    images: ["/basketball-world.jpg"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

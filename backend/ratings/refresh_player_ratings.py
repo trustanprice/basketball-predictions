@@ -31,16 +31,21 @@ from .player_power_rankings import build_player_table, top_defensive_players, to
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs"
 OUTPUT_FILE = OUTPUT_DIR / "player_power_rankings.json"
 DEFAULT_MAX_AGE_SECONDS = 24 * 60 * 60
+# The cache stores this many ranked players per side regardless of what any
+# one request asks for — the API's `n` query param (see api/dependencies.py)
+# slices this down at request time, so "show more" never needs its own
+# refresh. Matches the API's own cap; raising one without the other just
+# means requests for n beyond MAX_N silently get MAX_N back.
+MAX_N = 50
 
 METHODOLOGY_NOTE = (
-    "Offense: True Shooting % + usage-adjusted scoring + AST% (playmaking) + "
-    "TOV% (turnover rate, penalized). Defense: steal+block rate per 36 min + "
-    "defensive rebound % + on-court defensive rating (penalized). 'Defended FG%' "
-    "and a true on/off defensive rating split are not included — they require "
-    "NBA.com tracking/matchup endpoints (leaguedashptdefend, "
-    "teamplayeronoffdetails) that backend/live_client/ doesn't fetch yet. "
-    "Every score is a z-scored, weighted composite over players meeting a "
-    "minimum-playing-time filter — see backend/ratings/player_power_rankings.py."
+    "Offense score blends true shooting %, usage-adjusted scoring, assist rate, and turnover "
+    "rate (penalized). Defense score blends steal-and-block rate per 36 minutes, defensive "
+    "rebound %, and on-court defensive rating (penalized). Two things we'd like to include but "
+    "can't yet: defended field-goal % and a real on/off defensive rating split, both of which "
+    "need NBA.com tracking data we don't pull in here. Every score is a weighted composite of "
+    "z-scores, built only from players who clear a minimum playing-time bar — see "
+    "backend/ratings/player_power_rankings.py for the exact weights."
 )
 
 
@@ -68,7 +73,7 @@ def is_stale(max_age_seconds: float = DEFAULT_MAX_AGE_SECONDS) -> bool:
     return age_seconds > max_age_seconds
 
 
-def run_refresh(season: str | None = None, top_n: int = 5, write_output: bool = True) -> dict:
+def run_refresh(season: str | None = None, top_n: int = MAX_N, write_output: bool = True) -> dict:
     """Fetch this season's player data and compute top_n offense/defense rankings.
 
     Returns the same dict that gets written to OUTPUT_FILE, so callers (tests,

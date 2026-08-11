@@ -15,3 +15,4 @@ data/raw/team-stats/*
 data/raw/master-stats/*
 !data/raw/master-stats/test_results.csv
 !data/raw/master-stats/model_metadata.json
+!data/raw/master-stats/master_df.csv

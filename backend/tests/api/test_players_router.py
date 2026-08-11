@@ -18,3 +18,13 @@ def test_power_rankings_breakdown_is_fully_transparent(client):
     component = player["components"][0]
     assert set(component.keys()) == {"name", "column", "raw_value", "z_score", "weight", "higher_is_better", "contribution"}
     assert component["name"] == "True Shooting %"
+
+
+def test_projected_leaders_shape(client):
+    resp = client.get("/api/players/projected-leaders")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["season"] == "2026-27"
+    assert "PRESEASON PROJECTION" in body["note"]
+    assert body["offense"][0]["subject_name"] == "Player Three"
+    assert body["defense"][0]["subject_name"] == "Player Four"
