@@ -1,5 +1,46 @@
-import type { RatingBreakdown } from "@/lib/types";
+import type { RatingBreakdown, RatingComponent } from "@/lib/types";
 import { PlayerHeadshot } from "./PlayerHeadshot";
+
+/**
+ * Each component's contribution to the composite, at a glance — a
+ * zero-centered diverging bar (positive contributions extend right in the
+ * "positive/validated" green, negative extend left in muted gray), sized
+ * relative to the largest |contribution| in this specific breakdown. This is
+ * a companion to the full numeric table below it, not a replacement — the
+ * table is still what makes composite_score hand-reproducible; this is what
+ * makes "what actually drove this score" readable in one glance instead of
+ * requiring someone to scan five rows of decimals.
+ */
+function ContributionBars({ components }: { components: RatingComponent[] }) {
+  const maxAbs = Math.max(...components.map((c) => Math.abs(c.contribution)), 0.001);
+  return (
+    <div className="mt-4 space-y-1.5">
+      {components.map((c) => {
+        const isPositive = c.contribution > 0;
+        const widthPct = (Math.abs(c.contribution) / maxAbs) * 50;
+        return (
+          <div key={c.name} className="flex items-center gap-2">
+            <span className="text-label w-36 shrink-0 truncate text-[10px] text-ink-muted">{c.name}</span>
+            <div className="relative h-2 flex-1 rounded-full bg-line/10">
+              <div aria-hidden className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-line/30" />
+              <div
+                aria-hidden
+                className={`absolute top-0 h-full rounded-full ${isPositive ? "bg-positive" : "bg-ink-muted"}`}
+                style={isPositive ? { left: "50%", width: `${widthPct}%` } : { right: "50%", width: `${widthPct}%` }}
+              />
+            </div>
+            <span
+              className={`text-label w-14 shrink-0 text-right text-[10px] ${isPositive ? "text-positive" : "text-ink-muted"}`}
+            >
+              {isPositive ? "+" : ""}
+              {c.contribution.toFixed(3)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 /**
  * Renders one composite score with its full breakdown, expandable via native
@@ -26,6 +67,7 @@ export function RatingBreakdownCard({
           {breakdown.composite_score.toFixed(3)}
         </span>
       </summary>
+      <ContributionBars components={breakdown.components} />
       <table className="mt-4 w-full border-collapse text-left text-sm">
         <thead>
           <tr className="border-b border-line/10">

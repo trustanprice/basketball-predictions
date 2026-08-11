@@ -2,6 +2,7 @@ import type {
   CoachCareerSummary,
   CoachTeamSeason,
   PlayerPowerRankings,
+  PlayerProjectedLeaders,
   TeamPrediction,
 } from "./types";
 
@@ -38,9 +39,14 @@ export async function getMethodology() {
  * NBA.com is unreachable, this is a genuine "not yet available" state, not a
  * bug. Returns null instead of throwing so the page can render that state
  * without generic error-boundary machinery.
+ *
+ * Fetches at the API's max `n` (50) in this one server-side call; the
+ * players page's "show more" control slices the already-fetched list
+ * client-side rather than re-fetching per click — no client-side network
+ * calls, per this file's own fetch-is-server-side convention.
  */
 export async function getPlayerPowerRankings(): Promise<PlayerPowerRankings | null> {
-  const res = await fetch(`${API_BASE_URL}/api/players/power-rankings`, {
+  const res = await fetch(`${API_BASE_URL}/api/players/power-rankings?n=50`, {
     next: { revalidate: 3600 },
   });
   if (res.status === 503) {
@@ -50,6 +56,25 @@ export async function getPlayerPowerRankings(): Promise<PlayerPowerRankings | nu
     throw new Error(`GET /api/players/power-rankings -> ${res.status} ${res.statusText}`);
   }
   return res.json() as Promise<PlayerPowerRankings>;
+}
+
+/**
+ * A PRESEASON PROJECTION (see PlayerProjectedLeaders.note) — depends on the
+ * same kind of background refresh as power rankings, plus a live current-
+ * roster fetch, so "not available yet" (503) is an expected state here too,
+ * not a bug. Returns null rather than throwing, same as getPlayerPowerRankings.
+ */
+export async function getPlayerProjectedLeaders(): Promise<PlayerProjectedLeaders | null> {
+  const res = await fetch(`${API_BASE_URL}/api/players/projected-leaders?n=50`, {
+    next: { revalidate: 3600 },
+  });
+  if (res.status === 503) {
+    return null;
+  }
+  if (!res.ok) {
+    throw new Error(`GET /api/players/projected-leaders -> ${res.status} ${res.statusText}`);
+  }
+  return res.json() as Promise<PlayerProjectedLeaders>;
 }
 
 export async function getCoachTeamSeasons(): Promise<CoachTeamSeason[]> {

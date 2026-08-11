@@ -5,6 +5,7 @@ import pytest
 from live_client.endpoints.base import SchemaValidationError
 from live_client.endpoints.live.scoreboard import TodaysScoreboard
 from live_client.endpoints.stats.season_totals import PlayerSeasonTotals
+from live_client.endpoints.stats.shot_locations import PlayerShotLocations
 
 GOOD_SEASON_TOTALS_PAYLOAD = {
     "resultSets": [{
@@ -125,3 +126,36 @@ def test_live_endpoint_flattens_nested_json_into_dataframe():
     df = endpoint.fetch().to_dataframe()
     assert df.loc[0, "homeTeam.teamTricode"] == "BOS"
     assert df.loc[0, "awayTeam.score"] == 55
+
+
+# Shape confirmed live (not guessed) — see shot_locations.py's module
+# docstring: `resultSets` is a single dict, its "headers" holds two groups
+# (one named "columns" that is actually the full flat 30-name list, one
+# named "SHOT_CATEGORY" holding the zone labels + columnsToSkip/columnSpan),
+# and rowSet is flat per that same 30-column order. This fixture is a
+# same-shape excerpt (2 zones instead of 8) so a schema regression in either
+# header group is still caught without needing the full real payload.
+SHOT_LOCATIONS_PAYLOAD = {
+    "resultSets": {
+        "name": "ShotLocations",
+        "headers": [
+            {"name": "SHOT_CATEGORY", "columnsToSkip": 3, "columnSpan": 3, "columnNames": ["Restricted Area", "Mid-Range"]},
+            {"name": "columns", "columnSpan": 1, "columnNames": [
+                "PLAYER_ID", "PLAYER_NAME", "TEAM_ID",
+                "FGM", "FGA", "FG_PCT",
+                "FGM", "FGA", "FG_PCT",
+            ]},
+        ],
+        "rowSet": [
+            [1, "Player One", 1610612738, 3.0, 5.0, 0.6, 1.0, 4.0, 0.25],
+        ],
+    }
+}
+
+
+def test_shot_locations_flattens_two_level_headers():
+    endpoint = PlayerShotLocations(season="2023-24", client=_fake_client(SHOT_LOCATIONS_PAYLOAD), cache=_NullCache())
+    df = endpoint.fetch().to_dataframe()
+    assert df.loc[0, "PLAYER_NAME"] == "Player One"
+    assert df.loc[0, "Restricted Area_FGA"] == 5.0
+    assert df.loc[0, "Mid-Range_FG_PCT"] == 0.25
