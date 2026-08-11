@@ -33,6 +33,7 @@ Run manually:  python -m backend.ratings.refresh_roster_projection
 from __future__ import annotations
 
 import json
+import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -45,6 +46,8 @@ from backend.live_client.endpoints.stats.team_roster import TeamRoster
 from backend.live_client.lookups.loader import load_teams
 
 from .player_development import build_aging_curve, project_player_next_season, project_team_talent_features
+
+logger = logging.getLogger("basketball_predictions.refresh_roster_projection")
 
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs"
 OUTPUT_FILE = OUTPUT_DIR / "roster_projection.json"
@@ -131,7 +134,19 @@ def run_refresh(target_season_start_year: int | None = None, write_output: bool 
         for i, player_id in enumerate(all_player_ids):
             if i > 0:
                 time.sleep(REQUEST_PACING_SECONDS)
-            careers[player_id] = PlayerCareerStats(player_id=player_id, client=client).fetch().to_dataframe()
+            try:
+                careers[player_id] = PlayerCareerStats(player_id=player_id, client=client).fetch().to_dataframe()
+            except Exception as exc:
+                # A malformed/empty response for one player (nba_api itself
+                # raises KeyError on some no-career-data players, not just a
+                # network failure) must not take down the whole 400+ player
+                # batch. Leaving this player out of `careers` makes the
+                # downstream `career is None` check (below) exclude them the
+                # same way an empty dataframe already does -- "no data,
+                # excluded" is the existing, correct behavior; this just
+                # makes a fetch-time exception reach that path too instead of
+                # crashing before ever getting there.
+                logger.warning("PlayerCareerStats failed for player_id=%s: %s", player_id, exc)
 
     aging_curve = build_aging_curve(list(careers.values()))
 

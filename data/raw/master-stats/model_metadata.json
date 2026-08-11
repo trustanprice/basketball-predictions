@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T19:50:33.620495+00:00",
+  "generated_at": "2026-08-11T21:52:01.243565+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -60,63 +60,63 @@
   "top_feature_importance": [
     {
       "feature": "SOS",
-      "importance_mae_increase": 6.5693
+      "importance_mae_increase": 6.4504
     },
     {
       "feature": "E_L",
-      "importance_mae_increase": 1.2918
+      "importance_mae_increase": 1.1807
     },
     {
       "feature": "PLUS_MINUS",
-      "importance_mae_increase": 0.9359
+      "importance_mae_increase": 0.9399
     },
     {
       "feature": "W_W",
-      "importance_mae_increase": 0.8366
-    },
-    {
-      "feature": "Payroll",
-      "importance_mae_increase": 0.4662
-    },
-    {
-      "feature": "FT%",
-      "importance_mae_increase": 0.39
-    },
-    {
-      "feature": "W",
-      "importance_mae_increase": 0.3855
-    },
-    {
-      "feature": "TOV",
-      "importance_mae_increase": 0.3367
-    },
-    {
-      "feature": "BLK",
-      "importance_mae_increase": 0.2961
+      "importance_mae_increase": 0.9003
     },
     {
       "feature": "W_L",
-      "importance_mae_increase": 0.2871
+      "importance_mae_increase": 0.4207
     },
     {
-      "feature": "PFD",
-      "importance_mae_increase": 0.27
+      "feature": "W",
+      "importance_mae_increase": 0.4079
     },
     {
       "feature": "injury_rate",
-      "importance_mae_increase": 0.2609
+      "importance_mae_increase": 0.3675
+    },
+    {
+      "feature": "Payroll",
+      "importance_mae_increase": 0.3607
+    },
+    {
+      "feature": "FT%",
+      "importance_mae_increase": 0.3574
+    },
+    {
+      "feature": "BLK",
+      "importance_mae_increase": 0.3315
     },
     {
       "feature": "avg_production_score",
-      "importance_mae_increase": 0.254
+      "importance_mae_increase": 0.3051
+    },
+    {
+      "feature": "TOV",
+      "importance_mae_increase": 0.2536
+    },
+    {
+      "feature": "OREB",
+      "importance_mae_increase": 0.231
     },
     {
       "feature": "FG%",
-      "importance_mae_increase": 0.215
+      "importance_mae_increase": 0.228
     },
     {
-      "feature": "Pre-ASG_W",
-      "importance_mae_increase": 0.2078
+      "feature": "PFD",
+      "importance_mae_increase": 0.2101
     }
   ],
   "feature_values_available": [
@@ -124,14 +124,14 @@
     "E_L",
     "PLUS_MINUS",
     "W_W",
-    "Payroll"
+    "W_L"
   ],
   "feature_notes": {
     "SOS": "Strength of schedule \u2014 our own number, not a KenPom or ESPN rating. We build it from each opponent's win%, point differential, and roster age, averaged across the full schedule (see load_schedule() in data_loader.py if you want the exact recipe). Blank for next season's forecast: the schedule hasn't been set yet, so there are no opponents to average.",
     "E_L": "Eastern Conference losses \u2014 one half of the East/West win-loss split.",
     "PLUS_MINUS": "Points scored minus points allowed for the season \u2014 the team's full-season point differential.",
     "W_W": "Western Conference wins \u2014 one half of the East/West win-loss split.",
-    "Payroll": "Total team payroll for the season. For next season's forecast specifically, this is last season's known figure carried forward \u2014 there's no live payroll feed to draw from, and the real number moves with every trade, extension, and signing all summer. Treat it as a rough stand-in, not a snapshot of today's books. See the roster section below for what in this forecast is real-time versus carried forward."
+    "W_L": "No additional note recorded for this feature yet."
   },
   "prediction_interval": {
     "method": "GBM native quantile regression (refits the winning model at the 10th and 90th percentiles)",
@@ -152,16 +152,15 @@
   ],
   "forecast_target_season": 2026,
   "roster_projection": {
-    "available": false,
-    "season": null,
-    "generated_at": null,
+    "available": true,
+    "season": "2026-27",
+    "generated_at": "2026-08-11T21:47:32.243275+00:00",
     "features_overridden": [
       "avg_age",
       "avg_pts_top10",
       "avg_production_score"
     ],
-    "teams_projected": [],
-    "teams_fallback_stale": [
+    "teams_projected": [
       "Atlanta Hawks",
       "Boston Celtics",
       "Brooklyn Nets",
@@ -193,7 +192,1299 @@
       "Utah Jazz",
       "Washington Wizards"
     ],
-    "team_talent_composite": null,
-    "note": "No roster projection on file yet, so every team's talent numbers here are carried forward from last season rather than built from an actual current roster. Run `python -m backend.ratings.refresh_roster_projection` to fix that."
+    "teams_fallback_stale": [],
+    "team_talent_composite": {
+      "Atlanta Hawks": {
+        "subject_id": "Atlanta Hawks",
+        "subject_name": "Atlanta Hawks",
+        "composite_score": -0.0119,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 170057021.0,
+            "z_score": -0.245,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0735
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.919228017053848,
+            "z_score": 0.1775,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.0532
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.42865295060271147,
+            "z_score": -0.6478,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.162
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9964726631393298,
+            "z_score": 1.1357,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.1704
+          }
+        ]
+      },
+      "Boston Celtics": {
+        "subject_id": "Boston Celtics",
+        "subject_name": "Boston Celtics",
+        "composite_score": -0.8498,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 195348491.0,
+            "z_score": 1.2615,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.3785
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 11.581220159292682,
+            "z_score": -1.7616,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.5285
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.3764979672634444,
+            "z_score": -2.4227,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.6057
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9481481481481482,
+            "z_score": -0.6278,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0942
+          }
+        ]
+      },
+      "Brooklyn Nets": {
+        "subject_id": "Brooklyn Nets",
+        "subject_name": "Brooklyn Nets",
+        "composite_score": -0.7219,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 168312896.0,
+            "z_score": -0.3489,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1047
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 11.901697229008834,
+            "z_score": -1.4958,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.4487
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4515505438729598,
+            "z_score": 0.1314,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.0328
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9285714285714286,
+            "z_score": -1.3422,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.2013
+          }
+        ]
+      },
+      "Charlotte Hornets": {
+        "subject_id": "Charlotte Hornets",
+        "subject_name": "Charlotte Hornets",
+        "composite_score": -0.5291,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 168575524.0,
+            "z_score": -0.3333,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 12.55728485727652,
+            "z_score": -0.9521,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.2856
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.41514665727810357,
+            "z_score": -1.1074,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.2769
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9897119341563786,
+            "z_score": 0.889,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.1333
+          }
+        ]
+      },
+      "Chicago Bulls": {
+        "subject_id": "Chicago Bulls",
+        "subject_name": "Chicago Bulls",
+        "composite_score": -0.4364,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 165722496.0,
+            "z_score": -0.5032,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.151
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 12.608956913827786,
+            "z_score": -0.9092,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.2728
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.45766471678411863,
+            "z_score": 0.3395,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.0849
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9475308641975309,
+            "z_score": -0.6503,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0975
+          }
+        ]
+      },
+      "Cleveland Cavaliers": {
+        "subject_id": "Cleveland Cavaliers",
+        "subject_name": "Cleveland Cavaliers",
+        "composite_score": 0.3548,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 165110486.0,
+            "z_score": -0.5397,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1619
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.342633570242835,
+            "z_score": 0.5286,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.1586
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.49767882106370964,
+            "z_score": 1.7011,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.4253
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9530864197530865,
+            "z_score": -0.4476,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0671
+          }
+        ]
+      },
+      "Dallas Mavericks": {
+        "subject_id": "Dallas Mavericks",
+        "subject_name": "Dallas Mavericks",
+        "composite_score": 0.3607,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 174411922.0,
+            "z_score": 0.0144,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.0043
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.488664652420232,
+            "z_score": 0.6497,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.1949
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.44717740200824657,
+            "z_score": -0.0174,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.0044
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9956427015250545,
+            "z_score": 1.1054,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.1658
+          }
+        ]
+      },
+      "Denver Nuggets": {
+        "subject_id": "Denver Nuggets",
+        "subject_name": "Denver Nuggets",
+        "composite_score": 0.3733,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 185864258.0,
+            "z_score": 0.6966,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.209
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.190151738255494,
+            "z_score": 0.4022,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.1207
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4403436417411366,
+            "z_score": -0.25,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.0625
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9847494553376906,
+            "z_score": 0.7079,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.1062
+          }
+        ]
+      },
+      "Detroit Pistons": {
+        "subject_id": "Detroit Pistons",
+        "subject_name": "Detroit Pistons",
+        "composite_score": -0.8977,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 140501660.0,
+            "z_score": -2.0056,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.6017
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 12.799653797180643,
+            "z_score": -0.751,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.2253
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4223826519258067,
+            "z_score": -0.8612,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.2153
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9917695473251029,
+            "z_score": 0.9641,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.1446
+          }
+        ]
+      },
+      "Golden State Warriors": {
+        "subject_id": "Golden State Warriors",
+        "subject_name": "Golden State Warriors",
+        "composite_score": -0.3877,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 170316619.0,
+            "z_score": -0.2296,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0689
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.173228490041547,
+            "z_score": -0.4412,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1324
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4868778185897944,
+            "z_score": 1.3336,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.3334
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.8703703703703703,
+            "z_score": -3.4661,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.5199
+          }
+        ]
+      },
+      "Houston Rockets": {
+        "subject_id": "Houston Rockets",
+        "subject_name": "Houston Rockets",
+        "composite_score": -0.0563,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 163038023.0,
+            "z_score": -0.6631,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1989
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 15.038847560382873,
+            "z_score": 1.106,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.3318
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4561216316475672,
+            "z_score": 0.2869,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.0717
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9176954732510288,
+            "z_score": -1.7391,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.2609
+          }
+        ]
+      },
+      "Indiana Pacers": {
+        "subject_id": "Indiana Pacers",
+        "subject_name": "Indiana Pacers",
+        "composite_score": 0.0631,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 169543082.0,
+            "z_score": -0.2756,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0827
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.383030483061347,
+            "z_score": 0.5621,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.1686
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.45355196035613127,
+            "z_score": 0.1995,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.0499
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9520697167755992,
+            "z_score": -0.4847,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0727
+          }
+        ]
+      },
+      "Los Angeles Clippers": {
+        "subject_id": "Los Angeles Clippers",
+        "subject_name": "Los Angeles Clippers",
+        "composite_score": -0.6341,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 174124752.0,
+            "z_score": -0.0027,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0008
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 12.634070063028679,
+            "z_score": -0.8884,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.2665
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.41670350692609603,
+            "z_score": -1.0545,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.2636
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9465020576131687,
+            "z_score": -0.6878,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.1032
+          }
+        ]
+      },
+      "Los Angeles Lakers": {
+        "subject_id": "Los Angeles Lakers",
+        "subject_name": "Los Angeles Lakers",
+        "composite_score": 0.5459,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 192057940.0,
+            "z_score": 1.0655,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.3196
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.45727934281295,
+            "z_score": 0.6237,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.1871
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.44191103817292293,
+            "z_score": -0.1966,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.0492
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9814814814814815,
+            "z_score": 0.5886,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0883
+          }
+        ]
+      },
+      "Memphis Grizzlies": {
+        "subject_id": "Memphis Grizzlies",
+        "subject_name": "Memphis Grizzlies",
+        "composite_score": 0.173,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 165903638.0,
+            "z_score": -0.4924,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1477
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.475097809616846,
+            "z_score": -0.1909,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0573
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.48487472440157886,
+            "z_score": 1.2654,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.3164
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9766081871345029,
+            "z_score": 0.4108,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0616
+          }
+        ]
+      },
+      "Miami Heat": {
+        "subject_id": "Miami Heat",
+        "subject_name": "Miami Heat",
+        "composite_score": 0.1463,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 176102077.0,
+            "z_score": 0.1151,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.0345
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.142692392313085,
+            "z_score": -0.4665,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.14
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4867626885612964,
+            "z_score": 1.3297,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.3324
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9506172839506173,
+            "z_score": -0.5377,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0807
+          }
+        ]
+      },
+      "Milwaukee Bucks": {
+        "subject_id": "Milwaukee Bucks",
+        "subject_name": "Milwaukee Bucks",
+        "composite_score": 0.5265,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 182559432.0,
+            "z_score": 0.4997,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.1499
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.083574161450167,
+            "z_score": 0.3138,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.0941
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4612486370544863,
+            "z_score": 0.4614,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.1154
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9958847736625515,
+            "z_score": 1.1142,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.1671
+          }
+        ]
+      },
+      "Minnesota Timberwolves": {
+        "subject_id": "Minnesota Timberwolves",
+        "subject_name": "Minnesota Timberwolves",
+        "composite_score": 0.465,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 203708244.0,
+            "z_score": 1.7595,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.5278
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 12.750327068788824,
+            "z_score": -0.792,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.2376
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.46499868940950945,
+            "z_score": 0.589,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.1473
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9703703703703703,
+            "z_score": 0.1832,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0275
+          }
+        ]
+      },
+      "New Orleans Pelicans": {
+        "subject_id": "New Orleans Pelicans",
+        "subject_name": "New Orleans Pelicans",
+        "composite_score": -0.0494,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 172778396.0,
+            "z_score": -0.0829,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0249
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.947496326639168,
+            "z_score": 0.2009,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.0603
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4366150719818525,
+            "z_score": -0.3769,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.0942
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9670781893004115,
+            "z_score": 0.063,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0095
+          }
+        ]
+      },
+      "New York Knicks": {
+        "subject_id": "New York Knicks",
+        "subject_name": "New York Knicks",
+        "composite_score": 0.3516,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 214703508.0,
+            "z_score": 2.4144,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.7243
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.202764824772498,
+            "z_score": -0.4167,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.125
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.42805312900060233,
+            "z_score": -0.6682,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.1671
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9506172839506173,
+            "z_score": -0.5377,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0807
+          }
+        ]
+      },
+      "Oklahoma City Thunder": {
+        "subject_id": "Oklahoma City Thunder",
+        "subject_name": "Oklahoma City Thunder",
+        "composite_score": -0.2849,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 166418720.0,
+            "z_score": -0.4618,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1385
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 12.542101007894498,
+            "z_score": -0.9646,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.2894
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4600768412662979,
+            "z_score": 0.4215,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.1054
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9722222222222222,
+            "z_score": 0.2507,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0376
+          }
+        ]
+      },
+      "Orlando Magic": {
+        "subject_id": "Orlando Magic",
+        "subject_name": "Orlando Magic",
+        "composite_score": -0.1367,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 152308863.0,
+            "z_score": -1.3022,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.3907
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.226264279393629,
+            "z_score": 0.4321,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.1296
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.44150489657582936,
+            "z_score": -0.2105,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.0526
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9976851851851852,
+            "z_score": 1.1799,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.177
+          }
+        ]
+      },
+      "Philadelphia 76ers": {
+        "subject_id": "Philadelphia 76ers",
+        "subject_name": "Philadelphia 76ers",
+        "composite_score": 0.7446,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 171336738.0,
+            "z_score": -0.1688,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0506
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 16.85605758039525,
+            "z_score": 2.6131,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.7839
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.45180315948756117,
+            "z_score": 0.14,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.035
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9610136452241715,
+            "z_score": -0.1583,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0237
+          }
+        ]
+      },
+      "Phoenix Suns": {
+        "subject_id": "Phoenix Suns",
+        "subject_name": "Phoenix Suns",
+        "composite_score": 0.836,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 220708856.0,
+            "z_score": 2.7721,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.8316
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.575609119695248,
+            "z_score": -0.1075,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0323
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4309577546102727,
+            "z_score": -0.5694,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.1423
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9980506822612085,
+            "z_score": 1.1933,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.179
+          }
+        ]
+      },
+      "Portland Trail Blazers": {
+        "subject_id": "Portland Trail Blazers",
+        "subject_name": "Portland Trail Blazers",
+        "composite_score": 0.9408,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 167012048.0,
+            "z_score": -0.4264,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1279
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 16.414870670772576,
+            "z_score": 2.2472,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.6742
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.48306197769030434,
+            "z_score": 1.2037,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.3009
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9824561403508772,
+            "z_score": 0.6242,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0936
+          }
+        ]
+      },
+      "Sacramento Kings": {
+        "subject_id": "Sacramento Kings",
+        "subject_name": "Sacramento Kings",
+        "composite_score": -0.5561,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 167811057.0,
+            "z_score": -0.3788,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1136
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.240843457270978,
+            "z_score": -0.3851,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.1155
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.4150089475178375,
+            "z_score": -1.1121,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.278
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9564270152505447,
+            "z_score": -0.3257,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0488
+          }
+        ]
+      },
+      "San Antonio Spurs": {
+        "subject_id": "San Antonio Spurs",
+        "subject_name": "San Antonio Spurs",
+        "composite_score": 0.1469,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 162395330.0,
+            "z_score": -0.7014,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.2104
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 14.080844501967817,
+            "z_score": 0.3115,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.0935
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.46752843954058254,
+            "z_score": 0.6751,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.1688
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9827160493827161,
+            "z_score": 0.6337,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0951
+          }
+        ]
+      },
+      "Toronto Raptors": {
+        "subject_id": "Toronto Raptors",
+        "subject_name": "Toronto Raptors",
+        "composite_score": -0.9895,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 170516134.0,
+            "z_score": -0.2177,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0653
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 12.100131963696729,
+            "z_score": -1.3312,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.3994
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.38473726491837573,
+            "z_score": -2.1423,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.5356
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9673202614379085,
+            "z_score": 0.0719,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.0108
+          }
+        ]
+      },
+      "Utah Jazz": {
+        "subject_id": "Utah Jazz",
+        "subject_name": "Utah Jazz",
+        "composite_score": 0.1378,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 154060898.0,
+            "z_score": -1.1979,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.3594
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 15.537620658460124,
+            "z_score": 1.5197,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.4559
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.44454169283187034,
+            "z_score": -0.1071,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": -0.0268
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9777777777777777,
+            "z_score": 0.4535,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": 0.068
+          }
+        ]
+      },
+      "Washington Wizards": {
+        "subject_id": "Washington Wizards",
+        "subject_name": "Washington Wizards",
+        "composite_score": 0.3751,
+        "components": [
+          {
+            "name": "Payroll",
+            "column": "Payroll",
+            "raw_value": 173806822.0,
+            "z_score": -0.0217,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": -0.0065
+          },
+          {
+            "name": "Top-10 Player Scoring (avg_pts_top10)",
+            "column": "avg_pts_top10",
+            "raw_value": 13.904726295757616,
+            "z_score": 0.1655,
+            "weight": 0.3,
+            "higher_is_better": true,
+            "contribution": 0.0496
+          },
+          {
+            "name": "Roster Production Score (avg_production_score)",
+            "column": "avg_production_score",
+            "raw_value": 0.496656050906156,
+            "z_score": 1.6663,
+            "weight": 0.25,
+            "higher_is_better": true,
+            "contribution": 0.4166
+          },
+          {
+            "name": "Roster Age Curve (age_factor)",
+            "column": "AGE_FACTOR",
+            "raw_value": 0.9498910675381265,
+            "z_score": -0.5642,
+            "weight": 0.15,
+            "higher_is_better": true,
+            "contribution": -0.0846
+          }
+        ]
+      }
+    },
+    "note": "Age, top-scorer output, and roster production for 30 of 30 teams come from real current rosters (season 2026-27), aged forward one year with our empirical development curve \u2014 not a repeat of last season's numbers. Every team in this forecast is covered."
   }
 }
