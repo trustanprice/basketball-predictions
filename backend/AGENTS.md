@@ -334,6 +334,18 @@ as the request handling sidesteps that entirely.
   respectively), so the API reads/computes them straight, per-request (coaching results are
   `functools.lru_cache`d in-process purely to avoid re-parsing `master_df.csv` on every call,
   not because the computation is slow).
+- **Known, currently-unresolved issue: this refresh loop reliably fails on Render specifically.**
+  Confirmed in production logs — every attempt hits `ReadTimeoutError` against `stats.nba.com`
+  after the full retry budget, not a one-off. The same client works fine from a local/residential
+  connection (verified directly, real 2025-26 data pulled successfully) and from this repo's own
+  dev/CI environment — this is specific to Render's network, likely IP-range throttling/blocking
+  on NBA.com's side, not a code bug. `/api/players/power-rankings` and the coaching team-style/
+  shot-heatmap endpoints degrade gracefully (503 with an explanatory message, or null style
+  fields) rather than crash, per the design above — but they will stay perpetually stale on
+  Render until this is actually fixed. See root `AGENTS.md`'s Gotchas for the fix plan in
+  progress (bump timeout/retry → try a different Render region → offload the fetch to GitHub
+  Actions if neither works). Don't assume a 503 here means new code broke something; check this
+  note first.
 
 ### Hosting
 

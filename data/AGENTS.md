@@ -19,3 +19,11 @@ coaching evaluation module.
   only because the app reads them at runtime and Streamlit Cloud has no separate artifact store —
   don't treat them as frozen/curated the way the rest of this directory is, and don't hand-edit
   them.
+- **`master_df.csv` must also be committed** (`.gitignore` explicitly un-ignores it, same pattern
+  as the two files above) — `backend/api/dependencies.py` reads it directly at request time for
+  every `/api/coaches/*` endpoint. It was missed when `test_results.csv`/`model_metadata.json`
+  got their exceptions added, so it silently didn't exist on Render's deploy — every coaching
+  endpoint 503'd (`master_df.csv not found`) until this was caught and fixed. If a future
+  `git status` shows this file as untracked, that's the same bug recurring — re-check
+  `.gitignore`'s `data/raw/master-stats/*` block, don't just re-add it and move on without
+  understanding why it went missing.

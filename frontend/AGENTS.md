@@ -15,17 +15,27 @@ from this subdirectory.
   wrappers: `PredictionsExplorer` (forecast card), `FeatureScatterChart` (hover tooltips + click
   to select), `CoachingExplorer` (click-to-expand coach history). Each receives already-fetched
   data as props from its parent Server Component page — it never calls `lib/api.ts` itself.
-- **Team selection is global, not per-page.** `TeamThemeProvider` (wraps the whole app in
-  `layout.tsx`) holds the one `selectedTeam` used everywhere, persisted to `localStorage`.
-  `NavTeamSelector` (in the nav, every page) is the only picker — pages don't have their own.
-  `PredictionsExplorer`'s forecast card and `FeatureScatterChart`'s clickable points both read/
-  write this same context (`useTeamTheme()`); clicking a scatter point isn't "a second picker,"
-  it's another way to change the one global selection. Team color is scoped to identity chrome
-  only (a border, dot, or underline) — never the amber section/key-stat accent or the green
-  positive/hollow-locked status colors, see `lib/teamColors.ts`. Players/Coaching pages
-  deliberately don't re-theme their content on selection (only the nav selector itself shows the
-  color) — they aren't team-specific views, and re-theming league-wide tables/rankings by a
-  selected team would misleadingly imply a filter that doesn't exist.
+- **Team theme selection and team analysis selection are two deliberately separate states —
+  do not re-link them.** This was previously one shared `selectedTeam` (picking a team in the nav
+  both themed the site and changed what `PredictionsExplorer` displayed); that coupling was
+  removed on purpose. Now:
+  - `TeamThemeProvider`'s `selectedTeam` (nav's `NavTeamSelector`, persisted to `localStorage`) is
+    **purely a visual theme choice** — it recolors the whole site (background and the amber
+    accent both shift toward the selected team's colors, not just border/underline chrome
+    anymore) but never determines what data is shown on any page.
+  - `PredictionsExplorer` holds its **own separate local state** for which team's forecast is
+    displayed, independent of the nav's theme selection. A user can have the site themed
+    Cavaliers while viewing the Lakers' forecast — that's intended, not a bug to "fix" by
+    re-syncing them.
+  - The green "live/validated" and hollow "locked/future" status colors stay fixed regardless of
+    team theme — those encode real data meaning and must stay visually distinct from whichever
+    team color is active. Contrast-check before using a team's raw color as a large fill or body
+    text color (several teams' colors are near-black/near-white — Nets, Bulls, Spurs); fall back
+    to an accent/tint rather than a literal solid fill where that would hurt readability.
+  - Players/Coaching pages: use judgment on how much of the theme bleeds into page content vs.
+    just the nav/chrome — they aren't team-specific views the way predictions is, so don't force
+    a full recolor of league-wide tables/rankings if it would misleadingly imply a filter that
+    doesn't exist, but the nav and shared chrome should still reflect the selected theme.
 - **Expand/collapse uses native `<details>`/`<summary>`** (`MethodologyPanel`,
   `RatingBreakdownCard`, and the per-season blocks in `CoachingExplorer`) instead of client
   state where the interaction is just open/closed — zero extra client JS. Reach for
