@@ -45,6 +45,12 @@ from this subdirectory.
   here is read-mostly; `lib/api.ts`'s `fetch(..., { next: { revalidate: 3600 } })` matches the
   backend's own ~1h staleness bound (see `backend/AGENTS.md`'s refresh strategy) via Next's
   built-in ISR. Don't add one without revisiting that reasoning first.
+- **`TeamShotHeatmap`/`StyleCorrelationScatter`** (Coaching page, "Team Style" section) render
+  data from `/api/coaches/shot-heatmap`. That endpoint was the one live-fetch-per-request
+  exception in the whole API (see `backend/AGENTS.md`) — being moved to the same
+  cache-and-commit pattern as everything else, since it hit the same Render/NBA.com
+  connectivity wall. If this section shows "couldn't load shot data," check
+  `backend/AGENTS.md`'s refresh-strategy notes before assuming a frontend bug.
 - **No charting library** — `FeatureScatterChart` is hand-rolled inline SVG. ~30 points and one
   tooltip doesn't justify a new dependency; revisit if a future chart needs more than that.
 - **Player headshots** (`lib/headshots.ts`) come straight from NBA.com's own CDN

@@ -231,8 +231,10 @@ ranking system), fed *projected* stats instead of actual ones.
   volume), projects every current-roster player, reshapes the projected numbers into the exact
   input shape `build_player_table()` expects, and runs the *unmodified*
   `top_offensive_players`/`top_defensive_players` on them. Writes
-  `backend/outputs/player_projections.json` (gitignored). Run manually:
-  `python -m backend.ratings.refresh_player_projections`.
+  `backend/outputs/player_projections.json` — **committed**, not gitignored (see the
+  manual-refresh strategy note below; this was gitignored originally, un-ignored once Render's
+  NBA.com connectivity was confirmed broken and manual-refresh-then-commit became the actual
+  production data path). Run manually: `python -m backend.ratings.refresh_player_projections`.
 - **`live_client/endpoints/stats/shot_locations.py`** (`PlayerShotLocations`, via nba_api's
   `LeagueDashPlayerShotLocations`) — league-wide shot attempts by court zone for one season.
   Its raw response shape is genuinely unusual even by this project's "non-standard shape"
@@ -273,12 +275,17 @@ from the repo root. Endpoints:
   `GET /api/coaches/career-summary` — each team-season also carries `pace`/`ast_pct`/
   `three_pa_rate` (null if `refresh_team_style.py` hasn't run), descriptive context, not a
   causal claim — see `ratings/team_style.py`.
-- `GET /api/coaches/shot-heatmap?team=&season=` — the **one** endpoint in this API that calls
-  `live_client` directly on a request, not from a scheduled refresh. Deliberate, narrow
-  exception — see the comment on `dependencies.get_team_shot_heatmap` before adding another one
-  like it: it's a single external call (~1.5s, confirmed), backed by `live_client`'s own
-  never-expiring disk cache (so only the *first* request per team+season ever hits NBA.com), for
-  a completed season with no staleness concern a scheduled refresh would even solve.
+- `GET /api/coaches/shot-heatmap?team=&season=&grid_cells=` — reads
+  `refresh_shot_heatmaps.py`'s precomputed cache (all 30 teams, 10 historical seasons,
+  offense+defense, at the default `grid_cells=25`), same "only ever read the file a scheduled
+  refresh wrote" rule as player power rankings/team style above. This used to be the one
+  endpoint in this API that called `live_client` directly on a request — a deliberate, narrow
+  exception that held up fine on a working network (~1.5s per call, disk-cached after the
+  first hit) but hung for minutes per request on Render, which can't reach stats.nba.com at all
+  (see "Player ratings: refresh strategy" below). 503s immediately on a cache miss (non-default
+  `grid_cells`, or a season the refresh script hasn't covered) rather than falling back to a
+  live fetch — a fast, clear 503 is strictly better than one that arrives after minutes of
+  hanging.
 
 All routers read their data via FastAPI `Depends()` (see `dependencies.py`) rather than calling
 loaders directly in the route body — this is what makes `backend/tests/api/` able to swap in
@@ -303,11 +310,12 @@ as the request handling sidesteps that entirely.
 
 - `backend/ratings/refresh_player_ratings.py` — standalone, independently runnable (same shape
   as `win_model/train.py`): fetches the current season from `live_client`, computes the
-  rankings, and writes `backend/outputs/player_power_rankings.json` (gitignored — a build
-  artifact, not source, unlike `win_model`'s `test_results.csv`/`model_metadata.json`, which are
-  committed because Streamlit Cloud has no separate build step; the API's host does). Also
-  exposes `is_stale(max_age_seconds)`, so a caller can check before fetching instead of always
-  fetching unconditionally.
+  rankings, and writes `backend/outputs/player_power_rankings.json` — **committed** (see the
+  manual-refresh strategy note below — this was originally gitignored on the assumption the
+  in-process loop would keep it fresh in production; that assumption turned out to be wrong on
+  Render specifically, so it's committed now, same treatment `test_results.csv`/
+  `model_metadata.json` and `team_style.json` get). Also exposes `is_stale(max_age_seconds)`, so
+  a caller can check before fetching instead of always fetching unconditionally.
 - `backend/api/main.py` runs a background `asyncio` loop (started in the FastAPI `lifespan`)
   that checks `is_stale()` roughly hourly and calls `run_refresh()` when due (default staleness
   bound: 24h — "who's playing well this season" doesn't change hour to hour). The actual
@@ -334,18 +342,40 @@ as the request handling sidesteps that entirely.
   respectively), so the API reads/computes them straight, per-request (coaching results are
   `functools.lru_cache`d in-process purely to avoid re-parsing `master_df.csv` on every call,
   not because the computation is slow).
-- **Known, currently-unresolved issue: this refresh loop reliably fails on Render specifically.**
-  Confirmed in production logs — every attempt hits `ReadTimeoutError` against `stats.nba.com`
-  after the full retry budget, not a one-off. The same client works fine from a local/residential
-  connection (verified directly, real 2025-26 data pulled successfully) and from this repo's own
-  dev/CI environment — this is specific to Render's network, likely IP-range throttling/blocking
-  on NBA.com's side, not a code bug. `/api/players/power-rankings` and the coaching team-style/
-  shot-heatmap endpoints degrade gracefully (503 with an explanatory message, or null style
-  fields) rather than crash, per the design above — but they will stay perpetually stale on
-  Render until this is actually fixed. See root `AGENTS.md`'s Gotchas for the fix plan in
-  progress (bump timeout/retry → try a different Render region → offload the fetch to GitHub
-  Actions if neither works). Don't assume a 503 here means new code broke something; check this
-  note first.
+- **This in-process refresh loop cannot reach NBA.com from Render — confirmed, not a hypothesis,
+  and not fixed at the infrastructure level.** Two real fix attempts, both confirmed failed with
+  actual evidence (not assumed): (1) bumping the client's timeout 15s→40s and retries 3→4 — still
+  hard-timed-out after all 4 attempts, confirmed via the deployed traceback showing
+  `read timeout=40.0`, proving the new code ran and still failed; (2) moving the Render service to
+  a different region (Ohio instead of Oregon) — identical failure, ruling out regional
+  IP-throttling specifically and pointing at NBA.com blocking cloud/datacenter IP ranges more
+  broadly. A GitHub Actions offload (running the refresh on GitHub-hosted runners' network
+  instead) was scoped as a third option but **not what was actually adopted**.
+- **The actual production strategy: manual local refresh + commit, not automation.** Since the
+  same client works fine from a local/residential connection (verified repeatedly, real data
+  pulled successfully every time), the chosen fix is running the refresh scripts locally
+  (`refresh_player_ratings.py`, `refresh_team_style.py`, `refresh_player_projections.py` — and
+  `refresh_shot_heatmaps.py` once built) by hand periodically (weekly-ish, no fixed schedule) and
+  committing the resulting `backend/outputs/*.json` files — same treatment as
+  `master_df.csv`/`test_results.csv`. This is *why* those files moved from gitignored to
+  committed (see the notes above). The in-process background loop still runs in production as a
+  harmless fallback (it keeps retrying and failing gracefully, exactly as designed — verified this
+  can never overwrite good committed data, since the write only happens after a fully successful
+  fetch, past the point where it actually fails) — if Render's connectivity or hosting ever
+  changes, the loop would just start working again with zero code changes needed.
+- A **separate, unrelated bug** was found and fixed alongside this: `refresh_team_style.py` and
+  `refresh_player_projections.py` were built with the exact same `is_stale()`/`run_refresh()`
+  interface as `refresh_player_ratings.py` specifically so they could share this loop, but were
+  never actually added to it — nothing was calling them, automatically or manually, until this was
+  caught. Both are wired into `refresh_if_stale()` now. Don't assume a 503/null-style-field means
+  the network issue above; check whether this wiring gap has recurred for any *new* refresh source
+  added later.
+- `refresh_roster_projection.py` also had a real bug, unrelated to Render: one player's
+  `PlayerCareerStats` response doesn't match what `nba_api` expects (`KeyError: 'resultSet'`, not
+  a timeout), and the ~400-500-call batch had no per-player error handling, so one bad player
+  crashed the entire run. Fixed to catch and log per-player, excluding that player the same way an
+  empty response already was — if this script fails again, check whether it's this same failure
+  mode on a *different* player before assuming something bigger broke.
 
 ### Hosting
 
