@@ -80,8 +80,8 @@ class NBAStatsClient:
 
     def __init__(
         self,
-        timeout: float = 15.0,
-        max_retries: int = 3,
+        timeout: float = 40.0,
+        max_retries: int = 4,
         backoff_seconds: float = 1.0,
         proxy: str | None = None,
         extra_headers: dict | None = None,
