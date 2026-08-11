@@ -7,13 +7,14 @@ import { useTeamTheme } from "./TeamThemeProvider";
 const ALL_TEAMS = Object.keys(TEAM_COLORS).sort();
 
 /**
- * The global team selector: lives in the nav (available on every page, see
- * TeamThemeProvider/layout.tsx) rather than as a picker on the predictions
- * page — a compact button showing the current selection (name + color dot)
- * that opens a scrollable dropdown of all 30 teams. Reuses the colored-dot
- * row styling the predictions page's old in-page "All Teams" grid used, in a
- * compact list instead of a full-page grid — this is the one place team
- * selection happens now, see frontend/AGENTS.md.
+ * The global site-theme picker: lives in the nav (available on every page,
+ * see TeamThemeProvider/layout.tsx) — a compact button showing the current
+ * selection (name + color dot) that opens a scrollable dropdown of all 30
+ * teams. Picking a team here recolors the whole site (TeamThemeProvider);
+ * it does NOT change what data any page shows — each page's own team
+ * picker (e.g. PredictionsExplorer's dropdown) is a separate, independent
+ * selection. Labeled "Site Theme" below specifically so that's not
+ * ambiguous with a data filter.
  *
  * Not built on the shared Popover component: Popover has no "close on
  * selecting something inside it" hook, which a persistent global control
@@ -56,6 +57,7 @@ export function NavTeamSelector() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls={panelId}
+        title="Site color theme — doesn't change what data is shown on any page"
         className="text-label flex items-center gap-2 rounded-md border border-line/15 bg-card px-3 py-1.5 text-[11px] text-ink transition-colors duration-200 ease-out hover:border-line/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <span
@@ -64,7 +66,7 @@ export function NavTeamSelector() {
           style={{ backgroundColor: buttonPrimary ?? "var(--color-ink-muted)" }}
         />
         <span style={buttonTextColor ? { color: buttonTextColor } : undefined}>
-          {selectedTeam ?? "Select a team"}
+          {selectedTeam ? `Theme: ${selectedTeam}` : "Site Theme"}
         </span>
       </button>
 
@@ -75,6 +77,9 @@ export function NavTeamSelector() {
           aria-modal="false"
           className="card animate-popover-in absolute right-0 top-full z-50 mt-2 max-h-80 w-64 overflow-y-auto text-sm shadow-[0_8px_30px_rgba(0,0,0,0.4)]"
         >
+          <p className="text-label mb-2 px-1 text-[10px] text-ink-muted">
+            Recolors the whole site — doesn&apos;t change any page&apos;s data
+          </p>
           {selectedTeam && (
             <button
               type="button"

@@ -1,20 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import type { ModelMetadata, TeamPrediction } from "@/lib/types";
 import { getSafeTeamAccentColor, getTeamColors } from "@/lib/teamColors";
 import { SectionHeading } from "./SectionHeading";
 import { MethodologyPanel } from "./MethodologyPanel";
 import { FeatureScatterChart } from "./FeatureScatterChart";
-import { useTeamTheme } from "./TeamThemeProvider";
 
 /**
- * Client island for the predictions page's interactive pieces. The nav's
- * team selector (components/NavTeamSelector.tsx, via TeamThemeProvider) is
- * the sitewide control; the dropdown below is a page-local convenience that
- * reads/writes the exact same context value, not a second independent
- * picker — choosing a team either place updates both the displayed forecast
- * and the sitewide theme identically. The scatter chart's click-a-point
- * interaction writes to that same global selection too.
+ * Client island for the predictions page's interactive pieces. Which
+ * team's forecast is showing is entirely local state, independent of the
+ * nav's sitewide team selector (components/NavTeamSelector.tsx, via
+ * TeamThemeProvider) — that control only recolors the site now, it doesn't
+ * pick what's displayed anywhere. So a user can have the whole UI themed
+ * Cavaliers while this section shows the Lakers' forecast; nothing here
+ * reads or writes the sitewide selection. The dropdown below and the
+ * scatter chart's click-a-point interaction both write to this same local
+ * state.
  */
 export function PredictionsExplorer({
   predictions,
@@ -23,7 +25,7 @@ export function PredictionsExplorer({
   predictions: TeamPrediction[];
   methodology: ModelMetadata;
 }) {
-  const { selectedTeam, setSelectedTeam } = useTeamTheme();
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const selected = selectedTeam ? predictions.find((p) => p.team === selectedTeam) : undefined;
   const selectedColor = selected ? getSafeTeamAccentColor(selected.team) : undefined;
   const selectedPrimary = selected ? getTeamColors(selected.team).primary : undefined;
@@ -86,7 +88,7 @@ export function PredictionsExplorer({
           </div>
         ) : (
           <div className="card--hollow text-sm text-ink-muted">
-            Select a team from the nav above to see its forecast.
+            Select a team above (or click a point on the chart below) to see its forecast.
           </div>
         )}
       </section>

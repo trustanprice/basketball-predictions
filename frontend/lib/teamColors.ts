@@ -54,8 +54,15 @@ const NEUTRAL_FALLBACK = "#a89f8e";
 
 // Matches --color-page in globals.css. Hardcoded here (not imported — this
 // module has no CSS access) rather than left implicit, so the contrast math
-// below is self-documenting about what it's actually checking against.
+// below is self-documenting about what it's actually checking against. This
+// is the *default* background isTextSafe/getSafeTeamAccentColor check
+// against when no background is given — callers operating inside an active
+// sitewide team wash (see getSiteThemeOverrides below) pass the live washed
+// background instead, since that's what the color will actually sit on.
 const PAGE_BACKGROUND = "#1b1815";
+const CARD_BACKGROUND = "#252019";
+const INK = "#f2ede0"; // matches --color-ink — used as the lightening target in lightenUntilSafe
+const INK_MUTED = "#a89f8e"; // dimmest text color in normal use — the real worst case to protect
 
 const MIN_TEXT_CONTRAST = 4.5; // WCAG AA, normal text
 
@@ -67,6 +74,11 @@ function hexToRgb(hex: string): [number, number, number] {
   const clean = hex.replace("#", "");
   const value = parseInt(clean, 16);
   return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+function rgbToHex([r, g, b]: [number, number, number]): string {
+  const toHex = (c: number) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 function relativeLuminance([r, g, b]: [number, number, number]): number {
@@ -87,29 +99,125 @@ export function contrastRatio(hexA: string, hexB: string): number {
 }
 
 /**
- * Whether `hex` is safe to render as readable text/fill against the page's
- * charcoal background. Most NBA primary colors are saturated-but-dark (built
- * for white jerseys and light backgrounds, not a dark page) — expect this to
- * fail for the large majority of primaries; that's real, measured contrast
- * math, not a bug. 29 of 30 teams' primary color fails this check; only ~12
- * of 30 secondaries pass. Use getSafeTeamAccentColor() for the fallback
+ * Whether `hex` is safe to render as readable text/fill against `background`
+ * (defaults to the static page charcoal, for existing per-row/per-point
+ * decorative call sites that always sit on the plain page). Most NBA primary
+ * colors are saturated-but-dark (built for white jerseys and light
+ * backgrounds, not a dark page) — expect this to fail for the large majority
+ * of primaries; that's real, measured contrast math, not a bug. 29 of 30
+ * teams' primary color fails this check against the default background; only
+ * ~12 of 30 secondaries pass. Use getSafeTeamAccentColor() for the fallback
  * chain rather than assuming primary is usable.
  */
-export function isTextSafe(hex: string): boolean {
-  return contrastRatio(hex, PAGE_BACKGROUND) >= MIN_TEXT_CONTRAST;
+export function isTextSafe(hex: string, background: string = PAGE_BACKGROUND): boolean {
+  return contrastRatio(hex, background) >= MIN_TEXT_CONTRAST;
 }
 
 /**
  * Best team color for anywhere it needs to be READ (text, a filled shape
- * that must stay visible/legible) — primary, else secondary, else a neutral
- * fallback if neither clears contrast. For borders/dots/underlines, where
- * even a low-contrast color is still a legible accent against its shape and
+ * that must stay visible/legible) against `background` (defaults to the
+ * static page charcoal) — primary, else secondary, else a neutral fallback
+ * if neither clears contrast. For borders/dots/underlines, where even a
+ * low-contrast color is still a legible accent against its shape and
  * position (not read as text), use raw getTeamColors().primary/.secondary
  * directly instead — don't gate those through this function.
  */
-export function getSafeTeamAccentColor(team: string): string {
+export function getSafeTeamAccentColor(team: string, background: string = PAGE_BACKGROUND): string {
   const { primary, secondary } = getTeamColors(team);
-  if (isTextSafe(primary)) return primary;
-  if (isTextSafe(secondary)) return secondary;
+  if (isTextSafe(primary, background)) return primary;
+  if (isTextSafe(secondary, background)) return secondary;
   return NEUTRAL_FALLBACK;
+}
+
+function mixHex(hexA: string, hexB: string, weightA: number): string {
+  const a = hexToRgb(hexA);
+  const b = hexToRgb(hexB);
+  const t = Math.max(0, Math.min(1, weightA));
+  return rgbToHex([a[0] * t + b[0] * (1 - t), a[1] * t + b[1] * (1 - t), a[2] * t + b[2] * (1 - t)]);
+}
+
+/**
+ * The largest team-color wash we can mix into `baseHex` while keeping
+ * INK_MUTED (the dimmest text color still in normal use, e.g. small labels)
+ * readable on top of it at WCAG AA. Scans downward from `maxPct` in 1%
+ * steps and returns the first (= most saturated) mix that still clears
+ * MIN_TEXT_CONTRAST — computed per-team rather than a single hardcoded
+ * percentage, because team colors span a huge lightness range (Nets black to
+ * Spurs silver to Bucks' cream secondary) and a fixed percentage would be
+ * either invisible on the dark teams or unreadable on the light ones. This
+ * is why near-black/near-white teams get a visibly milder wash than
+ * saturated mid-tone teams (Cavs wine, Celtics green) automatically, with
+ * no per-team special-casing: their raw color already fails contrast at a
+ * lower mix percentage, so the search stops sooner.
+ */
+function largestSafeWash(teamHex: string, baseHex: string, maxPct: number): string {
+  for (let pct = maxPct; pct >= 0; pct -= 0.01) {
+    const mixed = mixHex(teamHex, baseHex, pct);
+    if (contrastRatio(mixed, INK_MUTED) >= MIN_TEXT_CONTRAST) return mixed;
+  }
+  return baseHex;
+}
+
+/**
+ * Lightens `teamHex` toward INK just enough to clear MIN_TEXT_CONTRAST
+ * against EVERY background in `backgrounds` (the accent renders on both the
+ * washed page and the washed card, and those are two different colors — see
+ * getSiteThemeOverrides) — the sitewide accent's own fallback, used only
+ * when neither the team's primary nor secondary is readable as-is (about
+ * half the league: primaries are built for white jerseys, not a dark page,
+ * and plenty of secondaries are just as dark — Cavaliers wine-on-navy,
+ * Mavericks blue-on-navy). Rather than dropping to the generic neutral gray
+ * getSafeTeamAccentColor()'s normal fallback chain uses (right for small
+ * decorative dots/borders, where "hey, unusual color" would look odd once
+ * washed out), this keeps the accent visibly *that team's* color family —
+ * scans upward from pure primary so it returns the least amount of
+ * lightening that still passes, i.e. the most saturated safe variant.
+ */
+function lightenUntilSafe(teamHex: string, backgrounds: string[]): string {
+  for (let pct = 0; pct <= 1; pct += 0.02) {
+    const lightened = mixHex(INK, teamHex, pct);
+    if (backgrounds.every((bg) => contrastRatio(lightened, bg) >= MIN_TEXT_CONTRAST)) return lightened;
+  }
+  return INK;
+}
+
+export interface SiteThemeOverrides {
+  page: string;
+  card: string;
+  accent: string;
+}
+
+/**
+ * The full sitewide recolor for `team`: tinted page/card backgrounds plus a
+ * contrast-safe accent, all derived from the same primary color so the whole
+ * UI reads as one coherent team palette rather than several colors picked
+ * independently. Backgrounds are capped lower than the accent's own
+ * contrast requirement (30%/38% max wash vs. a full readable-text
+ * threshold) — they sit *behind* body text, not as the text itself, so the
+ * binding constraint is "ink-muted text stays legible on top," computed
+ * per-team by largestSafeWash rather than assumed. The accent is checked
+ * against the *already-washed* page color (not the static default) so the
+ * existing bg-accent + text-page button pairing (see app/page.tsx) stays
+ * guaranteed readable even once the page background itself has shifted. If
+ * neither raw primary nor secondary clears that bar (roughly half the
+ * league — see lightenUntilSafe), the accent is a lightened variant of the
+ * team's own primary rather than getSafeTeamAccentColor()'s usual neutral-
+ * gray fallback: this is the one color meant to visibly carry team identity
+ * everywhere on the page, so it should never go generic.
+ * Deliberately does not touch --color-positive (green, "live/validated") or
+ * --color-line (the hollow/locked-card border) — those stay fixed regardless
+ * of team so status meaning never gets swallowed by team identity.
+ */
+export function getSiteThemeOverrides(team: string | null): SiteThemeOverrides | null {
+  if (!team) return null;
+  const { primary, secondary } = getTeamColors(team);
+  const page = largestSafeWash(primary, PAGE_BACKGROUND, 0.3);
+  const card = largestSafeWash(primary, CARD_BACKGROUND, 0.38);
+  const accent =
+    isTextSafe(primary, page) && isTextSafe(primary, card)
+      ? primary
+      : isTextSafe(secondary, page) && isTextSafe(secondary, card)
+        ? secondary
+        : lightenUntilSafe(primary, [page, card]);
+  return { page, card, accent };
 }

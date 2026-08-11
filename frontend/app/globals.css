@@ -3,11 +3,21 @@
 /**
  * Design tokens — editorial/technical aesthetic, not a SaaS dashboard.
  * Color always encodes meaning here, never decoration:
- *   --color-accent   (amber)  ONLY section numbers, key stat values, primary buttons.
+ *   --color-page/--color-card/--color-accent   the default amber/charcoal
+ *     theme below — but these three are also the sitewide team-recolor
+ *     targets: components/TeamThemeProvider.tsx overrides them (to a
+ *     contrast-checked wash of the selected team's color, computed in
+ *     lib/teamColors.ts's getSiteThemeOverrides) as an inline style on
+ *     <html> whenever a team is selected in the nav, and every element below
+ *     that references these vars picks it up automatically. --color-accent
+ *     is amber only in the no-team-selected default state.
  *   --color-positive (green)  ONLY "live/validated/positive" — positive wins-above-
- *                             expectation, positive rating contributions.
+ *                             expectation, positive rating contributions. Never
+ *                             overridden by team theming — status meaning has to
+ *                             stay legible regardless of which team is selected.
  *   "Hollow" (locked/future/inactive) is a STYLE, not a color — border-only,
- *   transparent fill. See the .card--hollow utility below.
+ *   transparent fill, always on --color-line (also never team-overridden — see
+ *   .card--hollow below). See the .card--hollow utility below.
  * See frontend/AGENTS.md before adding a new color — there shouldn't be one.
  */
 @theme {
