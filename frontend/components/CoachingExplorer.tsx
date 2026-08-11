@@ -197,12 +197,12 @@ export function CoachingExplorer({
                     <WaeValue value={ts.wins_above_expectation} />)
                   </span>
                 </summary>
-                {(ts.pace !== null || ts.ast_pct !== null || ts.three_pa_rate !== null) && (
+                {(typeof ts.pace === "number" || typeof ts.ast_pct === "number" || typeof ts.three_pa_rate === "number") && (
                   <p className="text-label mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-ink-muted">
                     <span>Style context (correlation, not causation):</span>
-                    {ts.pace !== null && <span>Pace {ts.pace.toFixed(1)}</span>}
-                    {ts.ast_pct !== null && <span>AST% {(ts.ast_pct * 100).toFixed(1)}%</span>}
-                    {ts.three_pa_rate !== null && <span>3PA Rate {(ts.three_pa_rate * 100).toFixed(1)}%</span>}
+                    {typeof ts.pace === "number" && <span>Pace {ts.pace.toFixed(1)}</span>}
+                    {typeof ts.ast_pct === "number" && <span>AST% {(ts.ast_pct * 100).toFixed(1)}%</span>}
+                    {typeof ts.three_pa_rate === "number" && <span>3PA Rate {(ts.three_pa_rate * 100).toFixed(1)}%</span>}
                   </p>
                 )}
                 <table className="mt-4 w-full border-collapse text-left text-xs">
