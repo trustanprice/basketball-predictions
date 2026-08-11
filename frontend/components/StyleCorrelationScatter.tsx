@@ -42,7 +42,7 @@ export function StyleCorrelationScatter({ teamSeasons }: { teamSeasons: CoachTea
   const points = useMemo(
     () =>
       teamSeasons
-        .filter((ts) => ts[metric] !== null)
+        .filter((ts) => typeof ts[metric] === "number" && !Number.isNaN(ts[metric]))
         .map((ts) => ({
           key: `${ts.season}-${ts.team}`,
           team: ts.team,
