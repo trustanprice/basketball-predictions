@@ -17,7 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routers import coaching, players, win_model
-from backend.ratings import refresh_player_ratings
+from backend.ratings import refresh_player_projections, refresh_player_ratings, refresh_team_style
 
 logger = logging.getLogger("basketball_predictions.api")
 
@@ -31,14 +31,24 @@ logger = logging.getLogger("basketball_predictions.api")
 REFRESH_CHECK_INTERVAL_SECONDS = int(os.environ.get("PLAYER_RATINGS_CHECK_INTERVAL_SECONDS", 60 * 60))
 REFRESH_MAX_AGE_SECONDS = int(os.environ.get("PLAYER_RATINGS_MAX_AGE_SECONDS", refresh_player_ratings.DEFAULT_MAX_AGE_SECONDS))
 
+# team_style and player_projections were built with the exact same is_stale()/
+# run_refresh() interface as refresh_player_ratings specifically so they could
+# share this one loop — they were never actually wired in until now, which is
+# why "no team-style data available" / "projected leaders" never resolved on
+# their own no matter how long the service ran: nothing was ever calling them.
+# Reusing the same check interval/max-age knobs rather than adding six new env
+# vars for what's the same tradeoff three times over.
+
 
 async def refresh_if_stale() -> None:
-    """One check-and-maybe-refresh attempt. Never raises: a failed NBA.com fetch
-    (down, rate-limited, no network) must not crash the API or the background
-    loop — the existing (stale) cache just keeps being served, and the next
-    scheduled check retries. run_refresh() itself is synchronous/blocking
-    (requests, not httpx), so it's offloaded to a thread to avoid stalling the
-    event loop that's also serving requests.
+    """One check-and-maybe-refresh attempt per data source. Never raises: a
+    failed NBA.com fetch (down, rate-limited, no network) must not crash the
+    API or the background loop — the existing (stale) cache just keeps being
+    served, and the next scheduled check retries. Each source is caught
+    independently so one failing (e.g. team_style) never blocks the others
+    from refreshing. run_refresh() is synchronous/blocking (requests, not
+    httpx), so each is offloaded to a thread to avoid stalling the event loop
+    that's also serving requests.
     """
     try:
         if refresh_player_ratings.is_stale(REFRESH_MAX_AGE_SECONDS):
@@ -46,6 +56,20 @@ async def refresh_if_stale() -> None:
             logger.info("player power rankings refreshed")
     except Exception:
         logger.exception("player power rankings refresh attempt failed; serving existing cache")
+
+    try:
+        if refresh_team_style.is_stale(REFRESH_MAX_AGE_SECONDS):
+            await asyncio.to_thread(refresh_team_style.run_refresh)
+            logger.info("team style refreshed")
+    except Exception:
+        logger.exception("team style refresh attempt failed; serving existing cache")
+
+    try:
+        if refresh_player_projections.is_stale(REFRESH_MAX_AGE_SECONDS):
+            await asyncio.to_thread(refresh_player_projections.run_refresh)
+            logger.info("player projections refreshed")
+    except Exception:
+        logger.exception("player projections refresh attempt failed; serving existing cache")
 
 
 async def _refresh_loop() -> None:
