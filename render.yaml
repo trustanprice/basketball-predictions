@@ -16,6 +16,14 @@ services:
     name: basketball-predictions-api
     runtime: python
     plan: free
+    # Step 2 of the NBA.com connectivity fix (backend/AGENTS.md's "Player
+    # ratings: refresh strategy") — Step 1 (bump client.py's timeout/retries)
+    # confirmed deployed but did not fix it: production logs still show a
+    # hard ReadTimeoutError against stats.nba.com at the new 40s/4-attempt
+    # config, every attempt, not a one-off. Trying a non-default region next,
+    # on the theory this is IP-range throttling/blocking specific to
+    # Render's default region rather than something timeout/retries can fix.
+    region: ohio
     buildCommand: pip install -r backend/requirements.txt
     startCommand: uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
