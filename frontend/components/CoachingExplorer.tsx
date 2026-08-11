@@ -1,10 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { CoachCareerSummary, CoachTeamSeason, TeamPrediction } from "@/lib/types";
 import { getTeamColors, isTextSafe } from "@/lib/teamColors";
 import { SectionHeading } from "./SectionHeading";
 import { Popover } from "./Popover";
+import { StyleCorrelationScatter } from "./StyleCorrelationScatter";
+import { TeamShotHeatmap } from "./TeamShotHeatmap";
+import { useTeamTheme } from "./TeamThemeProvider";
+
+// Matches the historical range backend/ratings/refresh_team_style.py covers
+// (season-start-year 2016-2025) — the shot-chart endpoint itself supports
+// any completed season, this is just what the rest of this page's data spans.
+const SHOT_HEATMAP_SEASONS = Array.from({ length: 10 }, (_, i) => {
+  const startYear = 2025 - i;
+  return `${startYear}-${String(startYear + 1).slice(-2)}`;
+});
 
 function formatPct(v: number) {
   return `${(v * 100).toFixed(1)}%`;
@@ -27,13 +38,20 @@ function WaeValue({ value }: { value: number }) {
  */
 function TeamNameChip({ team, predictions }: { team: string; predictions: TeamPrediction[] }) {
   const prediction = predictions.find((p) => p.team === team);
+  const { selectedTeam } = useTeamTheme();
   const { primary } = getTeamColors(team);
   const textColor = isTextSafe(primary) ? primary : undefined;
+  const isSitewideSelection = team === selectedTeam;
 
   return (
     <Popover
       trigger={
-        <span className="inline-flex items-center gap-1.5">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full ${
+            isSitewideSelection ? "ring-1 ring-offset-1 ring-offset-page" : ""
+          }`}
+          style={isSitewideSelection ? ({ "--tw-ring-color": primary } as CSSProperties) : undefined}
+        >
           <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: primary }} />
           <span style={textColor ? { color: textColor } : undefined}>{team}</span>
         </span>
@@ -179,6 +197,14 @@ export function CoachingExplorer({
                     <WaeValue value={ts.wins_above_expectation} />)
                   </span>
                 </summary>
+                {(ts.pace !== null || ts.ast_pct !== null || ts.three_pa_rate !== null) && (
+                  <p className="text-label mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-ink-muted">
+                    <span>Style context (correlation, not causation):</span>
+                    {ts.pace !== null && <span>Pace {ts.pace.toFixed(1)}</span>}
+                    {ts.ast_pct !== null && <span>AST% {(ts.ast_pct * 100).toFixed(1)}%</span>}
+                    {ts.three_pa_rate !== null && <span>3PA Rate {(ts.three_pa_rate * 100).toFixed(1)}%</span>}
+                  </p>
+                )}
                 <table className="mt-4 w-full border-collapse text-left text-xs">
                   <thead>
                     <tr className="border-b border-line/10">
@@ -221,6 +247,22 @@ export function CoachingExplorer({
           </div>
         </section>
       )}
+
+      <section>
+        <SectionHeading
+          number="03"
+          id="team-style"
+          title="Team Style"
+          description="Real pace/shot-profile data and shot-location heatmaps, shown as descriptive context alongside coaching outcomes — not a causal explanation for them."
+        />
+        <div className="space-y-8">
+          <StyleCorrelationScatter teamSeasons={teamSeasons} />
+          <TeamShotHeatmap
+            defaultTeam={teamSeasons[0]?.team ?? "Boston Celtics"}
+            seasons={SHOT_HEATMAP_SEASONS}
+          />
+        </div>
+      </section>
     </div>
   );
 }

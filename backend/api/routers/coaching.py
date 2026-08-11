@@ -11,9 +11,13 @@ import pandas as pd
 from fastapi import APIRouter, Depends, Query
 
 from backend.api import schemas
-from backend.api.dependencies import get_coach_career_summary, get_coach_team_seasons
+from backend.api.dependencies import get_coach_career_summary, get_coach_team_seasons, get_team_shot_heatmap
 
 router = APIRouter(prefix="/api/coaches", tags=["coaching"])
+
+
+def _none_if_nan(value) -> float | None:
+    return None if pd.isna(value) else float(value)
 
 
 def _row_to_team_season(row) -> schemas.CoachTeamSeason:
@@ -25,6 +29,9 @@ def _row_to_team_season(row) -> schemas.CoachTeamSeason:
         implied_win_pct=float(row["implied_win_pct"]),
         wins_above_expectation=float(row["wins_above_expectation"]),
         talent_breakdown=row["talent_breakdown"],
+        pace=_none_if_nan(row.get("pace")),
+        ast_pct=_none_if_nan(row.get("ast_pct")),
+        three_pa_rate=_none_if_nan(row.get("three_pa_rate")),
     )
 
 
@@ -59,3 +66,12 @@ def career_summary(df: pd.DataFrame = Depends(get_coach_career_summary)):
         )
         for _, row in df.iterrows()
     ]
+
+
+@router.get("/shot-heatmap", response_model=schemas.ShotHeatmap)
+def shot_heatmap(data: dict = Depends(get_team_shot_heatmap)):
+    """Real shot-location data for one team/season, binned to a grid — offense
+    (the team's own shots) and defense (shots allowed). Fetched on demand, not
+    pre-cached for all 30 teams — see dependencies.get_team_shot_heatmap for
+    why that's the right call specifically for this endpoint."""
+    return data
