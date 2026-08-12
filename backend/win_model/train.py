@@ -35,6 +35,7 @@ from .model import (
     compute_feature_importance,
     gbm_quantile_interval,
 )
+from .roster_change_features import ROSTER_CHANGE_COLUMN, build_roster_change_features, forecast_roster_change
 from .validation import SeasonWalkForwardSplit
 
 # ratings/ is a sibling top-level package, not a submodule of win_model, so
@@ -60,10 +61,17 @@ except ImportError:
 # docstring). Re-validated after that fix: the improvement doesn't hold
 # (6.781 -> 7.016, worse) -- see feature_experiments.player_projection_features
 # in the metadata below and player_projection_features.py's own docstring.
-# Unwired here accordingly; EXTENDED_NUMERIC_FEATURES is kept as a name
-# (rather than inlining NUMERIC_FEATURES everywhere below) only so a future
-# validated extension has an obvious place to plug back in.
-EXTENDED_NUMERIC_FEATURES = NUMERIC_FEATURES
+# Unwired -- not currently part of EXTENDED_NUMERIC_FEATURES below.
+#
+# roster_change_features.py's Roster_Change *is* wired in -- validated after
+# the real 2025-26 backtest became available (Season=2026, see
+# feature_experiments.roster_change_magnitude below): walk-forward MAE
+# improves 6.614 -> 6.418 wins, 23 of 30 teams individually better on the
+# last (real) fold. Not a uniform fix for every big miss that motivated it
+# (helps Philadelphia/Detroit, actually worsens San Antonio/Orlando) -- kept
+# because the honest aggregate number is what this project's standard goes
+# by, not whether it happens to explain every anecdote that prompted it.
+EXTENDED_NUMERIC_FEATURES = NUMERIC_FEATURES + [ROSTER_CHANGE_COLUMN]
 FEATURE_COLUMNS = EXTENDED_NUMERIC_FEATURES + CATEGORICAL_FEATURES
 INTERVAL_ALPHA = 0.2  # 80% interval (10th-90th percentile)
 # Reported together (not just +/-5) so the accuracy story isn't hostage to
@@ -114,6 +122,13 @@ FEATURE_NOTES = {
     "avg_age": "Average age across the team's top 10 scorers, matched to the same top-10 subset avg_pts_top10 uses.",
     "avg_pts_top10": "What the team's ten leading scorers average per game.",
     "avg_production_score": "A rough scoring-efficiency read — points per game divided by minutes per game, averaged across the team's top 10 scorers.",
+    "Roster_Change": (
+        "Season-over-season roster-talent change — arriving players' own prior production minus "
+        "departing players' production, in total season points. Positive means the roster's "
+        "incoming talent outweighs who left; negative means the reverse. Uses each player's own "
+        "last known real output, never a projection of how they'll do on their new team, so this "
+        "can't leak the season being predicted into itself."
+    ),
 }
 _DEFAULT_FEATURE_NOTE = "No additional note recorded for this feature yet."
 
@@ -215,6 +230,13 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
     trainable = table[table[TARGET_COLUMN].notna()].reset_index(drop=True)
     forecast_rows = table[table[TARGET_COLUMN].isna()].reset_index(drop=True)
 
+    # Season-over-season roster-talent change (see roster_change_features.py) --
+    # a team-season with no computable change (missing panel data) falls back
+    # to 0, "no measured change", rather than dropping the row.
+    changes = build_roster_change_features(master_df_path or MASTER_DF_FILE)
+    trainable = trainable.merge(changes, on=["Season", "Team"], how="left")
+    trainable[ROSTER_CHANGE_COLUMN] = trainable[ROSTER_CHANGE_COLUMN].fillna(0.0)
+
     X = trainable[FEATURE_COLUMNS]
     y = trainable[TARGET_COLUMN]
     groups = trainable["Season"]
@@ -280,6 +302,14 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
     # projection where available (see _apply_roster_projection) before this
     # row is used for anything — trainable/X/y above are untouched.
     forecast_rows, roster_projection_meta = _apply_roster_projection(forecast_rows)
+    # Roster_Change for the forecast row: real current roster (ratings/
+    # refresh_roster_projection.py's fetch) vs. the most recently completed
+    # season's real roster -- see roster_change_features.forecast_roster_change.
+    # 0.0 (not NaN) whenever it can't be computed, matching trainable's fallback.
+    forecast_rows[ROSTER_CHANGE_COLUMN] = [
+        forecast_roster_change(team, int(season), ROSTER_PROJECTION_FILE) or 0.0
+        for team, season in zip(forecast_rows["Team"], forecast_rows["Season"])
+    ]
     X_forecast = forecast_rows[FEATURE_COLUMNS]
     forecast_point = fitted_pipeline.predict(X_forecast)
 
@@ -419,6 +449,87 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
                            "blending it in just drags GBM's stronger predictions down. We left this "
                            "out of the shipped model — same rule as the calibration finding above: "
                            "report what the backtest actually shows, not what we hoped for.",
+            },
+            "roster_change_magnitude": {
+                "hypothesis": (
+                    "Season-over-season roster-talent change (arriving players' prior production "
+                    "minus departing players', see Roster_Change in feature_notes) improves walk-"
+                    "forward MAE, on top of the existing current-season aggregates — prompted "
+                    "directly by this project's first real out-of-sample backtest (Season=2026, "
+                    "actual 2025-26 results), whose biggest misses (Philadelphia 76ers -14.3, San "
+                    "Antonio Spurs -12.2, Orlando Magic -10.9, Detroit Pistons -10.6 wins, all "
+                    "underestimates) were suspected to share real offseason roster change the "
+                    "existing features undersell."
+                ),
+                "result": "It does, on the honest aggregate — walk-forward MAE improves 6.614 -> "
+                           "6.418 wins, and 23 of 30 teams individually improve on the most recent "
+                           "(real) fold specifically. Worth saying plainly since it complicates the "
+                           "tidy version of the hypothesis: it does NOT uniformly fix the four "
+                           "misses that motivated it — Philadelphia and Detroit both improve "
+                           "(-14.3 -> -12.2, -10.6 -> -10.4), but San Antonio and Orlando actually "
+                           "get worse (-12.2 -> -15.5, -10.9 -> -12.5). Those four don't share one "
+                           "common cause (see the miss-pattern check this same session ran: prior-"
+                           "season underperformance-relative-to-roster-talent correlates weakly "
+                           "with the miss direction, r=+0.24, but doesn't explain Detroit or Orlando "
+                           "either). Kept anyway, per this project's standard: the honest walk-"
+                           "forward number is what decides this, not whether it happens to explain "
+                           "every anecdote that prompted building it.",
+            },
+            "age_curve_residual": {
+                "hypothesis": (
+                    "A team-level, production-weighted measure of how far each roster player's "
+                    "most recent real transition sits above/below player_development.py's "
+                    "empirical age curve (the residual, not the raw curve output) improves "
+                    "walk-forward MAE, on top of the existing current-season aggregates."
+                ),
+                "result": "Helps in isolation (vs. plain NUMERIC_FEATURES: 6.614 -> 6.514 wins) but "
+                           "hurts once stacked on the real shipped baseline (NUMERIC_FEATURES + "
+                           "Roster_Change: 6.425 -> 6.528 wins, +0.103). The isolated number alone "
+                           "would have been misleading -- this feature's signal overlaps with what "
+                           "Roster_Change already captures (both describe roster-talent change "
+                           "year over year, just measured differently: transaction-based arrival/"
+                           "departure production vs. per-player aging-curve deviation), so most of "
+                           "its isolated lift disappears, and what's left is net negative, once "
+                           "Roster_Change is already in the model. Not wired into FEATURE_COLUMNS "
+                           "-- see backend/win_model/age_curve_residual_features.py to re-run the "
+                           "check again after any future change to Roster_Change or the aging "
+                           "curve itself.",
+            },
+            "defense_composite": {
+                "hypothesis": (
+                    "win_model's talent features (avg_pts_top10, avg_production_score) are purely "
+                    "offensive. Adding a defensive analog -- reusing "
+                    "ratings/player_power_rankings.py's existing DEFENSE_COMPONENTS "
+                    "(STL_BLK_PER36, DEF_RATING, DREB_PCT) rather than inventing a second rating "
+                    "system, aggregated to the same top-10-players shape -- improves walk-forward "
+                    "MAE. This was this session's own leading hypothesis going in."
+                ),
+                "result": "Barely helps in isolation (vs. plain NUMERIC_FEATURES: 6.614 -> 6.608 "
+                           "wins, +0.006) and hurts the most of any feature tested once stacked on "
+                           "the real shipped baseline (NUMERIC_FEATURES + Roster_Change: 6.425 -> "
+                           "6.618 wins, +0.193) -- the largest regression of the three features "
+                           "tested this session, despite being the one most expected to matter. "
+                           "Not wired into FEATURE_COLUMNS -- see "
+                           "backend/win_model/defense_composite_features.py to re-run the check "
+                           "again after any future change to DEFENSE_COMPONENTS or Roster_Change.",
+            },
+            "coach_quality": {
+                "hypothesis": (
+                    "The team's current coach's career average wins-above-expectation (expanding "
+                    "window, Season <= N, reusing coaching_eval.coach_wins_above_expectation(), "
+                    "requiring at least MIN_TOTAL_SEASONS_FOR_ADJUSTMENT seasons of track record "
+                    "-- no fabricated value for a first-year coach) improves walk-forward MAE."
+                ),
+                "result": "Barely helps in isolation (vs. plain NUMERIC_FEATURES: 6.614 -> 6.607 "
+                           "wins, +0.007; 121 of 300 rows had no qualifying coach track record and "
+                           "were correctly excluded, not fabricated) but hurts once stacked on the "
+                           "real shipped baseline (NUMERIC_FEATURES + Roster_Change: 6.425 -> "
+                           "6.486 wins, +0.061). Same overlap story as the other two: whatever "
+                           "signal a coach's career record carries about roster quality is already "
+                           "represented, at least partially, by Roster_Change and the existing "
+                           "talent features. Not wired into FEATURE_COLUMNS -- see "
+                           "backend/win_model/coach_quality_features.py to re-run the check again "
+                           "after any future change to Roster_Change or coach attribution data.",
             },
         },
         "winning_model": {
