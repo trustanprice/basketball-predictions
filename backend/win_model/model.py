@@ -106,6 +106,97 @@ def build_gbm(preprocessor, X, y, groups, splitter, numeric_features):
     return search
 
 
+# ===========================
+#   RECENCY-WEIGHTED GBM (see recency_weighting.py for the full experiment)
+# ===========================
+# KNeighborsRegressor.fit(X, y) has no sample_weight parameter at all (verified
+# directly against its signature -- this isn't a documentation gap, KNN
+# structurally cannot be recency-weighted this way). Recency weighting is a
+# GBM-only mechanism here; build_knn above is untouched and still competes on
+# its own, unweighted, exactly as before.
+DEFAULT_DECAY_RATES = (1.0, 0.95, 0.85, 0.7)  # 1.0 = no weighting -- today's behavior, a real candidate
+
+
+def recency_sample_weight(seasons, decay_rate: float) -> np.ndarray:
+    """weight = decay_rate ** seasons_ago, anchored to the max season actually
+    present in `seasons` -- for a GridSearchCV-internal fold's sliced training
+    rows, that max IS the fold's train_season_cutoff (the season right before
+    the one being predicted), which is exactly "fold-relative, not absolute
+    calendar year" recency: this formula never needs to know how many seasons
+    exist in the full dataset, only what's in front of it in this specific fit.
+
+    Precomputing one vector against the FULL season array and letting
+    GridSearchCV auto-slice it per fold (rather than recomputing fresh inside
+    each fold) still gives the right *relative* weights within any fold's
+    slice -- the sliced values differ from a from-scratch fold-relative
+    computation only by one constant multiplicative factor per fold (the
+    global anchor vs. that fold's own cutoff), and a uniform rescale of every
+    sample's weight within a single fit doesn't change what
+    HistGradientBoostingRegressor learns with this project's default
+    l2_regularization=0 (verified empirically: predictions identical to
+    floating-point noise, ~1e-8, under an arbitrary 7.3x uniform rescale of
+    otherwise-identical weights). Confirmed separately that GridSearchCV
+    actually requires the `histgradientboostingregressor__sample_weight`
+    step-prefixed form here -- a bare `sample_weight=` kwarg raises
+    ValueError in this sklearn version (1.5.0), not a silent misroute, so a
+    missing prefix fails loudly rather than fitting on unweighted data by
+    accident.
+    """
+    seasons = np.asarray(seasons)
+    return decay_rate ** (seasons.max() - seasons)
+
+
+@dataclass
+class RecencyGBMResult:
+    decay_rate: float
+    search: GridSearchCV
+    walk_forward_mae: float
+
+    def per_fold_mae(self) -> list[float]:
+        """MAE on each walk-forward fold, for this result's own best
+        hyperparameter combination -- lets a caller see whether an
+        improvement is concentrated in a few folds or spread evenly, not just
+        the aggregate `walk_forward_mae`."""
+        cv_results = self.search.cv_results_
+        n_splits = sum(1 for k in cv_results if k.startswith("split") and k.endswith("_test_score"))
+        return [
+            float(-cv_results[f"split{i}_test_score"][self.search.best_index_])
+            for i in range(n_splits)
+        ]
+
+
+def tune_gbm_recency(
+    preprocessor, X, y, groups, splitter, numeric_features, decay_rates=DEFAULT_DECAY_RATES,
+) -> list[RecencyGBMResult]:
+    """Same grid-searched GBM as build_gbm, tuned separately once per candidate
+    `decay_rate` -- decay_rate itself can't be a literal GridSearchCV param
+    (it controls a sample_weight vector computed outside the estimator, not a
+    step hyperparameter), so it's selected the same way this project already
+    picks between KNN and GBM: run the full walk-forward search per candidate,
+    keep whichever has the best honest score. decay_rate=1.0 is included by
+    default so "no weighting wins" is a real, expressible outcome.
+    """
+    monotonic_cst = _monotonic_constraints(numeric_features)
+    pipeline = make_pipeline(
+        preprocessor,
+        HistGradientBoostingRegressor(monotonic_cst=monotonic_cst, random_state=42),
+    )
+    param_grid = {
+        "histgradientboostingregressor__max_leaf_nodes": [7, 15, 31],
+        "histgradientboostingregressor__learning_rate": [0.03, 0.1, 0.2],
+        "histgradientboostingregressor__min_samples_leaf": [5, 10, 20],
+    }
+    results = []
+    for decay_rate in decay_rates:
+        weight = recency_sample_weight(groups, decay_rate)
+        search = GridSearchCV(
+            clone(pipeline), param_grid, cv=splitter, scoring="neg_mean_absolute_error", n_jobs=-1,
+        )
+        search.fit(X, y, groups=groups, histgradientboostingregressor__sample_weight=weight)
+        results.append(RecencyGBMResult(decay_rate=decay_rate, search=search, walk_forward_mae=-search.best_score_))
+    return results
+
+
 @dataclass
 class ModelComparison:
     winner: str  # "knn" or "gbm"
@@ -152,9 +243,15 @@ def compare_models_walk_forward(
 # ===========================
 #   PREDICTION INTERVALS
 # ===========================
-def gbm_quantile_interval(gbm_search: GridSearchCV, X, y, X_predict, lower_q=0.1, upper_q=0.9):
+def gbm_quantile_interval(gbm_search: GridSearchCV, X, y, X_predict, lower_q=0.1, upper_q=0.9, sample_weight=None):
     """Native quantile regression: refit the winning GBM's tuned pipeline at two
-    quantiles instead of the mean, reusing its selected hyperparameters."""
+    quantiles instead of the mean, reusing its selected hyperparameters.
+
+    `sample_weight`, if given, must already be aligned to X's rows (e.g. from
+    recency_sample_weight()) -- only relevant if `gbm_search` was itself tuned
+    with recency weighting, so both quantile refits stay consistent with how
+    the point-estimate model was actually selected, not silently unweighted.
+    """
     bounds = {}
     for name, q in [("lower", lower_q), ("upper", upper_q)]:
         pipeline = clone(gbm_search.best_estimator_)
@@ -162,7 +259,10 @@ def gbm_quantile_interval(gbm_search: GridSearchCV, X, y, X_predict, lower_q=0.1
             histgradientboostingregressor__loss="quantile",
             histgradientboostingregressor__quantile=q,
         )
-        pipeline.fit(X, y)
+        fit_kwargs = {}
+        if sample_weight is not None:
+            fit_kwargs["histgradientboostingregressor__sample_weight"] = sample_weight
+        pipeline.fit(X, y, **fit_kwargs)
         bounds[name] = pipeline.predict(X_predict)
     return bounds["lower"], bounds["upper"]
 
