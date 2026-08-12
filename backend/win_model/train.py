@@ -35,7 +35,6 @@ from .model import (
     compute_feature_importance,
     gbm_quantile_interval,
 )
-from .player_projection_features import PROJECTED_FEATURE_COLUMNS, build_projected_features
 from .validation import SeasonWalkForwardSplit
 
 # ratings/ is a sibling top-level package, not a submodule of win_model, so
@@ -52,16 +51,19 @@ try:
 except ImportError:
     from ratings.player_development import team_talent_composite
 
-# player_projection_features.py's three columns, alongside (not replacing) the
-# raw current-season aggregates -- validated via run_experiment() there to
-# actually lower walk-forward MAE (6.781 -> 6.719 wins) before being added
-# here; see that module's docstring. Appended to NUMERIC_FEATURES specifically
-# in train.py, not features.py's own list: prepare_model_table() validates its
-# output against master_df's raw columns, and these three are computed here,
-# not present in master_df.csv. Used everywhere the model needs the *full*
-# numeric feature list (preprocessing, monotonic constraints) -- features.py's
-# own NUMERIC_FEATURES stays the "raw historical data" list.
-EXTENDED_NUMERIC_FEATURES = NUMERIC_FEATURES + PROJECTED_FEATURE_COLUMNS
+# player_projection_features.py's three columns (avg_age_projected/
+# avg_pts_top10_projected/avg_production_score_projected) used to be appended
+# here -- validated once (6.781 -> 6.719 wins) and wired in, but that
+# validation ran against ratings/player_development.py's
+# project_team_talent_features() before its avg_age/avg_production_score
+# top-10 bug was fixed (see backend/AGENTS.md and player_development.py's
+# docstring). Re-validated after that fix: the improvement doesn't hold
+# (6.781 -> 7.016, worse) -- see feature_experiments.player_projection_features
+# in the metadata below and player_projection_features.py's own docstring.
+# Unwired here accordingly; EXTENDED_NUMERIC_FEATURES is kept as a name
+# (rather than inlining NUMERIC_FEATURES everywhere below) only so a future
+# validated extension has an obvious place to plug back in.
+EXTENDED_NUMERIC_FEATURES = NUMERIC_FEATURES
 FEATURE_COLUMNS = EXTENDED_NUMERIC_FEATURES + CATEGORICAL_FEATURES
 INTERVAL_ALPHA = 0.2  # 80% interval (10th-90th percentile)
 # Reported together (not just +/-5) so the accuracy story isn't hostage to
@@ -109,18 +111,9 @@ FEATURE_NOTES = {
         "summer. Treat it as a rough stand-in, not a snapshot of today's books. See the "
         "roster section below for what in this forecast is real-time versus carried forward."
     ),
-    "avg_age": "Average age across the roster, every player weighted equally.",
+    "avg_age": "Average age across the team's top 10 scorers, matched to the same top-10 subset avg_pts_top10 uses.",
     "avg_pts_top10": "What the team's ten leading scorers average per game.",
-    "avg_production_score": "A rough scoring-efficiency read — points per game divided by minutes per game, averaged across the roster.",
-    "avg_age_projected": (
-        "avg_age, projected one year ahead with our empirical aging curve instead of just "
-        "carrying over this season's roster average. For past seasons we build this from "
-        "that team's actual roster at the time; for next season's forecast it matches "
-        "avg_age exactly, since that figure is already built from today's real roster — "
-        "see the roster section below."
-    ),
-    "avg_pts_top10_projected": "avg_pts_top10, one year ahead via the same aging curve — see avg_age_projected.",
-    "avg_production_score_projected": "avg_production_score, one year ahead via the same aging curve — see avg_age_projected.",
+    "avg_production_score": "A rough scoring-efficiency read — points per game divided by minutes per game, averaged across the team's top 10 scorers.",
 }
 _DEFAULT_FEATURE_NOTE = "No additional note recorded for this feature yet."
 
@@ -222,20 +215,6 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
     trainable = table[table[TARGET_COLUMN].notna()].reset_index(drop=True)
     forecast_rows = table[table[TARGET_COLUMN].isna()].reset_index(drop=True)
 
-    # Player-level projected talent (see player_projection_features.py) for
-    # every historical row -- built from *local* historical player-stats CSVs
-    # (data/raw/player-stats/), each player's career history clipped to
-    # seasons <= that row's own season before projecting, so this can't leak
-    # a team-season's own future into its features. A team-season with no
-    # local roster match falls back to its own raw aggregate rather than
-    # dropping the row.
-    projected = build_projected_features(master_df_path or MASTER_DF_FILE)
-    trainable = trainable.merge(projected, on=["Season", "Team"], how="left")
-    for projected_col, raw_col in zip(
-        PROJECTED_FEATURE_COLUMNS, ["avg_age", "avg_pts_top10", "avg_production_score"],
-    ):
-        trainable[projected_col] = trainable[projected_col].fillna(trainable[raw_col])
-
     X = trainable[FEATURE_COLUMNS]
     y = trainable[TARGET_COLUMN]
     groups = trainable["Season"]
@@ -301,17 +280,6 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
     # projection where available (see _apply_roster_projection) before this
     # row is used for anything — trainable/X/y above are untouched.
     forecast_rows, roster_projection_meta = _apply_roster_projection(forecast_rows)
-    # avg_*_projected mirrors the (just-overridden) avg_* columns for the
-    # forecast row specifically: _apply_roster_projection already computed
-    # "next season's projected talent" from real, live current rosters where
-    # available -- strictly better than player_projection_features.py's local-
-    # historical-CSV approach (used for the historical rows above) could do for
-    # a season that isn't fully in the local data yet. Recomputing from local
-    # data here would be both redundant and a downgrade.
-    for projected_col, raw_col in zip(
-        PROJECTED_FEATURE_COLUMNS, ["avg_age", "avg_pts_top10", "avg_production_score"],
-    ):
-        forecast_rows[projected_col] = forecast_rows[raw_col]
     X_forecast = forecast_rows[FEATURE_COLUMNS]
     forecast_point = fitted_pipeline.predict(X_forecast)
 
@@ -415,18 +383,24 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
                     "curve, and feeding that alongside the usual current-season numbers, "
                     "sharpens the walk-forward backtest."
                 ),
-                "result": "It does. Walk-forward error improved from 6.781 to 6.719 wins (GBM won "
-                           "both times) — a small but real, repeatable gain, not noise (KNN has no "
-                           "randomness here, and GBM's seed is fixed). We kept it: these projected "
-                           "features (avg_age_projected, avg_pts_top10_projected, "
-                           "avg_production_score_projected) are now part of the model, not just a "
-                           "side experiment. See backend/win_model/player_projection_features.py to "
-                           "re-run the check after touching the aging curve.",
+                "result": "No longer holds — unwired. This validated positive once (6.781 -> 6.719 "
+                           "wins) and shipped, but that run measured "
+                           "ratings/player_development.py's project_team_talent_features() before "
+                           "a real bug in it was fixed: avg_age and avg_production_score were "
+                           "averaging every projected player on the roster (15+ once bench depth is "
+                           "included), not the same top-10-by-points subset avg_pts_top10 already "
+                           "used — inflating both toward bench-heavy values a real team-season "
+                           "never has. Re-tested after that fix: walk-forward error goes from 6.781 "
+                           "to 7.016 (worse, not better). The earlier positive result was measuring "
+                           "the bug, not the idea. Unwired from FEATURE_COLUMNS accordingly — see "
+                           "backend/win_model/player_projection_features.py to re-run the check "
+                           "again after any future change to the aging curve or "
+                           "project_team_talent_features().",
             },
             "gbm_knn_ensemble": {
                 "hypothesis": "Averaging the two candidate models' predictions beats picking the single better one.",
-                "result": "It doesn't. GBM alone (6.719 wins MAE) clearly beats a GBM/KNN blend "
-                           "(7.248 wins) — KNN trails badly enough on its own (8.277 wins) that "
+                "result": "It doesn't. GBM alone (6.781 wins MAE) clearly beats a GBM/KNN blend "
+                           "(7.211 wins) — KNN trails badly enough on its own (8.283 wins) that "
                            "blending it in just drags GBM's stronger predictions down. We left this "
                            "out of the shipped model — same rule as the calibration finding above: "
                            "report what the backtest actually shows, not what we hoped for.",

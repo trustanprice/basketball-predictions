@@ -168,17 +168,27 @@ def project_team_talent_features(projected_players: pd.DataFrame) -> dict:
     directly into win_model's existing feature columns rather than requiring
     a schema change (see backend/win_model/train.py).
 
+    All three are restricted to the top 10 players by projected_pts, not the
+    full roster (15+ players once bench depth is included) -- matching
+    calculate_player_features()'s historical rows, whose source data only
+    ever carried ~10 players per team-season, making its plain `.mean()`
+    over the whole group implicitly top-10-only already. Averaging the full
+    projected roster instead would systematically pull avg_age/
+    avg_production_score toward bench-heavy values a historical row never
+    had, for no reason other than the live pipeline happening to see the
+    deeper roster the historical curation didn't.
+
     `projected_players`: one row per roster player, the concatenated output
     of project_player_next_season() for that team.
     """
     if projected_players.empty:
         raise ValueError("project_team_talent_features got an empty roster")
 
-    prod_score = projected_players["projected_pts"] / projected_players["projected_min"].replace(0, 1)
     top10 = projected_players.sort_values("projected_pts", ascending=False).head(10)
+    prod_score = top10["projected_pts"] / top10["projected_min"].replace(0, 1)
 
     return {
-        "avg_age": float(projected_players["projected_age"].mean()),
+        "avg_age": float(top10["projected_age"].mean()),
         "avg_pts_top10": float(top10["projected_pts"].mean()),
         "avg_production_score": float(prod_score.mean()),
         "n_players": int(len(projected_players)),

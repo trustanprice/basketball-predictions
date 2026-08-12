@@ -47,10 +47,14 @@ from this subdirectory.
   built-in ISR. Don't add one without revisiting that reasoning first.
 - **`TeamShotHeatmap`/`StyleCorrelationScatter`** (Coaching page, "Team Style" section) render
   data from `/api/coaches/shot-heatmap`. That endpoint was the one live-fetch-per-request
-  exception in the whole API (see `backend/AGENTS.md`) — being moved to the same
-  cache-and-commit pattern as everything else, since it hit the same Render/NBA.com
-  connectivity wall. If this section shows "couldn't load shot data," check
-  `backend/AGENTS.md`'s refresh-strategy notes before assuming a frontend bug.
+  exception in the whole API (see `backend/AGENTS.md`) — now reads
+  `backend/ratings/refresh_shot_heatmaps.py`'s committed cache (all 30 teams, all 10 seasons
+  the page's season picker offers, at the one grid_cells value the frontend ever actually
+  requests) instead, same cache-and-commit pattern as everything else, since it hit the same
+  Render/NBA.com connectivity wall. A cache miss 503s immediately rather than attempting a live
+  fetch — if this section shows "couldn't load shot data," check whether
+  `refresh_shot_heatmaps.py` needs a re-run (new season added, etc.) before assuming a frontend
+  bug.
 - **No charting library** — `FeatureScatterChart` is hand-rolled inline SVG. ~30 points and one
   tooltip doesn't justify a new dependency; revisit if a future chart needs more than that.
 - **Player headshots** (`lib/headshots.ts`) come straight from NBA.com's own CDN

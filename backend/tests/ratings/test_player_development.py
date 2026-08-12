@@ -148,3 +148,29 @@ def test_project_team_talent_features_top10_excludes_bench_scorers():
 def test_project_team_talent_features_empty_roster_raises():
     with pytest.raises(ValueError):
         project_team_talent_features(pd.DataFrame())
+
+
+def test_project_team_talent_features_avg_age_and_production_also_restricted_to_top10():
+    """Regression test for the avg_age/avg_production_score top-10
+    inconsistency: a 15-player roster where the 10 highest-projected_pts
+    players are all age 24 (high production) and the 5 bench scorers are
+    all age 34 (low production) -- if avg_age/avg_production_score leaked
+    the full roster in, both would be pulled toward the bench's numbers;
+    restricted to the same top-10 subset avg_pts_top10 already uses, they
+    must come out exactly age 24 / the top-10 production score, unaffected
+    by the bench five."""
+    top10_rows = [
+        {"projected_age": 24.0, "projected_pts": float(30 - i), "projected_min": 34.0, "development_adjustment_applied": True}
+        for i in range(10)
+    ]
+    bench_rows = [
+        {"projected_age": 34.0, "projected_pts": 2.0, "projected_min": 10.0, "development_adjustment_applied": False}
+        for _ in range(5)
+    ]
+    projected = pd.DataFrame(top10_rows + bench_rows)
+    features = project_team_talent_features(projected)
+
+    assert features["avg_age"] == pytest.approx(24.0)
+    expected_prod = sum((30 - i) / 34.0 for i in range(10)) / 10
+    assert features["avg_production_score"] == pytest.approx(expected_prod)
+    assert features["n_players"] == 15

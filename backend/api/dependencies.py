@@ -22,6 +22,7 @@ from backend.ratings import coaching_eval
 from backend.ratings.refresh_player_projections import OUTPUT_FILE as PLAYER_PROJECTIONS_FILE
 from backend.ratings.refresh_player_ratings import MAX_N as PLAYER_RANKINGS_MAX_N
 from backend.ratings.refresh_player_ratings import OUTPUT_FILE as PLAYER_RANKINGS_FILE
+from backend.ratings.refresh_shot_heatmaps import OUTPUT_FILE as SHOT_HEATMAPS_FILE
 from backend.ratings.refresh_team_style import OUTPUT_FILE as TEAM_STYLE_FILE
 from backend.win_model.data_loader import MASTER_DF_FILE, load_final_results, load_model_metadata
 
@@ -149,51 +150,73 @@ def get_coach_career_summary() -> pd.DataFrame:
     return coaching_eval.coach_career_summary(get_coach_team_seasons())
 
 
-# ---- shot heatmaps (on demand, not a scheduled refresh) ----
-# The one place in this API that calls live_client directly on a request —
-# a deliberate, narrow exception to the "player ratings: refresh strategy"
-# rule above, for reasons specific to this endpoint, not a reason to add
-# more like it without re-reading this comment:
-#   1. It's a single external call (one team's shot chart), not the ~30-90
-#      call bulk fetch that made a live player-ratings call unacceptably
-#      slow inside a request (~96s worst case, see backend/AGENTS.md).
-#      Confirmed directly: a real TeamShotChart fetch takes ~1.5s.
-#   2. live_client's DiskCache (see cache.py, never-expires by default) means
-#      only the *first* request for a given team+season ever actually hits
-#      NBA.com — everything after is a local disk read, same latency
-#      profile as any other endpoint here.
-#   3. This is a completed-season shot chart — there's no "current season"
-#      staleness concern a scheduled refresh would even need to solve.
+# ---- shot heatmaps ----
+# Used to be the one place in this API that called live_client directly on a
+# request (a single ~1.5s TeamShotChart call, backed by live_client's own
+# never-expiring disk cache — fine on a working network). That justification
+# broke down on Render specifically: it can't reach stats.nba.com *at all*
+# (see backend/AGENTS.md's "Player ratings: refresh strategy"), so instead of
+# a fast disk-cache hit after the first request, every request hung for
+# minutes before eventually 503ing. Now reads
+# backend/ratings/refresh_shot_heatmaps.py's precomputed cache instead — same
+# "only ever read the file a scheduled refresh wrote" rule as player power
+# rankings/team style above. No live-fetch fallback on a cache miss
+# (non-default grid_cells, or a season the refresh script hasn't covered):
+# an immediate 503 is a strict improvement over a request that hangs for
+# minutes and 503s anyway.
+
+@functools.lru_cache(maxsize=1)
+def _shot_heatmap_lookup() -> tuple[dict[tuple[int, str, str], dict], int | None]:
+    """({(season_start_year, team, side): {cells, n_shots, ...}}, grid_cells)
+    — grid_cells is None (and the dict empty) if refresh_shot_heatmaps.py has
+    never run here, same "empty means never refreshed" convention as
+    _team_style_lookup() above."""
+    if not SHOT_HEATMAPS_FILE.exists():
+        return {}, None
+    import json
+    payload = json.loads(SHOT_HEATMAPS_FILE.read_text())
+    lookup = {(row["season"], row["team"], row["side"]): row for row in payload["heatmaps"]}
+    return lookup, payload["grid_cells"]
+
+
 def get_team_shot_heatmap(
     team: str = Query(..., description="Full team name, e.g. 'Boston Celtics'"),
     season: str = Query(..., description="e.g. '2023-24'"),
     grid_cells: int = Query(25, ge=5, le=50),
 ) -> dict:
-    from backend.live_client.client import NBAStatsClient
-    from backend.live_client.endpoints.stats.shot_chart import TeamShotChart
-    from backend.live_client.lookups.loader import load_teams
-    from backend.ratings.team_style import bin_shots_to_heatmap
-
-    teams = load_teams()
-    match = teams.loc[teams["full_name"] == team, "team_id"]
-    if match.empty:
-        raise HTTPException(status_code=404, detail=f"Unknown team: {team!r}")
-    team_id = int(match.iloc[0])
-
-    client = NBAStatsClient()
-    try:
-        offense = TeamShotChart(season=season, team_id=team_id, client=client).fetch().to_dataframe()
-        defense = TeamShotChart(season=season, opponent_team_id=team_id, client=client).fetch().to_dataframe()
-    except Exception as exc:
+    lookup, cached_grid_cells = _shot_heatmap_lookup()
+    if not lookup:
         raise HTTPException(
-            status_code=503, detail=f"Couldn't fetch shot chart data for {team} ({season}): {exc}",
-        ) from exc
+            status_code=503,
+            detail=(
+                "Shot heatmaps haven't been computed yet — run "
+                "`python -m backend.ratings.refresh_shot_heatmaps` (needs network access "
+                "to NBA.com) or wait for the next scheduled refresh."
+            ),
+        )
+    if grid_cells != cached_grid_cells:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Only grid_cells={cached_grid_cells} is cached; {grid_cells} was requested.",
+        )
+    try:
+        start_year = int(season.split("-")[0])
+    except (ValueError, IndexError) as exc:
+        raise HTTPException(status_code=400, detail=f"Malformed season: {season!r}") from exc
+
+    offense = lookup.get((start_year, team, "offense"))
+    defense = lookup.get((start_year, team, "defense"))
+    if offense is None or defense is None:
+        raise HTTPException(
+            status_code=503,
+            detail=f"No cached shot data for {team} ({season}) — this team/season isn't covered yet.",
+        )
 
     return {
         "team": team,
         "season": season,
-        "offense_cells": bin_shots_to_heatmap(offense, grid_cells=grid_cells),
-        "defense_cells": bin_shots_to_heatmap(defense, grid_cells=grid_cells),
-        "n_offense_shots": int(len(offense)),
-        "n_defense_shots": int(len(defense)),
+        "offense_cells": offense["cells"],
+        "defense_cells": defense["cells"],
+        "n_offense_shots": offense["n_shots"],
+        "n_defense_shots": defense["n_shots"],
     }

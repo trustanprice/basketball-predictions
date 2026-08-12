@@ -17,13 +17,19 @@ data/raw/master-stats/*
 !data/raw/master-stats/model_metadata.json
 !data/raw/master-stats/master_df.csv
 # Same cascade, same reason — backend/outputs/ is otherwise a gitignored build
-# artifact directory (line 4 above), but these three files are now written by
-# .github/workflows/refresh-nba-data.yml and committed as source of truth for
-# the API to read (Step 3 of the NBA.com connectivity fix — Render's network
-# can't reach stats.nba.com, see backend/AGENTS.md's "Player ratings: refresh
-# strategy"). Every other file under backend/outputs/ stays ignored.
+# artifact directory (line 4 above), but these files are committed as source
+# of truth for the API to read instead of live-fetching (Render's network
+# can't reach stats.nba.com at all, confirmed across two regions, see
+# backend/AGENTS.md's "Player ratings: refresh strategy"). All four are kept
+# fresh by running the matching refresh_*.py script locally (where the same
+# client works fine) and committing the result — the actual production
+# strategy, not the .github/workflows/refresh-nba-data.yml schedule (scoped
+# but not adopted; GitHub-hosted runners hit the same NBA.com block, so it's
+# left in place as a dormant fallback, not relied on). Every other file under
+# backend/outputs/ stays ignored.
 !backend/outputs/
 backend/outputs/*
 !backend/outputs/player_power_rankings.json
 !backend/outputs/team_style.json
 !backend/outputs/player_projections.json
+!backend/outputs/shot_heatmaps.json

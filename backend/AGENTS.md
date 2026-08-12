@@ -354,14 +354,17 @@ as the request handling sidesteps that entirely.
 - **The actual production strategy: manual local refresh + commit, not automation.** Since the
   same client works fine from a local/residential connection (verified repeatedly, real data
   pulled successfully every time), the chosen fix is running the refresh scripts locally
-  (`refresh_player_ratings.py`, `refresh_team_style.py`, `refresh_player_projections.py` — and
-  `refresh_shot_heatmaps.py` once built) by hand periodically (weekly-ish, no fixed schedule) and
+  (`refresh_player_ratings.py`, `refresh_team_style.py`, `refresh_player_projections.py`,
+  `refresh_shot_heatmaps.py`) by hand periodically (weekly-ish, no fixed schedule) and
   committing the resulting `backend/outputs/*.json` files — same treatment as
   `master_df.csv`/`test_results.csv`. This is *why* those files moved from gitignored to
-  committed (see the notes above). The in-process background loop still runs in production as a
-  harmless fallback (it keeps retrying and failing gracefully, exactly as designed — verified this
-  can never overwrite good committed data, since the write only happens after a fully successful
-  fetch, past the point where it actually fails) — if Render's connectivity or hosting ever
+  committed (see the notes above). The in-process background loop (player ratings/team
+  style/player projections only — `refresh_shot_heatmaps.py` was never added to it, see its own
+  section above: a cache miss there 503s immediately rather than attempting any live fetch,
+  in-process or otherwise) still runs in production as a harmless fallback for those three (it
+  keeps retrying and failing gracefully, exactly as designed — verified this can never overwrite
+  good committed data, since the write only happens after a fully successful fetch, past the
+  point where it actually fails) — if Render's connectivity or hosting ever
   changes, the loop would just start working again with zero code changes needed.
 - A **separate, unrelated bug** was found and fixed alongside this: `refresh_team_style.py` and
   `refresh_player_projections.py` were built with the exact same `is_stale()`/`run_refresh()`

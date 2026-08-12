@@ -4,11 +4,15 @@ One-off, honestly-reported experiment (Predictions page redesign, Part A3):
 does averaging GBM and KNN's predictions (a simple ensemble) beat the
 walk-forward-selected single best model on walk-forward MAE?
 
-Uses the same feature set train.py actually trains on (including
-player_projection_features.py's validated additions), so this is a fair
-comparison against the model currently shipped, not a stale baseline. Not
-wired into run_pipeline() unless the result says to be -- see run_experiment()'s
-"improves_mae" and backend/AGENTS.md.
+Uses the same feature set train.py actually trains on, so this is a fair
+comparison against the model currently shipped, not a stale baseline --
+that set is plain NUMERIC_FEATURES + CATEGORICAL_FEATURES; the
+player_projection_features.py augmentation this used to include was
+unwired from train.py after re-validation showed it no longer helps (see
+that module's docstring), so it's dropped here too, to keep matching
+whatever train.py actually ships. Not wired into run_pipeline() unless the
+result says to be -- see run_experiment()'s "improves_mae" and
+backend/AGENTS.md.
 
 Run manually: python -m backend.win_model.ensemble_experiment
 """
@@ -22,10 +26,9 @@ from sklearn.base import clone
 from .data_loader import MASTER_DF_FILE
 from .features import CATEGORICAL_FEATURES, NUMERIC_FEATURES, TARGET_COLUMN, prepare_model_table
 from .model import compare_models_walk_forward
-from .player_projection_features import PROJECTED_FEATURE_COLUMNS, build_projected_features
 from .validation import SeasonWalkForwardSplit
 
-EXTENDED_NUMERIC_FEATURES = NUMERIC_FEATURES + PROJECTED_FEATURE_COLUMNS
+EXTENDED_NUMERIC_FEATURES = NUMERIC_FEATURES
 FEATURE_COLUMNS = EXTENDED_NUMERIC_FEATURES + CATEGORICAL_FEATURES
 
 
@@ -33,13 +36,6 @@ def run_experiment(master_df_path=None) -> dict:
     master_df = pd.read_csv(master_df_path or MASTER_DF_FILE)
     table = prepare_model_table(master_df)
     trainable = table[table[TARGET_COLUMN].notna()].reset_index(drop=True)
-
-    projected = build_projected_features(master_df_path or MASTER_DF_FILE)
-    trainable = trainable.merge(projected, on=["Season", "Team"], how="left")
-    for projected_col, raw_col in zip(
-        PROJECTED_FEATURE_COLUMNS, ["avg_age", "avg_pts_top10", "avg_production_score"],
-    ):
-        trainable[projected_col] = trainable[projected_col].fillna(trainable[raw_col])
 
     X = trainable[FEATURE_COLUMNS]
     y = trainable[TARGET_COLUMN]

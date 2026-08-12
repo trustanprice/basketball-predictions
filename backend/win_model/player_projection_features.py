@@ -6,17 +6,22 @@ empirical aging curve, applied retrospectively to each historical season's real
 roster -- into win_model's feature set for every historical training row improve
 walk-forward MAE, on top of the team-level current-season aggregates already used?
 
-Verified via run_experiment(): walk-forward MAE improved (6.781 -> 6.719 wins,
-GBM both times) with these three columns added alongside the existing raw
-aggregates, not replacing them. Real, reproducible (both candidate models are
-deterministic here -- KNN has no randomness, GBM's random_state is fixed), if
-modest. Per the same standard as calibration.py's honest negative finding: this
-one's positive, so it's wired into train.py's FEATURE_COLUMNS rather than left
-as a standalone curiosity -- see run_pipeline().
+Verified positive once (6.781 -> 6.719 wins) and wired into train.py's
+FEATURE_COLUMNS -- but that run measured
+ratings.player_development.project_team_talent_features() before a real bug
+in it was fixed (avg_age/avg_production_score were averaging the full
+projected roster instead of the same top-10-by-points subset avg_pts_top10
+already used, inflating both toward bench-heavy values -- see that
+function's docstring). Re-run after the fix: walk-forward MAE goes to 7.016,
+worse than baseline. **Currently NOT wired into train.py** -- the earlier
+positive result was measuring the bug, not the idea.
 
-`run_experiment()` stays here as the re-runnable record of that validation --
-re-run it after any change to player_development.py's aging curve to confirm
-the improvement still holds.
+`run_experiment()` stays here as the re-runnable record of that finding --
+re-run it (`python -m backend.win_model.player_projection_features`) after
+any future change to player_development.py's aging curve or
+project_team_talent_features(), in case the answer changes again. Only wire
+PROJECTED_FEATURE_COLUMNS back into train.py's FEATURE_COLUMNS if
+improves_mae comes back True.
 
 Run manually: python -m backend.win_model.player_projection_features
 """
