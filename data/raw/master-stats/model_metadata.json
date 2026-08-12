@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T15:41:43.672833+00:00",
+  "generated_at": "2026-08-12T16:40:16.269507+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -7,19 +7,19 @@
       "KNeighborsRegressor",
       "HistGradientBoostingRegressor (monotonic)"
     ],
-    "knn_walk_forward_mae": 8.283,
-    "gbm_walk_forward_mae": 6.781,
+    "knn_walk_forward_mae": 8.37,
+    "gbm_walk_forward_mae": 6.614,
     "winner": "gbm",
-    "n_walk_forward_folds": 8
+    "n_walk_forward_folds": 9
   },
   "calibration": {
     "description": "We adjust the raw model output two ways before showing it to you. First, we widen or narrow each season's 30 predictions around that season's own average to match how spread out real NBA win totals actually are \u2014 left alone, regression models like this one flatten the gap between good and bad teams more than reality does. Second, we shift every team by the same small amount so the season's predictions add up to exactly 1,230 wins \u2014 the real total for a full slate of games (30 teams, 82 games apiece, two teams per game). Neither property comes for free from the model itself; both are enforced afterward.",
-    "historical_win_std": 11.827,
+    "historical_win_std": 12.018,
     "target_season_total_wins": 1230,
-    "walk_forward_mae_uncalibrated": 6.781,
-    "walk_forward_mae_calibrated": 7.162,
+    "walk_forward_mae_uncalibrated": 6.614,
+    "walk_forward_mae_calibrated": 6.925,
     "improves_backtest_mae": false,
-    "note": "Worth saying plainly: this adjustment does not sharpen the backtest \u2014 walk-forward error moves from 6.781 to 7.162 wins, flat or worse. We keep it anyway, because matching the real 82-game season total and the real spread of win totals are correct on their own terms, independent of whether they happen to shave points off average error. Don't read this as \"calibration helped.\""
+    "note": "Worth saying plainly: this adjustment does not sharpen the backtest \u2014 walk-forward error moves from 6.614 to 6.925 wins, flat or worse. We keep it anyway, because matching the real 82-game season total and the real spread of win totals are correct on their own terms, independent of whether they happen to shave points off average error. Don't read this as \"calibration helped.\""
   },
   "feature_experiments": {
     "player_projection_features": {
@@ -50,94 +50,94 @@
       8
     ],
     "overall": {
-      "3": 0.3,
-      "5": 0.4833,
-      "8": 0.6417
+      "3": 0.3111,
+      "5": 0.4926,
+      "8": 0.6667
     },
-    "n_oof_predictions": 240,
-    "note": "This is out-of-sample accuracy \u2014 every prediction here came from a model that had never seen that season's result, pooled across all 240 team-seasons we've backtested. We show three thresholds on purpose, because a single cutoff can flatter or unfairly bury the model depending on exactly where it lands. A team's win total is a genuinely hard thing to call a year out \u2014 injuries, trades, a young player's leap, a coaching change \u2014 which is exactly why Vegas's own preseason win totals and ESPN's BPI land in a similar range at tight thresholds. Small sample here, too: these numbers will firm up as more seasons get backtested, not because anything's broken today."
+    "n_oof_predictions": 270,
+    "note": "This is out-of-sample accuracy \u2014 every prediction here came from a model that had never seen that season's result, pooled across all 270 team-seasons we've backtested. We show three thresholds on purpose, because a single cutoff can flatter or unfairly bury the model depending on exactly where it lands. A team's win total is a genuinely hard thing to call a year out \u2014 injuries, trades, a young player's leap, a coaching change \u2014 which is exactly why Vegas's own preseason win totals and ESPN's BPI land in a similar range at tight thresholds. Small sample here, too: these numbers will firm up as more seasons get backtested, not because anything's broken today."
   },
   "top_feature_importance": [
     {
       "feature": "SOS",
-      "importance_mae_increase": 6.6132
-    },
-    {
-      "feature": "E_L",
-      "importance_mae_increase": 1.2845
-    },
-    {
-      "feature": "PLUS_MINUS",
-      "importance_mae_increase": 0.9325
+      "importance_mae_increase": 7.0538
     },
     {
       "feature": "W_W",
-      "importance_mae_increase": 0.8978
+      "importance_mae_increase": 1.4436
+    },
+    {
+      "feature": "E_L",
+      "importance_mae_increase": 1.4424
     },
     {
       "feature": "Payroll",
-      "importance_mae_increase": 0.4946
-    },
-    {
-      "feature": "W_L",
-      "importance_mae_increase": 0.4361
-    },
-    {
-      "feature": "BLK",
-      "importance_mae_increase": 0.4084
-    },
-    {
-      "feature": "W",
-      "importance_mae_increase": 0.3873
+      "importance_mae_increase": 0.441
     },
     {
       "feature": "FT%",
-      "importance_mae_increase": 0.3855
+      "importance_mae_increase": 0.4002
     },
     {
-      "feature": "avg_production_score",
-      "importance_mae_increase": 0.3336
-    },
-    {
-      "feature": "PFD",
-      "importance_mae_increase": 0.3007
-    },
-    {
-      "feature": "avg_age",
-      "importance_mae_increase": 0.2943
-    },
-    {
-      "feature": "E_W",
-      "importance_mae_increase": 0.2912
-    },
-    {
-      "feature": "injury_rate",
-      "importance_mae_increase": 0.271
+      "feature": "BLK",
+      "importance_mae_increase": 0.3489
     },
     {
       "feature": "TOV",
-      "importance_mae_increase": 0.2619
+      "importance_mae_increase": 0.3103
+    },
+    {
+      "feature": "3PA",
+      "importance_mae_increase": 0.3087
+    },
+    {
+      "feature": "avg_production_score",
+      "importance_mae_increase": 0.272
+    },
+    {
+      "feature": "avg_age",
+      "importance_mae_increase": 0.2668
+    },
+    {
+      "feature": "BLKA",
+      "importance_mae_increase": 0.26
+    },
+    {
+      "feature": "injury_rate",
+      "importance_mae_increase": 0.2526
+    },
+    {
+      "feature": "PFD",
+      "importance_mae_increase": 0.2492
+    },
+    {
+      "feature": "PF",
+      "importance_mae_increase": 0.247
+    },
+    {
+      "feature": "Home_W",
+      "importance_mae_increase": 0.2377
     }
   ],
   "feature_values_available": [
     "SOS",
-    "E_L",
-    "PLUS_MINUS",
     "W_W",
-    "Payroll"
+    "E_L",
+    "Payroll",
+    "FT%"
   ],
   "feature_notes": {
     "SOS": "Strength of schedule \u2014 our own number, not a KenPom or ESPN rating. We build it from each opponent's win%, point differential, and roster age, averaged across the full schedule (see load_schedule() in data_loader.py if you want the exact recipe). Blank for next season's forecast: the schedule hasn't been set yet, so there are no opponents to average.",
-    "E_L": "Eastern Conference losses \u2014 one half of the East/West win-loss split.",
-    "PLUS_MINUS": "Points scored minus points allowed for the season \u2014 the team's full-season point differential.",
     "W_W": "Western Conference wins \u2014 one half of the East/West win-loss split.",
-    "Payroll": "Total team payroll for the season. For next season's forecast specifically, this is last season's known figure carried forward \u2014 there's no live payroll feed to draw from, and the real number moves with every trade, extension, and signing all summer. Treat it as a rough stand-in, not a snapshot of today's books. See the roster section below for what in this forecast is real-time versus carried forward."
+    "E_L": "Eastern Conference losses \u2014 one half of the East/West win-loss split.",
+    "Payroll": "Total team payroll for the season. For next season's forecast specifically, this is last season's known figure carried forward \u2014 there's no live payroll feed to draw from, and the real number moves with every trade, extension, and signing all summer. Treat it as a rough stand-in, not a snapshot of today's books. See the roster section below for what in this forecast is real-time versus carried forward.",
+    "FT%": "No additional note recorded for this feature yet."
   },
   "prediction_interval": {
     "method": "GBM native quantile regression (refits the winning model at the 10th and 90th percentiles)",
     "coverage": "80% (10th-90th percentile)"
   },
-  "n_training_rows": 270,
+  "n_training_rows": 300,
   "n_teams": 30,
   "feature_seasons_used": [
     2016,
@@ -148,9 +148,10 @@
     2021,
     2022,
     2023,
-    2024
+    2024,
+    2025
   ],
-  "forecast_target_season": 2026,
+  "forecast_target_season": 2027,
   "roster_projection": {
     "available": true,
     "season": "2026-27",
@@ -197,16 +198,16 @@
       "Atlanta Hawks": {
         "subject_id": "Atlanta Hawks",
         "subject_name": "Atlanta Hawks",
-        "composite_score": 0.1182,
+        "composite_score": 0.2045,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 170057021.0,
-            "z_score": -0.245,
+            "raw_value": 190318494.0,
+            "z_score": 0.0428,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0735
+            "contribution": 0.0128
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -240,16 +241,16 @@
       "Boston Celtics": {
         "subject_id": "Boston Celtics",
         "subject_name": "Boston Celtics",
-        "composite_score": -0.7913,
+        "composite_score": -0.9204,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 195348491.0,
-            "z_score": 1.2615,
+            "raw_value": 204311991.0,
+            "z_score": 0.8314,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.3785
+            "contribution": 0.2494
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -283,16 +284,16 @@
       "Brooklyn Nets": {
         "subject_id": "Brooklyn Nets",
         "subject_name": "Brooklyn Nets",
-        "composite_score": -0.9788,
+        "composite_score": -1.7153,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 168312896.0,
-            "z_score": -0.3489,
+            "raw_value": 139805782.0,
+            "z_score": -2.8038,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1047
+            "contribution": -0.8411
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -326,16 +327,16 @@
       "Charlotte Hornets": {
         "subject_id": "Charlotte Hornets",
         "subject_name": "Charlotte Hornets",
-        "composite_score": -0.5282,
+        "composite_score": -0.5767,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 168575524.0,
-            "z_score": -0.3333,
+            "raw_value": 180776048.0,
+            "z_score": -0.495,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1
+            "contribution": -0.1485
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -369,16 +370,16 @@
       "Chicago Bulls": {
         "subject_id": "Chicago Bulls",
         "subject_name": "Chicago Bulls",
-        "composite_score": -0.388,
+        "composite_score": -0.4654,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 165722496.0,
-            "z_score": -0.5032,
+            "raw_value": 176052328.0,
+            "z_score": -0.7612,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.151
+            "contribution": -0.2283
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -412,16 +413,16 @@
       "Cleveland Cavaliers": {
         "subject_id": "Cleveland Cavaliers",
         "subject_name": "Cleveland Cavaliers",
-        "composite_score": 0.0045,
+        "composite_score": 0.8315,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 165110486.0,
-            "z_score": -0.5397,
+            "raw_value": 228898634.0,
+            "z_score": 2.2169,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1619
+            "contribution": 0.6651
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -455,16 +456,16 @@
       "Dallas Mavericks": {
         "subject_id": "Dallas Mavericks",
         "subject_name": "Dallas Mavericks",
-        "composite_score": 0.3545,
+        "composite_score": 0.71,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 174411922.0,
-            "z_score": 0.0144,
+            "raw_value": 210847259.0,
+            "z_score": 1.1996,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.0043
+            "contribution": 0.3599
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -498,16 +499,16 @@
       "Denver Nuggets": {
         "subject_id": "Denver Nuggets",
         "subject_name": "Denver Nuggets",
-        "composite_score": 0.428,
+        "composite_score": 0.3561,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 185864258.0,
-            "z_score": 0.6966,
+            "raw_value": 197664737.0,
+            "z_score": 0.4568,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.209
+            "contribution": 0.137
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -541,16 +542,16 @@
       "Detroit Pistons": {
         "subject_id": "Detroit Pistons",
         "subject_name": "Detroit Pistons",
-        "composite_score": -0.7735,
+        "composite_score": -0.4871,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 140501660.0,
-            "z_score": -2.0056,
+            "raw_value": 170909241.0,
+            "z_score": -1.051,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.6017
+            "contribution": -0.3153
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -584,16 +585,16 @@
       "Golden State Warriors": {
         "subject_id": "Golden State Warriors",
         "subject_name": "Golden State Warriors",
-        "composite_score": -0.5322,
+        "composite_score": -0.7561,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 170316619.0,
-            "z_score": -0.2296,
+            "raw_value": 172242523.0,
+            "z_score": -0.9759,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0689
+            "contribution": -0.2928
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -627,16 +628,16 @@
       "Houston Rockets": {
         "subject_id": "Houston Rockets",
         "subject_name": "Houston Rockets",
-        "composite_score": 0.4854,
+        "composite_score": 0.8803,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 163038023.0,
-            "z_score": -0.6631,
+            "raw_value": 201150043.0,
+            "z_score": 0.6532,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1989
+            "contribution": 0.196
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -670,16 +671,16 @@
       "Indiana Pacers": {
         "subject_id": "Indiana Pacers",
         "subject_name": "Indiana Pacers",
-        "composite_score": 0.1991,
+        "composite_score": 0.2181,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 169543082.0,
-            "z_score": -0.2756,
+            "raw_value": 185791168.0,
+            "z_score": -0.2123,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0827
+            "contribution": -0.0637
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -713,16 +714,16 @@
       "Los Angeles Clippers": {
         "subject_id": "Los Angeles Clippers",
         "subject_name": "Los Angeles Clippers",
-        "composite_score": -0.8703,
+        "composite_score": -0.5832,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 174124752.0,
-            "z_score": -0.0027,
+            "raw_value": 206491393.0,
+            "z_score": 0.9542,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0008
+            "contribution": 0.2863
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -756,16 +757,16 @@
       "Los Angeles Lakers": {
         "subject_id": "Los Angeles Lakers",
         "subject_name": "Los Angeles Lakers",
-        "composite_score": 0.8967,
+        "composite_score": 0.8083,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 192057940.0,
-            "z_score": 1.0655,
+            "raw_value": 203233649.0,
+            "z_score": 0.7706,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.3196
+            "contribution": 0.2312
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -799,16 +800,16 @@
       "Memphis Grizzlies": {
         "subject_id": "Memphis Grizzlies",
         "subject_name": "Memphis Grizzlies",
-        "composite_score": 0.2327,
+        "composite_score": 0.1548,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 165903638.0,
-            "z_score": -0.4924,
+            "raw_value": 176212849.0,
+            "z_score": -0.7521,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1477
+            "contribution": -0.2256
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -842,16 +843,16 @@
       "Miami Heat": {
         "subject_id": "Miami Heat",
         "subject_name": "Miami Heat",
-        "composite_score": -0.2781,
+        "composite_score": -0.2234,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 176102077.0,
-            "z_score": 0.1151,
+            "raw_value": 194836455.0,
+            "z_score": 0.2974,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.0345
+            "contribution": 0.0892
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -885,16 +886,16 @@
       "Milwaukee Bucks": {
         "subject_id": "Milwaukee Bucks",
         "subject_name": "Milwaukee Bucks",
-        "composite_score": 0.3493,
+        "composite_score": 0.0521,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 182559432.0,
-            "z_score": 0.4997,
+            "raw_value": 180845629.0,
+            "z_score": -0.491,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.1499
+            "contribution": -0.1473
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -928,16 +929,16 @@
       "Minnesota Timberwolves": {
         "subject_id": "Minnesota Timberwolves",
         "subject_name": "Minnesota Timberwolves",
-        "composite_score": 0.409,
+        "composite_score": 0.1389,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 203708244.0,
-            "z_score": 1.7595,
+            "raw_value": 204804757.0,
+            "z_score": 0.8591,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.5278
+            "contribution": 0.2577
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -971,16 +972,16 @@
       "New Orleans Pelicans": {
         "subject_id": "New Orleans Pelicans",
         "subject_name": "New Orleans Pelicans",
-        "composite_score": 0.0981,
+        "composite_score": 0.1685,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 172778396.0,
-            "z_score": -0.0829,
+            "raw_value": 192255503.0,
+            "z_score": 0.1519,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0249
+            "contribution": 0.0456
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1014,16 +1015,16 @@
       "New York Knicks": {
         "subject_id": "New York Knicks",
         "subject_name": "New York Knicks",
-        "composite_score": 0.0153,
+        "composite_score": -0.4691,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 214703508.0,
-            "z_score": 2.4144,
+            "raw_value": 203751948.0,
+            "z_score": 0.7998,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.7243
+            "contribution": 0.2399
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1057,16 +1058,16 @@
       "Oklahoma City Thunder": {
         "subject_id": "Oklahoma City Thunder",
         "subject_name": "Oklahoma City Thunder",
-        "composite_score": -0.3583,
+        "composite_score": -0.2089,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 166418720.0,
-            "z_score": -0.4618,
+            "raw_value": 190199275.0,
+            "z_score": 0.0361,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1385
+            "contribution": 0.0108
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1100,16 +1101,16 @@
       "Orlando Magic": {
         "subject_id": "Orlando Magic",
         "subject_name": "Orlando Magic",
-        "composite_score": -0.1805,
+        "composite_score": 0.4863,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 152308863.0,
-            "z_score": -1.3022,
+            "raw_value": 205894588.0,
+            "z_score": 0.9205,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.3907
+            "contribution": 0.2762
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1143,16 +1144,16 @@
       "Philadelphia 76ers": {
         "subject_id": "Philadelphia 76ers",
         "subject_name": "Philadelphia 76ers",
-        "composite_score": 1.1718,
+        "composite_score": 1.2594,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 171336738.0,
-            "z_score": -0.1688,
+            "raw_value": 191750451.0,
+            "z_score": 0.1235,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0506
+            "contribution": 0.037
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1186,16 +1187,16 @@
       "Phoenix Suns": {
         "subject_id": "Phoenix Suns",
         "subject_name": "Phoenix Suns",
-        "composite_score": 0.78,
+        "composite_score": 0.0301,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 220708856.0,
-            "z_score": 2.7721,
+            "raw_value": 194395956.0,
+            "z_score": 0.2726,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": 0.8316
+            "contribution": 0.0818
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1229,16 +1230,16 @@
       "Portland Trail Blazers": {
         "subject_id": "Portland Trail Blazers",
         "subject_name": "Portland Trail Blazers",
-        "composite_score": 1.0588,
+        "composite_score": 1.1773,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 167012048.0,
-            "z_score": -0.4264,
+            "raw_value": 189003937.0,
+            "z_score": -0.0313,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1279
+            "contribution": -0.0094
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1272,16 +1273,16 @@
       "Sacramento Kings": {
         "subject_id": "Sacramento Kings",
         "subject_name": "Sacramento Kings",
-        "composite_score": -0.5413,
+        "composite_score": -0.4867,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 167811057.0,
-            "z_score": -0.3788,
+            "raw_value": 186063825.0,
+            "z_score": -0.197,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.1136
+            "contribution": -0.0591
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1315,16 +1316,16 @@
       "San Antonio Spurs": {
         "subject_id": "San Antonio Spurs",
         "subject_name": "San Antonio Spurs",
-        "composite_score": 0.0326,
+        "composite_score": 0.326,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 162395330.0,
-            "z_score": -0.7014,
+            "raw_value": 194469353.0,
+            "z_score": 0.2767,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.2104
+            "contribution": 0.083
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1358,16 +1359,16 @@
       "Toronto Raptors": {
         "subject_id": "Toronto Raptors",
         "subject_name": "Toronto Raptors",
-        "composite_score": -0.7988,
+        "composite_score": -0.5943,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 170516134.0,
-            "z_score": -0.2177,
+            "raw_value": 197793840.0,
+            "z_score": 0.464,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0653
+            "contribution": 0.1392
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1401,16 +1402,16 @@
       "Utah Jazz": {
         "subject_id": "Utah Jazz",
         "subject_name": "Utah Jazz",
-        "composite_score": 0.5107,
+        "composite_score": 0.2585,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 154060898.0,
-            "z_score": -1.1979,
+            "raw_value": 153383114.0,
+            "z_score": -2.0386,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.3594
+            "contribution": -0.6116
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",
@@ -1444,16 +1445,16 @@
       "Washington Wizards": {
         "subject_id": "Washington Wizards",
         "subject_name": "Washington Wizards",
-        "composite_score": -0.1254,
+        "composite_score": -0.5743,
         "components": [
           {
             "name": "Payroll",
             "column": "Payroll",
-            "raw_value": 173806822.0,
-            "z_score": -0.0217,
+            "raw_value": 162622594.0,
+            "z_score": -1.518,
             "weight": 0.3,
             "higher_is_better": true,
-            "contribution": -0.0065
+            "contribution": -0.4554
           },
           {
             "name": "Top-10 Player Scoring (avg_pts_top10)",

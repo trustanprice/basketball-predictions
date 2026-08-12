@@ -29,7 +29,7 @@ def test_get_model_metadata_reads_real_output():
 def test_get_coach_team_seasons_computes_from_real_master_df():
     df = dependencies.get_coach_team_seasons()
     assert {"Season", "Team", "Coach", "wins_above_expectation"} <= set(df.columns)
-    assert len(df) == 300  # 30 teams x 10 seasons, per Phase 4's validated run
+    assert len(df) == 330  # 30 teams x 11 seasons (2015-16 through 2025-26, real and complete)
 
 
 def test_get_coach_career_summary_computes_from_real_master_df():
