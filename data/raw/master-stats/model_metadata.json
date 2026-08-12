@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T20:40:18.496973+00:00",
+  "generated_at": "2026-08-12T21:11:41.797670+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -8,7 +8,7 @@
       "HistGradientBoostingRegressor (monotonic)"
     ],
     "knn_walk_forward_mae": 8.308,
-    "gbm_walk_forward_mae": 6.418,
+    "gbm_walk_forward_mae": 6.434,
     "winner": "gbm",
     "n_walk_forward_folds": 9
   },
@@ -16,10 +16,10 @@
     "description": "We adjust the raw model output two ways before showing it to you. First, we widen or narrow each season's 30 predictions around that season's own average to match how spread out real NBA win totals actually are \u2014 left alone, regression models like this one flatten the gap between good and bad teams more than reality does. Second, we shift every team by the same small amount so the season's predictions add up to exactly 1,230 wins \u2014 the real total for a full slate of games (30 teams, 82 games apiece, two teams per game). Neither property comes for free from the model itself; both are enforced afterward.",
     "historical_win_std": 12.018,
     "target_season_total_wins": 1230,
-    "walk_forward_mae_uncalibrated": 6.418,
-    "walk_forward_mae_calibrated": 6.818,
+    "walk_forward_mae_uncalibrated": 6.434,
+    "walk_forward_mae_calibrated": 6.835,
     "improves_backtest_mae": false,
-    "note": "Worth saying plainly: this adjustment does not sharpen the backtest \u2014 walk-forward error moves from 6.418 to 6.818 wins, flat or worse. We keep it anyway, because matching the real 82-game season total and the real spread of win totals are correct on their own terms, independent of whether they happen to shave points off average error. Don't read this as \"calibration helped.\""
+    "note": "Worth saying plainly: this adjustment does not sharpen the backtest \u2014 walk-forward error moves from 6.434 to 6.835 wins, flat or worse. We keep it anyway, because matching the real 82-game season total and the real spread of win totals are correct on their own terms, independent of whether they happen to shave points off average error. Don't read this as \"calibration helped.\""
   },
   "feature_experiments": {
     "player_projection_features": {
@@ -47,8 +47,8 @@
       "result": "Barely helps in isolation (vs. plain NUMERIC_FEATURES: 6.614 -> 6.607 wins, +0.007; 121 of 300 rows had no qualifying coach track record and were correctly excluded, not fabricated) but hurts once stacked on the real shipped baseline (NUMERIC_FEATURES + Roster_Change: 6.425 -> 6.486 wins, +0.061). Same overlap story as the other two: whatever signal a coach's career record carries about roster quality is already represented, at least partially, by Roster_Change and the existing talent features. Not wired into FEATURE_COLUMNS -- see backend/win_model/coach_quality_features.py to re-run the check again after any future change to Roster_Change or coach attribution data."
     },
     "recency_weighting": {
-      "hypothesis": "Exponentially decay-weighting training rows by fold-relative recency (weight = decay_rate ** seasons_ago, tuned via the walk-forward grid alongside decay_rate in [1.0, 0.95, 0.85, 0.7]) improves walk-forward MAE on top of the existing current-season aggregates and Roster_Change.",
-      "result": "It does not, on the honest (stacked) test. Isolated against plain NUMERIC_FEATURES, decay_rate=0.95 looks like a real win (6.615 -> 6.525). Stacked on the real current baseline (NUMERIC_FEATURES + Roster_Change, 6.434), the best decay rate is 1.0 (no weighting at all, todays behavior) - 6.434, with every weighted option worse (0.95: 6.537, 0.85: 6.628, 0.7: 6.734). Same failure mode as age_curve_residual/defense_composite/coach_quality: looks like a win isolated, evaporates once tested against what is actually shipped. Not wired in. GBM-only (KNeighborsRegressor.fit has no sample_weight parameter at all - verified against its signature, not a documentation gap - so KNN was left unweighted and still competes on its own in both isolated and stacked runs)."
+      "hypothesis": "Weighting training rows by recency (sample_weight = decay_rate ** seasons_ago, fold-relative so early folds don't leak dataset-size information) so the model favors how the league plays now over how it played a decade ago improves walk-forward MAE. GBM only -- KNeighborsRegressor.fit() has no sample_weight parameter at all, so KNN structurally can't be recency-weighted this way.",
+      "result": "Helps in isolation (vs. plain NUMERIC_FEATURES: 6.615 -> 6.525 wins at decay_rate=0.95) but loses once stacked on the real shipped baseline (NUMERIC_FEATURES + Roster_Change: best stacked decay_rate is 1.0 -- i.e. no weighting at all -- at 6.434 wins). Same overlap story as the other three: same isolated-win, stacked-loss pattern. Not wired into FEATURE_COLUMNS or the training Pipeline -- see backend/win_model/recency_weighting.py to re-run the check again after any future change to Roster_Change or the season range in master_df.csv."
     }
   },
   "winning_model": {
@@ -70,7 +70,7 @@
       8
     ],
     "overall": {
-      "3": 0.337,
+      "3": 0.3333,
       "5": 0.5,
       "8": 0.6556
     },
@@ -80,78 +80,78 @@
   "top_feature_importance": [
     {
       "feature": "SOS",
-      "importance_mae_increase": 8.2121
+      "importance_mae_increase": 8.2172
     },
     {
       "feature": "W_W",
-      "importance_mae_increase": 2.6029
+      "importance_mae_increase": 2.4984
     },
     {
       "feature": "E_L",
-      "importance_mae_increase": 1.389
-    },
-    {
-      "feature": "Roster_Change",
-      "importance_mae_increase": 0.8589
-    },
-    {
-      "feature": "FT%",
-      "importance_mae_increase": 0.7745
-    },
-    {
-      "feature": "3PA",
-      "importance_mae_increase": 0.7086
-    },
-    {
-      "feature": "STL",
-      "importance_mae_increase": 0.6715
-    },
-    {
-      "feature": "Pre-ASG_L",
-      "importance_mae_increase": 0.6266
-    },
-    {
-      "feature": "BLKA",
-      "importance_mae_increase": 0.5715
-    },
-    {
-      "feature": "3PM",
-      "importance_mae_increase": 0.5502
-    },
-    {
-      "feature": "TOV",
-      "importance_mae_increase": 0.523
-    },
-    {
-      "feature": "3P%",
-      "importance_mae_increase": 0.482
+      "importance_mae_increase": 1.3605
     },
     {
       "feature": "PLUS_MINUS",
-      "importance_mae_increase": 0.4378
+      "importance_mae_increase": 0.7718
     },
     {
-      "feature": "FGM",
-      "importance_mae_increase": 0.4356
+      "feature": "Roster_Change",
+      "importance_mae_increase": 0.7242
+    },
+    {
+      "feature": "3PA",
+      "importance_mae_increase": 0.6593
+    },
+    {
+      "feature": "STL",
+      "importance_mae_increase": 0.638
+    },
+    {
+      "feature": "FT%",
+      "importance_mae_increase": 0.621
+    },
+    {
+      "feature": "TOV",
+      "importance_mae_increase": 0.4986
+    },
+    {
+      "feature": "3P%",
+      "importance_mae_increase": 0.4876
+    },
+    {
+      "feature": "BLKA",
+      "importance_mae_increase": 0.4814
+    },
+    {
+      "feature": "avg_age",
+      "importance_mae_increase": 0.4167
+    },
+    {
+      "feature": "FG%",
+      "importance_mae_increase": 0.4116
     },
     {
       "feature": "avg_pts_top10",
-      "importance_mae_increase": 0.4349
+      "importance_mae_increase": 0.4026
+    },
+    {
+      "feature": "Payroll",
+      "importance_mae_increase": 0.3949
     }
   ],
   "feature_values_available": [
     "SOS",
     "W_W",
     "E_L",
-    "Roster_Change",
-    "FT%"
+    "PLUS_MINUS",
+    "Roster_Change"
   ],
   "feature_notes": {
     "SOS": "Strength of schedule \u2014 our own number, not a KenPom or ESPN rating. We build it from each opponent's win%, point differential, and roster age, averaged across the full schedule (see load_schedule() in data_loader.py if you want the exact recipe). Blank for next season's forecast: the schedule hasn't been set yet, so there are no opponents to average.",
     "W_W": "Western Conference wins \u2014 one half of the East/West win-loss split.",
     "E_L": "Eastern Conference losses \u2014 one half of the East/West win-loss split.",
-    "Roster_Change": "Season-over-season roster-talent change \u2014 arriving players' own prior production minus departing players' production, in total season points. Positive means the roster's incoming talent outweighs who left; negative means the reverse. Uses each player's own last known real output, never a projection of how they'll do on their new team, so this can't leak the season being predicted into itself.",
-    "FT%": "No additional note recorded for this feature yet."
+    "PLUS_MINUS": "Points scored minus points allowed for the season \u2014 the team's full-season point differential.",
+    "Roster_Change": "Season-over-season roster-talent change \u2014 arriving players' own prior production minus departing players' production, in total season points. Positive means the roster's incoming talent outweighs who left; negative means the reverse. Uses each player's own last known real output, never a projection of how they'll do on their new team, so this can't leak the season being predicted into itself."
   },
   "prediction_interval": {
     "method": "GBM native quantile regression (refits the winning model at the 10th and 90th percentiles)",

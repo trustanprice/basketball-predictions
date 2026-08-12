@@ -531,6 +531,25 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
                            "backend/win_model/coach_quality_features.py to re-run the check again "
                            "after any future change to Roster_Change or coach attribution data.",
             },
+            "recency_weighting": {
+                "hypothesis": (
+                    "Weighting training rows by recency (sample_weight = decay_rate ** "
+                    "seasons_ago, fold-relative so early folds don't leak dataset-size "
+                    "information) so the model favors how the league plays now over how it "
+                    "played a decade ago improves walk-forward MAE. GBM only -- "
+                    "KNeighborsRegressor.fit() has no sample_weight parameter at all, so KNN "
+                    "structurally can't be recency-weighted this way."
+                ),
+                "result": "Helps in isolation (vs. plain NUMERIC_FEATURES: 6.615 -> 6.525 wins "
+                           "at decay_rate=0.95) but loses once stacked on the real shipped "
+                           "baseline (NUMERIC_FEATURES + Roster_Change: best stacked decay_rate "
+                           "is 1.0 -- i.e. no weighting at all -- at 6.434 wins). Same overlap "
+                           "story as the other three: same isolated-win, stacked-loss pattern. "
+                           "Not wired into FEATURE_COLUMNS or the training Pipeline -- see "
+                           "backend/win_model/recency_weighting.py to re-run the check again "
+                           "after any future change to Roster_Change or the season range in "
+                           "master_df.csv.",
+            },
         },
         "winning_model": {
             "type": type(fitted_pipeline.steps[-1][1]).__name__,
