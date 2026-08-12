@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-11T22:45:58.422090+00:00",
+  "generated_at": "2026-08-12T15:41:43.672833+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -60,63 +60,63 @@
   "top_feature_importance": [
     {
       "feature": "SOS",
-      "importance_mae_increase": 6.6201
+      "importance_mae_increase": 6.6132
     },
     {
       "feature": "E_L",
-      "importance_mae_increase": 1.2841
+      "importance_mae_increase": 1.2845
     },
     {
       "feature": "PLUS_MINUS",
-      "importance_mae_increase": 0.8915
+      "importance_mae_increase": 0.9325
     },
     {
       "feature": "W_W",
-      "importance_mae_increase": 0.7993
+      "importance_mae_increase": 0.8978
     },
     {
       "feature": "Payroll",
-      "importance_mae_increase": 0.517
-    },
-    {
-      "feature": "BLK",
-      "importance_mae_increase": 0.3876
-    },
-    {
-      "feature": "avg_production_score",
-      "importance_mae_increase": 0.384
-    },
-    {
-      "feature": "W",
-      "importance_mae_increase": 0.3818
+      "importance_mae_increase": 0.4946
     },
     {
       "feature": "W_L",
-      "importance_mae_increase": 0.3758
+      "importance_mae_increase": 0.4361
     },
     {
-      "feature": "E_W",
-      "importance_mae_increase": 0.3548
+      "feature": "BLK",
+      "importance_mae_increase": 0.4084
     },
     {
-      "feature": "PFD",
-      "importance_mae_increase": 0.3501
+      "feature": "W",
+      "importance_mae_increase": 0.3873
     },
     {
       "feature": "FT%",
-      "importance_mae_increase": 0.3326
+      "importance_mae_increase": 0.3855
     },
     {
-      "feature": "TOV",
-      "importance_mae_increase": 0.2722
+      "feature": "avg_production_score",
+      "importance_mae_increase": 0.3336
+    },
+    {
+      "feature": "PFD",
+      "importance_mae_increase": 0.3007
     },
     {
       "feature": "avg_age",
-      "importance_mae_increase": 0.2272
+      "importance_mae_increase": 0.2943
+    },
+    {
+      "feature": "E_W",
+      "importance_mae_increase": 0.2912
     },
     {
       "feature": "injury_rate",
-      "importance_mae_increase": 0.2266
+      "importance_mae_increase": 0.271
+    },
+    {
+      "feature": "TOV",
+      "importance_mae_increase": 0.2619
     }
   ],
   "feature_values_available": [

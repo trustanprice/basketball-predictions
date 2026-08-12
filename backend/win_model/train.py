@@ -296,7 +296,22 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
         interval_method = "Bootstrap of pooled walk-forward out-of-fold residuals (1000 resamples per team)"
 
     # Independently-fit quantile models aren't guaranteed to stay on the correct side
-    # of the point estimate on every row ("quantile crossing") — clip rather than trust it.
+    # of the point estimate on every row ("quantile crossing"). Simply clamping the
+    # crossed side to the point estimate (upper = max(upper, point)) prevents an
+    # invalid interval but produces a degenerate zero-margin one instead — confirmed
+    # live: ~9/30 teams in a real run had an upper margin under 1 win while their
+    # lower margin was a normal 8-14 wins, which reads as "no upside uncertainty"
+    # and isn't true — that team's independently-fit 90th-percentile model just
+    # happened to land at/below its own median model's prediction. Where crossing
+    # actually happened, mirror the OTHER side's margin instead of collapsing to
+    # zero width — an honest fallback ("no trustworthy upper quantile fit for this
+    # team, so we're using the lower margin's width as our best estimate of the
+    # interval's scale") beats a technically-valid but useless zero-margin interval.
+    lower_crossed = lower >= forecast_point
+    upper_crossed = upper <= forecast_point
+    lower = np.where(lower_crossed, forecast_point - (upper - forecast_point), lower)
+    upper = np.where(upper_crossed, forecast_point + (forecast_point - lower), upper)
+    # Final safety net in case mirroring itself produced a crossing.
     lower = np.minimum(lower, forecast_point)
     upper = np.maximum(upper, forecast_point)
 
