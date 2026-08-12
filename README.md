@@ -5,7 +5,10 @@ three connected pieces: a walk-forward-validated win predictor, a live player po
 engine, and a coaching evaluation model — all built to be transparent about *how* every number
 was produced, not just what it is.
 
-👉 Transitional Streamlit demo (being replaced by the Next.js frontend below):
+👉 Live app (Next.js on Vercel, backed by a FastAPI API on Render):
+[basketball-predictions.vercel.app](https://basketball-predictions.vercel.app/)
+
+👉 Transitional Streamlit demo (superseded by the live app above, kept around for now):
 [Streamlit App](https://basketball-predictions-trustanprice.streamlit.app/)
 
 👉 Codebase: [GitHub Repo](https://github.com/trustanprice/basketball-predictions)
@@ -28,9 +31,11 @@ was produced, not just what it is.
   as a transparent weighted composite (z-scored inputs, documented weights) rather than a
   black-box model. Every rating expands into its exact formula, raw inputs, z-scores, and
   per-component contribution.
-- **Coaching evaluation** (`backend/ratings/coaching_eval.py`) — actual win% vs.
-  roster-talent-implied win%, tracked per coach across every team and season they've coached,
-  using the same transparency standard as the player ratings.
+- **Coaching evaluation** (`backend/ratings/coaching_eval.py` + `team_style.py`) — actual win%
+  vs. roster-talent-implied win%, tracked per coach across every team and season they've
+  coached, plus a team-style fingerprint (pace, shot profile, shot-location heatmaps) shown as
+  descriptive context alongside coaching outcomes — explicitly never framed as a causal
+  explanation for them.
 - **API** (`backend/api/`) — a FastAPI app serving all of the above as JSON, with live-data
   results refreshed on a background schedule rather than fetched on every request.
 - **Frontend** (`frontend/`) — a Next.js (App Router, TypeScript, Tailwind) app that reads

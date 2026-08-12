@@ -182,6 +182,16 @@ real player-seasons and taking a median — not a trained model.
     `avg_age`/`avg_pts_top10`/`avg_production_score` shape `win_model/data_loader.py`'s
     `calculate_player_features()` produces from historical data — so these values are drop-in
     replacements for `win_model`'s existing feature columns, not a new/different feature.
+    **All three are restricted to the top-10-by-projected-points players on the roster**, not
+    the full ~15-19 man roster — matching how the historical training data was always implicitly
+    top-10-only (the source player stats this project has only ever contained the top 10 per
+    team, see root README's Data Sources). This was a real train/serve inconsistency until fixed
+    (`avg_age`/`avg_production_score` were averaging every rostered player, including deep-bench/
+    two-way players, while `avg_pts_top10` was already correctly restricted) — confirmed the fix
+    by hand-recomputing a team's `avg_age` from just its top-10 scorers and matching the committed
+    value exactly. A player who doesn't crack the top 10 by points (e.g. a min-minutes veteran)
+    has zero influence on team talent features, by design — don't "fix" this back to a full-roster
+    average.
   - `team_talent_composite(team_features)`: the explainable, hand-reproducible "how this team's
     projected talent compares league-wide" summary — reuses `coaching_eval.compute_team_season_talent`
     and its `TALENT_COMPONENTS` directly rather than a second parallel composite system. This is a
@@ -399,7 +409,19 @@ import convention above, e.g. `uvicorn backend.api.main:app`, not `uvicorn api.m
 - Validation is walk-forward only: train on seasons ≤ N, evaluate on season N+1, roll forward.
   Random-fold `cv=` on team-season rows leaks future seasons into training — do not reintroduce
   it.
-- Point predictions ship with a prediction interval, not just a single number.
+- Point predictions ship with a prediction interval, not just a single number. The interval
+  comes from two **independently-fit** GBM quantile models (10th/90th percentile) — nothing
+  guarantees either stays on the correct side of the point estimate for every team
+  ("quantile crossing"). A naive `upper = max(upper, point)` clamp prevents an invalid interval
+  but produces a degenerate near-zero-margin one instead whenever crossing happens — confirmed
+  live in a real run: 9/30 teams had an upper margin under 1 win while their lower margin was a
+  normal 8-14 wins, silently implying "no upside uncertainty" for that team specifically, which
+  wasn't true. Where crossing is detected, the crossed side now mirrors the other (uncrossed)
+  side's margin instead of collapsing to zero width (`train.py`, right after the interval is
+  computed) — an honest "no trustworthy quantile fit on this side, using the other side's scale
+  as the best estimate" fallback. If you ever see a team with a suspiciously tight one-sided
+  margin again, check whether this mirroring logic still covers the case before assuming
+  something new broke.
 - Every prediction surfaced in the app needs a "how this was calculated" explanation — same
   transparency spirit as `ratings/`, even though this module is allowed to use real ML
   (ElasticNet / gradient-boosted regressor) rather than a hand-reproducible formula.
