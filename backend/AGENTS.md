@@ -213,6 +213,28 @@ real player-seasons and taking a median — not a trained model.
   the forecast row (exactly as before) and labels it explicitly stale in both
   `FEATURE_NOTES["Payroll"]` and `metadata.roster_projection` — same honesty standard as the SOS
   null-for-forecast-season caveat.
+  Once the master_df staleness fix above landed, this stopped being a live-forecast staleness
+  problem for the *current* forecast row specifically — the forecast row's own-season payroll is
+  now a real, known figure (that season already happened), not a carry-forward guess. The
+  forward-looking multi-year salary figures in `data/raw/team-stats/team-payroll.csv` (real,
+  user-supplied, current as of when they were entered — not fetched, since there's still no live
+  source) are what the *next* forecast cycle will need once the season they describe completes;
+  they aren't wired into anything yet on their own.
+- **`Roster_Change` (`win_model/roster_change_features.py`) is a shipped, validated feature** —
+  season-over-season roster-talent change (arriving players' own prior production minus departing
+  players'), leak-free by construction (never uses a player's output on their new team). Prompted
+  directly by this project's first real out-of-sample backtest and validated the same way
+  everything else here is: walk-forward MAE 6.614 → 6.418. Not a uniform win — helps some of the
+  real misses that motivated it, makes others worse — kept because the honest aggregate number is
+  what decides, not whether it explains every anecdote. Three follow-up hypotheses
+  (`age_curve_residual_features.py`, `defense_composite_features.py`, `coach_quality_features.py`)
+  each looked like a further improvement in isolation, then **regressed once tested stacked on
+  top of `Roster_Change`** instead of the plain baseline — their signal overlaps with what
+  `Roster_Change` already captures. None are wired in; see `model_metadata.json`'s
+  `feature_experiments` for the documented numbers, same treatment as `player_projection_features`
+  and `gbm_knn_ensemble` below. **Lesson worth repeating for any future feature test: validate
+  stacked on the real current baseline, not just against the plain unweighted one — isolated
+  results here have repeatedly looked like wins and then evaporated once tested honestly.**
 
 ### Projected player leaders (Players page, preseason)
 

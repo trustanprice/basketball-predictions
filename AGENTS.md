@@ -14,6 +14,17 @@ transitional, kept alive for its own Streamlit Cloud deployment.
   1,230-game league total. The forecast row's roster-talent features come from a real,
   currently-running roster-projection pipeline (see `backend/AGENTS.md`) — not a stale
   same-roster carry-forward. Backtest data lives in `data/`.
+  **`data/raw/master-stats/master_df.csv` must stay current to one season behind the calendar,
+  or the "forecast" silently predicts an already-completed season instead of a real future one.**
+  This actually happened: the dataset sat one season stale (its newest row was the real 2024-25
+  season) for the entire early part of this project, so what the app called a "2026-27 forecast"
+  was really a stale re-guess at the *already-played* 2025-26 season, built from a season-old
+  input. Caught by comparing a live NBA.com standings pull against the training data directly.
+  Fixed by adding the real, completed season as a new row (team stats, records, draft, coach —
+  all pulled live and verified against real results) — this is a recurring maintenance task, not
+  a one-time fix: **every season that finishes, this dataset needs the real result added**, or
+  the same staleness silently recurs. There's no automated job for this yet — check `master_df`'s
+  newest `Season` against the real calendar before trusting a forecast looks "off."
 - **Live ratings** (`backend/live_client/` + `backend/ratings/`) — a data client for NBA.com
   (built on `nba_api`, with its own retry/cache/schema-validation layer nba_api itself doesn't
   have), and a computation module producing Player Power Rankings (offense/defense) and
