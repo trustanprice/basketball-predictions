@@ -52,6 +52,20 @@ export interface ModelMetadata {
     team_talent_composite: Record<string, RatingBreakdown> | null;
     note: string;
   };
+  schedule_adjustment: {
+    applied: boolean;
+    season?: string | null;
+    description: string;
+    n_games_simulated?: number;
+    n_games_in_full_season?: number;
+    home_court_edge?: number;
+    validation?: {
+      walk_forward_mae_before: number;
+      walk_forward_mae_after: number;
+      note: string;
+    };
+    note?: string;
+  };
 }
 
 export interface TeamPrediction {

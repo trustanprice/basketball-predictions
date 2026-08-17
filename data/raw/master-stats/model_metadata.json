@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-17T00:24:06.787718+00:00",
+  "generated_at": "2026-08-17T02:58:48.176139+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -1511,5 +1511,19 @@
       }
     },
     "note": "Age, top-scorer output, and roster production for 30 of 30 teams come from real current rosters (season 2026-27), aged forward one year with our empirical development curve \u2014 not a repeat of last season's numbers. Every team in this forecast is covered."
+  },
+  "schedule_adjustment": {
+    "applied": true,
+    "season": "2026-27",
+    "description": "The forecast row's win total no longer assumes a flat win rate across all 82 games -- it simulates the real schedule game-by-game instead, so a team with a harder slate (more games against strong opponents) gets a lower win total than a team with the same underlying talent but an easier one, and vice versa. Each matchup gets a win probability (the log5 formula, plus a home-court edge calibrated from this project's own historical home/away split, 5.9% above a coin flip), then a full season is simulated 10,000 times and averaged.",
+    "n_games_simulated": 1200,
+    "n_games_in_full_season": 1230,
+    "home_court_edge": 0.0594,
+    "validation": {
+      "walk_forward_mae_before": 6.835,
+      "walk_forward_mae_after": 6.768,
+      "note": "Validated by pooling this same adjustment across every backtestable season (2017-18 through 2025-26, 270 team-seasons, using each season's real schedule and honest walk-forward predictions): MAE improves 6.835 -> 6.768 wins. Real but modest, and it clearly hurt in both pandemic-disrupted seasons (2019-20, 2020-21) while helping in most normal ones -- this is the one feature hypothesis this project tried that survived that test; four others were tried and rejected."
+    },
+    "note": "30 of the 1230 real regular-season games are still unresolved (NBA Cup knockout-stage matchups stay TBD until the group stage completes) and aren't part of this simulation yet -- re-run this refresh once the bracket is set for a fully complete slate."
   }
 }

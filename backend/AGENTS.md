@@ -495,6 +495,17 @@ import convention above, e.g. `uvicorn backend.api.main:app`, not `uvicorn api.m
     currently known, not exactly 1,230, until re-run once the bracket is set. This is a real,
     current gap, not a bug — no manual workaround needed, just re-run the refresh once the
     schedule fills in.
+  - **Surfaced on the site, not just in this file.** `train.py` writes a `schedule_adjustment`
+    placeholder (`applied: false`) into `model_metadata.json`; `refresh_schedule_simulation.py`
+    patches it with the real numbers (games simulated, home-court edge, the pooled validation
+    MAE) after it runs. Wired all the way through — `backend/api/schemas.py`'s `ModelMetadata`,
+    `frontend/lib/types.ts`, and rendered in `MethodologyPanel.tsx` — because this project's
+    other four rejected feature experiments were found to not be surfaced on the site at all
+    (`feature_experiments` was never added to the API schema or frontend types, a pre-existing
+    gap this didn't fix — see `model_metadata.json`'s `feature_experiments` for those, readable
+    only by reading the file/repo directly, not via the API). Don't let a future adjustment like
+    this one land only in the raw JSON again without checking whether it needs the same
+    schema→types→component wiring to actually reach a site visitor.
 
 ## Testing
 

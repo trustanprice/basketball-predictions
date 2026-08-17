@@ -104,6 +104,39 @@ export function MethodologyPanel({ metadata }: { metadata: ModelMetadata }) {
           </div>
         )}
 
+        {metadata.schedule_adjustment && metadata.schedule_adjustment.applied && (
+          <div>
+            <p className="text-label mb-2 text-xs text-ink">Schedule-Aware Adjustment</p>
+            <p>{metadata.schedule_adjustment.description}</p>
+            {metadata.schedule_adjustment.validation && (
+              <table className="mt-3 w-full max-w-sm border-collapse text-left">
+                <tbody>
+                  <tr className="border-b border-line/5">
+                    <td className="py-1.5 pr-4">Walk-forward MAE, flat win rate</td>
+                    <td className="text-label py-1.5 text-xs">
+                      {metadata.schedule_adjustment.validation.walk_forward_mae_before} wins
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1.5 pr-4">Walk-forward MAE, schedule-simulated</td>
+                    <td className="text-label py-1.5 text-xs">
+                      {metadata.schedule_adjustment.validation.walk_forward_mae_after} wins
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
+            {metadata.schedule_adjustment.validation && (
+              <p className="mt-3">{metadata.schedule_adjustment.validation.note}</p>
+            )}
+            {metadata.schedule_adjustment.note && (
+              <p className="text-label mt-2 text-[11px] text-ink-muted">
+                {metadata.schedule_adjustment.note}
+              </p>
+            )}
+          </div>
+        )}
+
         <div>
           <p className="text-label mb-1 text-xs text-ink">Top Features by Permutation Importance</p>
           <p className="mb-2">

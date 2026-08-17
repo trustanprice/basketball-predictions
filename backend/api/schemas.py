@@ -29,6 +29,7 @@ class ModelMetadata(BaseModel):
     roster_projection: dict = {}
     calibration: dict = {}
     backtest_accuracy: dict = {}
+    schedule_adjustment: dict = {}
 
 
 class TeamPrediction(BaseModel):

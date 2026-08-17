@@ -626,6 +626,23 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
         # rows are entirely unaffected; this section only ever describes the
         # live forecast row.
         "roster_projection": roster_projection_meta,
+        # Placeholder until refresh_schedule_simulation.py runs (see that module and
+        # backend/AGENTS.md's "Schedule simulation" section) — it patches this key with
+        # real numbers after adjusting the forecast row's Pred_Wins/Lower/Upper. train.py
+        # itself can't compute this: schedule simulation needs Pred_Wins as its rating
+        # input, which is what this very function produces.
+        "schedule_adjustment": {
+            "applied": False,
+            "description": (
+                "Not yet applied for this run. Once applied (a separate step, see "
+                "refresh_schedule_simulation.py), the forecast row's win total stops "
+                "assuming a flat win rate across all 82 games and instead simulates the "
+                "real schedule game-by-game — some teams play a harder slate than others, "
+                "and this accounts for that."
+            ),
+            "note": "This is expected right after a fresh train.py run — check back once "
+                    "refresh_schedule_simulation.py has also run.",
+        },
     }
 
     if write_output:
