@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-08-12T20:24:42.936818+00:00",
+  "generated_at": "2026-08-17T00:22:03.163791+00:00",
   "note": "PRESEASON PROJECTION -- there's no in-season ranking yet, because the season hasn't tipped off. Every number here starts from that player's real most recent season and ages it forward using a straightforward rule: how have players of the same scoring archetype and age typically trended the following year (see backend/ratings/player_development.py for the actual medians)? That's a lookup against real history, not a model's guess. Check back once games are being played -- these rankings will switch over to real, in-season performance then.",
   "historical_seasons_used": [
     "2025-26",
@@ -10,132 +10,132 @@
     "2021-22",
     "2020-21"
   ],
-  "n_players_projected": 502,
-  "n_qualified_players": 344,
+  "n_players_projected": 499,
+  "n_qualified_players": 343,
   "offense": [
     {
       "subject_id": "1630169",
       "subject_name": "Tyrese Haliburton",
-      "composite_score": 1.908,
+      "composite_score": 1.9049,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6170657439446366,
-          "z_score": 0.7307,
+          "z_score": 0.7276,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2192
+          "contribution": 0.2183
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 18.87746161213957,
-          "z_score": 2.4059,
+          "raw_value": 18.88759951256941,
+          "z_score": 2.4027,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.8421
+          "contribution": 0.841
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.40800000000000003,
-          "z_score": 2.8274,
+          "z_score": 2.8229,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.7069
+          "contribution": 0.7057
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 6.80506329113924,
-          "z_score": -1.3984,
+          "z_score": -1.3993,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.1398
+          "contribution": 0.1399
         }
       ]
     },
     {
       "subject_id": "203999",
       "subject_name": "Nikola Joki\u0107",
-      "composite_score": 1.8948,
+      "composite_score": 1.892,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6582268370607028,
-          "z_score": 1.5344,
+          "z_score": 1.532,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.4603
+          "contribution": 0.4596
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 17.45457216105824,
-          "z_score": 1.9442,
+          "raw_value": 17.46394591682318,
+          "z_score": 1.9412,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6805
+          "contribution": 0.6794
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.4370457516339869,
-          "z_score": 3.1622,
+          "z_score": 3.1573,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.7906
+          "contribution": 0.7893
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.7,
-          "z_score": 0.3657,
+          "z_score": 0.3634,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0366
+          "contribution": -0.0363
         }
       ]
     },
     {
       "subject_id": "1628983",
       "subject_name": "Shai Gilgeous-Alexander",
-      "composite_score": 1.7715,
+      "composite_score": 1.769,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6697499999999998,
-          "z_score": 1.7594,
+          "z_score": 1.7572,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.5278
+          "contribution": 0.5272
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 17.227188697180086,
-          "z_score": 1.8705,
+          "raw_value": 17.236440339550565,
+          "z_score": 1.8674,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6547
+          "contribution": 0.6536
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.31735294117647056,
-          "z_score": 1.7826,
+          "z_score": 1.7792,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4457
+          "contribution": 0.4448
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 6.7275,
-          "z_score": -1.4336,
+          "z_score": -1.4344,
           "weight": 0.1,
           "higher_is_better": false,
           "contribution": 0.1434
@@ -145,590 +145,719 @@
     {
       "subject_id": "203081",
       "subject_name": "Damian Lillard",
-      "composite_score": 1.4928,
+      "composite_score": 1.4902,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6304090909090909,
-          "z_score": 0.9912,
+          "z_score": 0.9884,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2974
+          "contribution": 0.2965
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 17.70649393179927,
-          "z_score": 2.026,
+          "raw_value": 17.71600297894397,
+          "z_score": 2.0229,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.7091
+          "contribution": 0.708
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.3138967971530249,
-          "z_score": 1.7428,
+          "z_score": 1.7394,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4357
+          "contribution": 0.4349
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 8.773333333333333,
-          "z_score": -0.507,
+          "z_score": -0.5085,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0507
+          "contribution": 0.0509
         }
       ]
     },
     {
       "subject_id": "1627750",
       "subject_name": "Jamal Murray",
-      "composite_score": 1.4659,
+      "composite_score": 1.4633,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6322252739891208,
-          "z_score": 1.0267,
+          "z_score": 1.0239,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.308
+          "contribution": 0.3072
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.95140901829454,
-          "z_score": 1.781,
+          "raw_value": 16.960512556699427,
+          "z_score": 1.7779,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6233
+          "contribution": 0.6223
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.3170884792626728,
-          "z_score": 1.7796,
+          "z_score": 1.7762,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4449
+          "contribution": 0.444
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.912654914529915,
-          "z_score": -0.8968,
+          "z_score": -0.8981,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0897
+          "contribution": 0.0898
         }
       ]
     },
     {
       "subject_id": "203507",
       "subject_name": "Giannis Antetokounmpo",
-      "composite_score": 1.4535,
+      "composite_score": 1.451,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6521206930041669,
-          "z_score": 1.4151,
+          "z_score": 1.4127,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.4245
+          "contribution": 0.4238
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.97914293087179,
-          "z_score": 1.4655,
+          "raw_value": 15.987724326152344,
+          "z_score": 1.4625,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5129
+          "contribution": 0.5119
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.338678318375059,
-          "z_score": 2.0284,
+          "z_score": 2.0247,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.5071
+          "contribution": 0.5062
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.695704717530578,
-          "z_score": -0.0892,
+          "z_score": -0.0911,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0089
+          "contribution": 0.0091
         }
       ]
     },
     {
       "subject_id": "1630178",
       "subject_name": "Tyrese Maxey",
-      "composite_score": 1.4084,
+      "composite_score": 1.4056,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5924707085367463,
-          "z_score": 0.2505,
+          "z_score": 0.247,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0751
+          "contribution": 0.0741
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 18.766149326974944,
-          "z_score": 2.3698,
+          "raw_value": 18.776227448559148,
+          "z_score": 2.3666,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.8294
+          "contribution": 0.8283
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.30399389312977093,
-          "z_score": 1.6286,
+          "z_score": 1.6254,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4072
+          "contribution": 0.4064
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.757610350076104,
-          "z_score": -0.967,
+          "z_score": -0.9682,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0967
+          "contribution": 0.0968
         }
       ]
     },
     {
       "subject_id": "1629029",
       "subject_name": "Luka Don\u010di\u0107",
-      "composite_score": 1.3796,
+      "composite_score": 1.3766,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6027197346600331,
-          "z_score": 0.4506,
+          "z_score": 0.4473,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1352
+          "contribution": 0.1342
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.145166269060038,
-          "z_score": 1.5194,
+          "raw_value": 16.153836825060726,
+          "z_score": 1.5164,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5318
+          "contribution": 0.5307
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.41880821917808225,
-          "z_score": 2.952,
+          "z_score": 2.9473,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.738
+          "contribution": 0.7368
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.45232558139535,
-          "z_score": 0.2535,
+          "z_score": 0.2513,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0253
+          "contribution": -0.0251
         }
       ]
     },
     {
       "subject_id": "202710",
       "subject_name": "Jimmy Butler III",
-      "composite_score": 1.2667,
+      "composite_score": 1.2644,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.644993769470405,
-          "z_score": 1.276,
+          "z_score": 1.2734,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3828
+          "contribution": 0.382
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.811569703987095,
-          "z_score": 1.4112,
+          "raw_value": 15.82006110619953,
+          "z_score": 1.4082,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4939
+          "contribution": 0.4929
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.2571851851851852,
-          "z_score": 1.0891,
+          "z_score": 1.0865,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.2723
+          "contribution": 0.2716
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.292307692307694,
-          "z_score": -1.1778,
+          "z_score": -1.1788,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.1178
+          "contribution": 0.1179
         }
       ]
     },
     {
       "subject_id": "1641708",
       "subject_name": "Amen Thompson",
-      "composite_score": 1.2394,
+      "composite_score": 1.2371,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6151527941647794,
-          "z_score": 0.6933,
+          "z_score": 0.6903,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.208
+          "contribution": 0.2071
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 19.71203906839521,
-          "z_score": 2.6767,
+          "raw_value": 19.722625168022923,
+          "z_score": 2.6735,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.9368
+          "contribution": 0.9357
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.20347445255474456,
-          "z_score": 0.47,
+          "z_score": 0.4681,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.1175
+          "contribution": 0.117
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.4,
-          "z_score": 0.2298,
+          "z_score": 0.2276,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.023
+          "contribution": -0.0228
         }
       ]
     },
     {
       "subject_id": "1630200",
       "subject_name": "Tre Jones",
-      "composite_score": 1.2032,
+      "composite_score": 1.2007,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6466369137670196,
-          "z_score": 1.3081,
+          "z_score": 1.3055,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3924
+          "contribution": 0.3917
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 14.09134476137205,
-          "z_score": 0.853,
+          "raw_value": 14.098912338679234,
+          "z_score": 0.8501,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2986
+          "contribution": 0.2975
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.3061560283687943,
-          "z_score": 1.6535,
+          "z_score": 1.6503,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4134
+          "contribution": 0.4126
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.711090190171343,
-          "z_score": -0.9881,
+          "z_score": -0.9893,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0988
+          "contribution": 0.0989
         }
       ]
     },
     {
       "subject_id": "1641718",
       "subject_name": "Keyonte George",
-      "composite_score": 1.202,
+      "composite_score": 1.1995,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6181140638496355,
-          "z_score": 0.7512,
+          "z_score": 0.7481,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2253
+          "contribution": 0.2244
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.94295318323365,
-          "z_score": 1.7782,
+          "raw_value": 16.95205218053997,
+          "z_score": 1.7752,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6224
+          "contribution": 0.6213
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.2989470509591767,
-          "z_score": 1.5705,
+          "z_score": 1.5673,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.3926
+          "contribution": 0.3918
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.73932584269663,
-          "z_score": 0.3835,
+          "z_score": 0.3812,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0383
+          "contribution": -0.0381
         }
       ]
     },
     {
       "subject_id": "1630595",
       "subject_name": "Cade Cunningham",
-      "composite_score": 1.176,
+      "composite_score": 1.1728,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5728787454241424,
-          "z_score": -0.1321,
+          "z_score": -0.1359,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.0396
+          "contribution": -0.0408
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.406855072533205,
-          "z_score": 1.2798,
+          "raw_value": 15.415129127905239,
+          "z_score": 1.2769,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4479
+          "contribution": 0.4469
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.43969875271980635,
-          "z_score": 3.1928,
+          "z_score": 3.1878,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.7982
+          "contribution": 0.797
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.567034578573633,
-          "z_score": 0.3054,
+          "z_score": 0.3032,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0305
+          "contribution": -0.0303
         }
       ]
     },
     {
       "subject_id": "1628378",
       "subject_name": "Donovan Mitchell",
-      "composite_score": 1.153,
+      "composite_score": 1.1505,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6230773198638762,
-          "z_score": 0.8481,
+          "z_score": 0.8451,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2544
+          "contribution": 0.2535
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.10527632772139,
-          "z_score": 1.5064,
+          "raw_value": 16.11392546133692,
+          "z_score": 1.5035,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5273
+          "contribution": 0.5262
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.2830387096774194,
-          "z_score": 1.3871,
+          "z_score": 1.3842,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.3468
+          "contribution": 0.346
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.351319444444444,
-          "z_score": -0.2452,
+          "z_score": -0.247,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0245
+          "contribution": 0.0247
         }
       ]
     },
     {
       "subject_id": "1630530",
       "subject_name": "Trey Murphy III",
-      "composite_score": 1.1367,
+      "composite_score": 1.1345,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6205280701754387,
-          "z_score": 0.7983,
+          "z_score": 0.7953,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2395
+          "contribution": 0.2386
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 18.7264479662275,
-          "z_score": 2.3569,
+          "raw_value": 18.736504766701355,
+          "z_score": 2.3538,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.8249
+          "contribution": 0.8238
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.1552340425531915,
-          "z_score": -0.086,
+          "z_score": -0.0873,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": -0.0215
+          "contribution": -0.0218
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.822549019607844,
-          "z_score": -0.9376,
+          "z_score": -0.9388,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0938
+          "contribution": 0.0939
         }
       ]
     },
     {
       "subject_id": "1628973",
       "subject_name": "Jalen Brunson",
-      "composite_score": 1.1185,
+      "composite_score": 1.1156,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5895348214046463,
-          "z_score": 0.1931,
+          "z_score": 0.1896,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0579
+          "contribution": 0.0569
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.769067178382638,
-          "z_score": 1.3974,
+          "raw_value": 15.777535755154796,
+          "z_score": 1.3944,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4891
+          "contribution": 0.488
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.32666497695852537,
-          "z_score": 1.8899,
+          "z_score": 1.8864,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4725
+          "contribution": 0.4716
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.707131410256411,
-          "z_score": -0.9899,
+          "z_score": -0.9911,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.099
+          "contribution": 0.0991
         }
       ]
     },
     {
       "subject_id": "1642285",
       "subject_name": "Cam Spencer",
-      "composite_score": 1.089,
+      "composite_score": 1.0865,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.649,
-          "z_score": 1.3542,
+          "z_score": 1.3517,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.4063
+          "contribution": 0.4055
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 12.622748365620414,
-          "z_score": 0.3765,
+          "raw_value": 12.629527251929959,
+          "z_score": 0.3737,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1318
+          "contribution": 0.1308
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.332,
-          "z_score": 1.9514,
+          "z_score": 1.9479,
+          "weight": 0.25,
+          "higher_is_better": true,
+          "contribution": 0.487
+        },
+        {
+          "name": "Turnover Rate (TOV%)",
+          "column": "TM_TOV_PCT",
+          "raw_value": 8.5,
+          "z_score": -0.6322,
+          "weight": 0.1,
+          "higher_is_better": false,
+          "contribution": 0.0632
+        }
+      ]
+    },
+    {
+      "subject_id": "1630559",
+      "subject_name": "Austin Reaves",
+      "composite_score": 1.0845,
+      "components": [
+        {
+          "name": "True Shooting %",
+          "column": "TS_PCT",
+          "raw_value": 0.643191452991453,
+          "z_score": 1.2382,
+          "weight": 0.3,
+          "higher_is_better": true,
+          "contribution": 0.3715
+        },
+        {
+          "name": "Usage-Adjusted Scoring",
+          "column": "USAGE_ADJ_PTS",
+          "raw_value": 16.82342315118824,
+          "z_score": 1.7335,
+          "weight": 0.35,
+          "higher_is_better": true,
+          "contribution": 0.6067
+        },
+        {
+          "name": "Playmaking (AST%)",
+          "column": "AST_PCT",
+          "raw_value": 0.23354014598540146,
+          "z_score": 0.8143,
+          "weight": 0.25,
+          "higher_is_better": true,
+          "contribution": 0.2036
+        },
+        {
+          "name": "Turnover Rate (TOV%)",
+          "column": "TM_TOV_PCT",
+          "raw_value": 12.045054945054945,
+          "z_score": 0.9721,
+          "weight": 0.1,
+          "higher_is_better": false,
+          "contribution": -0.0972
+        }
+      ]
+    },
+    {
+      "subject_id": "1630162",
+      "subject_name": "Anthony Edwards",
+      "composite_score": 1.054,
+      "components": [
+        {
+          "name": "True Shooting %",
+          "column": "TS_PCT",
+          "raw_value": 0.626713095614709,
+          "z_score": 0.9162,
+          "weight": 0.3,
+          "higher_is_better": true,
+          "contribution": 0.2749
+        },
+        {
+          "name": "Usage-Adjusted Scoring",
+          "column": "USAGE_ADJ_PTS",
+          "raw_value": 17.794057330241507,
+          "z_score": 2.0482,
+          "weight": 0.35,
+          "higher_is_better": true,
+          "contribution": 0.7169
+        },
+        {
+          "name": "Playmaking (AST%)",
+          "column": "AST_PCT",
+          "raw_value": 0.17792461156568906,
+          "z_score": 0.174,
+          "weight": 0.25,
+          "higher_is_better": true,
+          "contribution": 0.0435
+        },
+        {
+          "name": "Turnover Rate (TOV%)",
+          "column": "TM_TOV_PCT",
+          "raw_value": 9.48070392096326,
+          "z_score": -0.1884,
+          "weight": 0.1,
+          "higher_is_better": false,
+          "contribution": 0.0188
+        }
+      ]
+    },
+    {
+      "subject_id": "1630552",
+      "subject_name": "Jalen Johnson",
+      "composite_score": 1.0442,
+      "components": [
+        {
+          "name": "True Shooting %",
+          "column": "TS_PCT",
+          "raw_value": 0.5901463671833808,
+          "z_score": 0.2016,
+          "weight": 0.3,
+          "higher_is_better": true,
+          "contribution": 0.0605
+        },
+        {
+          "name": "Usage-Adjusted Scoring",
+          "column": "USAGE_ADJ_PTS",
+          "raw_value": 16.271199440828084,
+          "z_score": 1.5544,
+          "weight": 0.35,
+          "higher_is_better": true,
+          "contribution": 0.5441
+        },
+        {
+          "name": "Playmaking (AST%)",
+          "column": "AST_PCT",
+          "raw_value": 0.33233045263706296,
+          "z_score": 1.9517,
           "weight": 0.25,
           "higher_is_better": true,
           "contribution": 0.4879
@@ -736,309 +865,180 @@
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
-          "raw_value": 8.5,
-          "z_score": -0.6308,
-          "weight": 0.1,
-          "higher_is_better": false,
-          "contribution": 0.0631
-        }
-      ]
-    },
-    {
-      "subject_id": "1630559",
-      "subject_name": "Austin Reaves",
-      "composite_score": 1.0867,
-      "components": [
-        {
-          "name": "True Shooting %",
-          "column": "TS_PCT",
-          "raw_value": 0.643191452991453,
-          "z_score": 1.2408,
-          "weight": 0.3,
-          "higher_is_better": true,
-          "contribution": 0.3722
-        },
-        {
-          "name": "Usage-Adjusted Scoring",
-          "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.8143931953867,
-          "z_score": 1.7365,
-          "weight": 0.35,
-          "higher_is_better": true,
-          "contribution": 0.6078
-        },
-        {
-          "name": "Playmaking (AST%)",
-          "column": "AST_PCT",
-          "raw_value": 0.23354014598540146,
-          "z_score": 0.8166,
-          "weight": 0.25,
-          "higher_is_better": true,
-          "contribution": 0.2041
-        },
-        {
-          "name": "Turnover Rate (TOV%)",
-          "column": "TM_TOV_PCT",
-          "raw_value": 12.045054945054945,
-          "z_score": 0.9749,
-          "weight": 0.1,
-          "higher_is_better": false,
-          "contribution": -0.0975
-        }
-      ]
-    },
-    {
-      "subject_id": "1630162",
-      "subject_name": "Anthony Edwards",
-      "composite_score": 1.0562,
-      "components": [
-        {
-          "name": "True Shooting %",
-          "column": "TS_PCT",
-          "raw_value": 0.626713095614709,
-          "z_score": 0.9191,
-          "weight": 0.3,
-          "higher_is_better": true,
-          "contribution": 0.2757
-        },
-        {
-          "name": "Usage-Adjusted Scoring",
-          "column": "USAGE_ADJ_PTS",
-          "raw_value": 17.784506387500652,
-          "z_score": 2.0513,
-          "weight": 0.35,
-          "higher_is_better": true,
-          "contribution": 0.718
-        },
-        {
-          "name": "Playmaking (AST%)",
-          "column": "AST_PCT",
-          "raw_value": 0.17792461156568906,
-          "z_score": 0.1755,
-          "weight": 0.25,
-          "higher_is_better": true,
-          "contribution": 0.0439
-        },
-        {
-          "name": "Turnover Rate (TOV%)",
-          "column": "TM_TOV_PCT",
-          "raw_value": 9.48070392096326,
-          "z_score": -0.1866,
-          "weight": 0.1,
-          "higher_is_better": false,
-          "contribution": 0.0187
-        }
-      ]
-    },
-    {
-      "subject_id": "1630552",
-      "subject_name": "Jalen Johnson",
-      "composite_score": 1.047,
-      "components": [
-        {
-          "name": "True Shooting %",
-          "column": "TS_PCT",
-          "raw_value": 0.5901463671833808,
-          "z_score": 0.2051,
-          "weight": 0.3,
-          "higher_is_better": true,
-          "contribution": 0.0615
-        },
-        {
-          "name": "Usage-Adjusted Scoring",
-          "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.262465890559014,
-          "z_score": 1.5574,
-          "weight": 0.35,
-          "higher_is_better": true,
-          "contribution": 0.5451
-        },
-        {
-          "name": "Playmaking (AST%)",
-          "column": "AST_PCT",
-          "raw_value": 0.33233045263706296,
-          "z_score": 1.9552,
-          "weight": 0.25,
-          "higher_is_better": true,
-          "contribution": 0.4888
-        },
-        {
-          "name": "Turnover Rate (TOV%)",
-          "column": "TM_TOV_PCT",
           "raw_value": 10.96206390861377,
-          "z_score": 0.4844,
+          "z_score": 0.482,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0484
+          "contribution": -0.0482
         }
       ]
     },
     {
       "subject_id": "1631105",
       "subject_name": "Jalen Duren",
-      "composite_score": 1.035,
+      "composite_score": 1.0334,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.688,
-          "z_score": 2.1157,
+          "z_score": 2.1139,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.6347
+          "contribution": 0.6342
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.023850506360095,
-          "z_score": 1.48,
+          "raw_value": 16.032455911274894,
+          "z_score": 1.477,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.518
+          "contribution": 0.517
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.12185333333333333,
-          "z_score": -0.4708,
+          "z_score": -0.4716,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": -0.1177
+          "contribution": -0.1179
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.892079207920792,
-          "z_score": -0.0003,
+          "z_score": -0.0022,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0
+          "contribution": 0.0002
         }
       ]
     },
     {
       "subject_id": "1630166",
       "subject_name": "Deni Avdija",
-      "composite_score": 1.0199,
+      "composite_score": 1.0173,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6045619474864758,
-          "z_score": 0.4866,
+          "z_score": 0.4833,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.146
+          "contribution": 0.145
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.103685167920027,
-          "z_score": 1.5059,
+          "raw_value": 16.112333447023442,
+          "z_score": 1.5029,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5271
+          "contribution": 0.526
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.33354885496183206,
-          "z_score": 1.9693,
+          "z_score": 1.9657,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4923
+          "contribution": 0.4914
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 13.104071537290714,
-          "z_score": 1.4545,
+          "z_score": 1.4514,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.1455
+          "contribution": -0.1451
         }
       ]
     },
     {
       "subject_id": "201935",
       "subject_name": "James Harden",
-      "composite_score": 1.0045,
+      "composite_score": 1.0017,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.590843674949091,
-          "z_score": 0.2187,
+          "z_score": 0.2152,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0656
+          "contribution": 0.0646
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.0259681862653,
-          "z_score": 1.1563,
+          "raw_value": 15.034037691184134,
+          "z_score": 1.1533,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4047
+          "contribution": 0.4037
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.3783481711162497,
-          "z_score": 2.4857,
+          "z_score": 2.4815,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.6214
+          "contribution": 0.6204
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 11.818078953985419,
-          "z_score": 0.8721,
+          "z_score": 0.8694,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0872
+          "contribution": -0.0869
         }
       ]
     },
     {
       "subject_id": "1628374",
       "subject_name": "Lauri Markkanen",
-      "composite_score": 0.9608,
+      "composite_score": 0.9587,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6179951231276293,
-          "z_score": 0.7488,
+          "z_score": 0.7458,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2247
+          "contribution": 0.2237
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 17.819000818443477,
-          "z_score": 2.0625,
+          "raw_value": 17.82857028597932,
+          "z_score": 2.0594,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.7219
+          "contribution": 0.7208
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.10746958525345623,
-          "z_score": -0.6366,
+          "z_score": -0.6372,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": -0.1591
+          "contribution": -0.1593
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 6.062943376068376,
-          "z_score": -1.7346,
+          "z_score": -1.7352,
           "weight": 0.1,
           "higher_is_better": false,
           "contribution": 0.1735
@@ -1048,31 +1048,31 @@
     {
       "subject_id": "1629637",
       "subject_name": "Jaxson Hayes",
-      "composite_score": 0.9597,
+      "composite_score": 0.9586,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.7694674735249621,
-          "z_score": 3.7063,
+          "z_score": 3.7059,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 1.1119
+          "contribution": 1.1118
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 11.243094224498973,
-          "z_score": -0.0711,
+          "raw_value": 11.249132185116407,
+          "z_score": -0.0738,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": -0.0249
+          "contribution": -0.0258
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.07653900709219857,
-          "z_score": -0.9931,
+          "z_score": -0.9933,
           "weight": 0.25,
           "higher_is_better": true,
           "contribution": -0.2483
@@ -1081,557 +1081,557 @@
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.223046507249106,
-          "z_score": -1.2091,
+          "z_score": -1.2101,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.1209
+          "contribution": 0.121
         }
       ]
     },
     {
       "subject_id": "2544",
       "subject_name": "LeBron James",
-      "composite_score": 0.9565,
+      "composite_score": 0.9538,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.594,
-          "z_score": 0.2803,
+          "z_score": 0.2769,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0841
+          "contribution": 0.0831
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.058580283227927,
-          "z_score": 1.1668,
+          "raw_value": 15.066667302058251,
+          "z_score": 1.1639,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4084
+          "contribution": 0.4074
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.338,
-          "z_score": 2.0206,
+          "z_score": 2.0169,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.5051
+          "contribution": 0.5042
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.8,
-          "z_score": 0.411,
+          "z_score": 0.4087,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0411
+          "contribution": -0.0409
         }
       ]
     },
     {
       "subject_id": "1626164",
       "subject_name": "Devin Booker",
-      "composite_score": 0.9268,
+      "composite_score": 0.9241,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5946170181408933,
-          "z_score": 0.2924,
+          "z_score": 0.2889,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0877
+          "contribution": 0.0867
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.26252886410836,
-          "z_score": 1.233,
+          "raw_value": 15.270725410927573,
+          "z_score": 1.2301,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4316
+          "contribution": 0.4305
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.31176820276497696,
-          "z_score": 1.7182,
+          "z_score": 1.7149,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.4296
+          "contribution": 0.4287
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.378936965811965,
-          "z_score": 0.2203,
+          "z_score": 0.2181,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.022
+          "contribution": -0.0218
         }
       ]
     },
     {
       "subject_id": "1630578",
       "subject_name": "Alperen Sengun",
-      "composite_score": 0.9058,
+      "composite_score": 0.9032,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5892625250501001,
-          "z_score": 0.1878,
+          "z_score": 0.1843,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0563
+          "contribution": 0.0553
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.54418874909301,
-          "z_score": 1.6489,
+          "raw_value": 16.553073595036643,
+          "z_score": 1.6458,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5771
+          "contribution": 0.576
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.2840583941605839,
-          "z_score": 1.3988,
+          "z_score": 1.3959,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.3497
+          "contribution": 0.349
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 11.6,
-          "z_score": 0.7733,
+          "z_score": 0.7707,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0773
+          "contribution": -0.0771
         }
       ]
     },
     {
       "subject_id": "1630245",
       "subject_name": "Ayo Dosunmu",
-      "composite_score": 0.8704,
+      "composite_score": 0.8682,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6395310136157337,
-          "z_score": 1.1693,
+          "z_score": 1.1667,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3508
+          "contribution": 0.35
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 13.96502641001727,
-          "z_score": 0.812,
+          "raw_value": 13.97252614966202,
+          "z_score": 0.8092,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2842
+          "contribution": 0.2832
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.21775886524822696,
-          "z_score": 0.6347,
+          "z_score": 0.6326,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.1587
+          "contribution": 0.1581
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 8.19913387309358,
-          "z_score": -0.767,
+          "z_score": -0.7684,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0767
+          "contribution": 0.0768
         }
       ]
     },
     {
       "subject_id": "1641705",
       "subject_name": "Victor Wembanyama",
-      "composite_score": 0.8619,
+      "composite_score": 0.8598,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6353684794250769,
-          "z_score": 1.0881,
+          "z_score": 1.0853,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3264
+          "contribution": 0.3256
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.619341763399932,
-          "z_score": 1.3488,
+          "raw_value": 15.627729932044126,
+          "z_score": 1.3458,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4721
+          "contribution": 0.471
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.17769579952118894,
-          "z_score": 0.1729,
+          "z_score": 0.1713,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0432
+          "contribution": 0.0428
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.446629213483146,
-          "z_score": -0.202,
+          "z_score": -0.2038,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0202
+          "contribution": 0.0204
         }
       ]
     },
     {
       "subject_id": "1630217",
       "subject_name": "Desmond Bane",
-      "composite_score": 0.857,
+      "composite_score": 0.8548,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6090752136752137,
-          "z_score": 0.5747,
+          "z_score": 0.5715,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1724
+          "contribution": 0.1714
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.70679035726478,
-          "z_score": 1.7016,
+          "raw_value": 16.715762526332004,
+          "z_score": 1.6986,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5956
+          "contribution": 0.5945
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.18722627737226277,
-          "z_score": 0.2827,
+          "z_score": 0.281,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0707
+          "contribution": 0.0703
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.486813186813187,
-          "z_score": -0.1838,
+          "z_score": -0.1856,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0184
+          "contribution": 0.0186
         }
       ]
     },
     {
       "subject_id": "202681",
       "subject_name": "Kyrie Irving",
-      "composite_score": 0.8316,
+      "composite_score": 0.8293,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.603975085324232,
-          "z_score": 0.4751,
+          "z_score": 0.4718,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1425
+          "contribution": 0.1415
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.57596615458652,
-          "z_score": 1.6592,
+          "raw_value": 16.58486806618122,
+          "z_score": 1.6561,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5807
+          "contribution": 0.5796
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.18,
-          "z_score": 0.1994,
+          "z_score": 0.1978,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0499
+          "contribution": 0.0495
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 8.602021978021977,
-          "z_score": -0.5846,
+          "z_score": -0.5861,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0585
+          "contribution": 0.0586
         }
       ]
     },
     {
       "subject_id": "1642851",
       "subject_name": "Kon Knueppel",
-      "composite_score": 0.8285,
+      "composite_score": 0.8265,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.633,
-          "z_score": 1.0418,
+          "z_score": 1.039,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3125
+          "contribution": 0.3117
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.16802645596442,
-          "z_score": 1.5268,
+          "raw_value": 16.17670928873745,
+          "z_score": 1.5238,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5344
+          "contribution": 0.5333
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.158,
-          "z_score": -0.0541,
+          "z_score": -0.0554,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": -0.0135
+          "contribution": -0.0139
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.0,
-          "z_score": 0.0486,
+          "z_score": 0.0466,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0049
+          "contribution": -0.0047
         }
       ]
     },
     {
       "subject_id": "1629627",
       "subject_name": "Zion Williamson",
-      "composite_score": 0.8056,
+      "composite_score": 0.8036,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.63952,
-          "z_score": 1.1691,
+          "z_score": 1.1664,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3507
+          "contribution": 0.3499
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 14.755181008166037,
-          "z_score": 1.0684,
+          "raw_value": 14.763105090278263,
+          "z_score": 1.0655,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3739
+          "contribution": 0.3729
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.18946666666666667,
-          "z_score": 0.3086,
+          "z_score": 0.3068,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0771
+          "contribution": 0.0767
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.808695652173913,
-          "z_score": -0.038,
+          "z_score": -0.04,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0038
+          "contribution": 0.004
         }
       ]
     },
     {
       "subject_id": "201142",
       "subject_name": "Kevin Durant",
-      "composite_score": 0.8053,
+      "composite_score": 0.8031,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6155510514476578,
-          "z_score": 0.7011,
+          "z_score": 0.698,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2103
+          "contribution": 0.2094
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.7561528926946,
-          "z_score": 1.7176,
+          "raw_value": 16.76515157128304,
+          "z_score": 1.7146,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6012
+          "contribution": 0.6001
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.1906800563304721,
-          "z_score": 0.3225,
+          "z_score": 0.3208,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0806
+          "contribution": 0.0802
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 11.810297639411564,
-          "z_score": 0.8686,
+          "z_score": 0.8659,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0869
+          "contribution": -0.0866
         }
       ]
     },
     {
       "subject_id": "1629614",
       "subject_name": "Andrew Nembhard",
-      "composite_score": 0.7775,
+      "composite_score": 0.7745,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.562110552763819,
-          "z_score": -0.3423,
+          "z_score": -0.3463,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.1027
+          "contribution": -0.1039
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 13.656803382813674,
-          "z_score": 0.712,
+          "raw_value": 13.66413759520565,
+          "z_score": 0.7092,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2492
+          "contribution": 0.2482
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.3786046511627907,
-          "z_score": 2.4886,
+          "z_score": 2.4844,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.6222
+          "contribution": 0.6211
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.696969696969697,
-          "z_score": -0.0886,
+          "z_score": -0.0905,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0089
+          "contribution": 0.0091
         }
       ]
     },
     {
       "subject_id": "1629639",
       "subject_name": "Tyler Herro",
-      "composite_score": 0.7666,
+      "composite_score": 0.7643,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5999832495812395,
-          "z_score": 0.3972,
+          "z_score": 0.3938,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1191
+          "contribution": 0.1181
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.563972456100766,
-          "z_score": 1.3308,
+          "raw_value": 15.572330889363382,
+          "z_score": 1.3279,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4658
+          "contribution": 0.4647
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.2036279069767442,
-          "z_score": 0.4718,
+          "z_score": 0.4699,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.1179
+          "contribution": 0.1175
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 8.484848484848486,
-          "z_score": -0.6376,
+          "z_score": -0.6391,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0638
+          "contribution": 0.0639
         }
       ]
     },
     {
       "subject_id": "1641750",
       "subject_name": "Ryan Kalkbrenner",
-      "composite_score": 0.7288,
+      "composite_score": 0.728,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.762,
-          "z_score": 3.5605,
+          "z_score": 3.56,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 1.0682
+          "contribution": 1.068
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 12.696212499455244,
-          "z_score": 0.4003,
+          "raw_value": 12.703030838742597,
+          "z_score": 0.3976,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1401
+          "contribution": 0.1391
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.053,
-          "z_score": -1.2644,
+          "z_score": -1.2643,
           "weight": 0.25,
           "higher_is_better": true,
           "contribution": -0.3161
@@ -1640,50 +1640,50 @@
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 13.5,
-          "z_score": 1.6339,
+          "z_score": 1.6306,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.1634
+          "contribution": -0.1631
         }
       ]
     },
     {
       "subject_id": "1628436",
       "subject_name": "Luke Kornet",
-      "composite_score": 0.7185,
+      "composite_score": 0.7168,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6902759259259258,
-          "z_score": 2.1601,
+          "z_score": 2.1583,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.648
+          "contribution": 0.6475
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 11.406665678284142,
-          "z_score": -0.0181,
+          "raw_value": 11.412791482868403,
+          "z_score": -0.0208,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": -0.0063
+          "contribution": -0.0073
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.12715384615384617,
-          "z_score": -0.4097,
+          "z_score": -0.4106,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": -0.1024
+          "contribution": -0.1026
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 5.936470588235293,
-          "z_score": -1.7919,
+          "z_score": -1.7924,
           "weight": 0.1,
           "higher_is_better": false,
           "contribution": 0.1792
@@ -1693,203 +1693,203 @@
     {
       "subject_id": "1630567",
       "subject_name": "Scottie Barnes",
-      "composite_score": 0.7145,
+      "composite_score": 0.712,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5860833973576776,
-          "z_score": 0.1258,
+          "z_score": 0.1222,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0377
+          "contribution": 0.0367
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.281920749547137,
-          "z_score": 1.2393,
+          "raw_value": 15.290127710531548,
+          "z_score": 1.2364,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4338
+          "contribution": 0.4327
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.260751585915234,
-          "z_score": 1.1302,
+          "z_score": 1.1276,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.2826
+          "contribution": 0.2819
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 10.764549243593702,
-          "z_score": 0.3949,
+          "z_score": 0.3926,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0395
+          "contribution": -0.0393
         }
       ]
     },
     {
       "subject_id": "1628969",
       "subject_name": "Mikal Bridges",
-      "composite_score": 0.7093,
+      "composite_score": 0.7069,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.596649896835392,
-          "z_score": 0.3321,
+          "z_score": 0.3287,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0996
+          "contribution": 0.0986
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.20680360659234,
-          "z_score": 1.2149,
+          "raw_value": 15.214970226871445,
+          "z_score": 1.212,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4252
+          "contribution": 0.4242
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.16812073732718893,
-          "z_score": 0.0625,
+          "z_score": 0.0611,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0156
+          "contribution": 0.0153
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 6.165705128205128,
-          "z_score": -1.688,
+          "z_score": -1.6887,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.1688
+          "contribution": 0.1689
         }
       ]
     },
     {
       "subject_id": "1630532",
       "subject_name": "Franz Wagner",
-      "composite_score": 0.7001,
+      "composite_score": 0.6978,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5972565643783612,
-          "z_score": 0.3439,
+          "z_score": 0.3405,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1032
+          "contribution": 0.1022
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 15.35447821166947,
-          "z_score": 1.2628,
+          "raw_value": 15.362724138715185,
+          "z_score": 1.2599,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.442
+          "contribution": 0.441
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.17894716680457234,
-          "z_score": 0.1873,
+          "z_score": 0.1857,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0468
+          "contribution": 0.0464
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.505557270762581,
-          "z_score": -1.0812,
+          "z_score": -1.0823,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.1081
+          "contribution": 0.1082
         }
       ]
     },
     {
       "subject_id": "1630193",
       "subject_name": "Immanuel Quickley",
-      "composite_score": 0.6878,
+      "composite_score": 0.685,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5645605306799336,
-          "z_score": -0.2945,
+          "z_score": -0.2984,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.0883
+          "contribution": -0.0895
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 14.119592445592104,
-          "z_score": 0.8622,
+          "raw_value": 14.127175192958479,
+          "z_score": 0.8593,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3018
+          "contribution": 0.3008
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.28245205479452057,
-          "z_score": 1.3803,
+          "z_score": 1.3774,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.3451
+          "contribution": 0.3443
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.037209302325581,
-          "z_score": -1.2933,
+          "z_score": -1.2943,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.1293
+          "contribution": 0.1294
         }
       ]
     },
     {
       "subject_id": "203501",
       "subject_name": "Tim Hardaway Jr.",
-      "composite_score": 0.6796,
+      "composite_score": 0.6777,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6334545454545455,
-          "z_score": 1.0507,
+          "z_score": 1.0479,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3152
+          "contribution": 0.3144
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 14.589688179458866,
-          "z_score": 1.0147,
+          "raw_value": 14.597523385754322,
+          "z_score": 1.0118,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3551
+          "contribution": 0.3541
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.07348754448398576,
-          "z_score": -1.0283,
+          "z_score": -1.0285,
           "weight": 0.25,
           "higher_is_better": true,
           "contribution": -0.2571
@@ -1898,7 +1898,7 @@
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 4.013333333333334,
-          "z_score": -2.6629,
+          "z_score": -2.6628,
           "weight": 0.1,
           "higher_is_better": false,
           "contribution": 0.2663
@@ -1908,258 +1908,258 @@
     {
       "subject_id": "1628368",
       "subject_name": "De'Aaron Fox",
-      "composite_score": 0.6677,
+      "composite_score": 0.665,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5799760683760683,
-          "z_score": 0.0065,
+          "z_score": 0.0028,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.002
+          "contribution": 0.0008
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 14.31009648955799,
-          "z_score": 0.924,
+          "raw_value": 14.317781544695869,
+          "z_score": 0.9211,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3234
+          "contribution": 0.3224
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.28182481751824817,
-          "z_score": 1.3731,
+          "z_score": 1.3702,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.3433
+          "contribution": 0.3425
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.913186813186813,
-          "z_score": 0.0093,
+          "z_score": 0.0073,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0009
+          "contribution": -0.0007
         }
       ]
     },
     {
       "subject_id": "1629638",
       "subject_name": "Nickeil Alexander-Walker",
-      "composite_score": 0.6519,
+      "composite_score": 0.6497,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.596849087893864,
-          "z_score": 0.336,
+          "z_score": 0.3326,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1008
+          "contribution": 0.0998
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 16.039138311472176,
-          "z_score": 1.485,
+          "raw_value": 16.047751926508084,
+          "z_score": 1.482,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5197
+          "contribution": 0.5187
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.16773972602739728,
-          "z_score": 0.0581,
+          "z_score": 0.0567,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.0145
+          "contribution": 0.0142
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.52093023255814,
-          "z_score": -0.1684,
+          "z_score": -0.1702,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0168
+          "contribution": 0.017
         }
       ]
     },
     {
       "subject_id": "1629645",
       "subject_name": "Kevin Porter Jr.",
-      "composite_score": 0.6426,
+      "composite_score": 0.6397,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.5651005025125628,
-          "z_score": -0.2839,
+          "z_score": -0.2879,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.0852
+          "contribution": -0.0864
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 13.882111191105007,
-          "z_score": 0.7851,
+          "raw_value": 13.889566402187032,
+          "z_score": 0.7823,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2748
+          "contribution": 0.2738
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.3438139534883721,
-          "z_score": 2.0876,
+          "z_score": 2.0839,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.5219
+          "contribution": 0.521
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 11.414141414141415,
-          "z_score": 0.6891,
+          "z_score": 0.6866,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0689
+          "contribution": -0.0687
         }
       ]
     },
     {
       "subject_id": "202695",
       "subject_name": "Kawhi Leonard",
-      "composite_score": 0.636,
+      "composite_score": 0.6339,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6360674157303371,
-          "z_score": 1.1017,
+          "z_score": 1.099,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3305
+          "contribution": 0.3297
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 12.99099540877285,
-          "z_score": 0.496,
+          "raw_value": 12.997972057468766,
+          "z_score": 0.4932,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1736
+          "contribution": 0.1726
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.1703474178403756,
-          "z_score": 0.0882,
+          "z_score": 0.0867,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": 0.022
+          "contribution": 0.0217
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 7.467889908256881,
-          "z_score": -1.0982,
+          "z_score": -1.0993,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.1098
+          "contribution": 0.1099
         }
       ]
     },
     {
       "subject_id": "1629674",
       "subject_name": "Neemias Queta",
-      "composite_score": 0.6332,
+      "composite_score": 0.6317,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.684196671709531,
-          "z_score": 2.0414,
+          "z_score": 2.0395,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.6124
+          "contribution": 0.6119
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 13.076106275996601,
-          "z_score": 0.5236,
+          "raw_value": 13.083128632400214,
+          "z_score": 0.5208,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1833
+          "contribution": 0.1823
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.09809929078014185,
-          "z_score": -0.7446,
+          "z_score": -0.7451,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": -0.1861
+          "contribution": -0.1863
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 9.370438712106948,
-          "z_score": -0.2365,
+          "z_score": -0.2383,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": 0.0237
+          "contribution": 0.0238
         }
       ]
     },
     {
       "subject_id": "1627751",
       "subject_name": "Jakob Poeltl",
-      "composite_score": 0.6329,
+      "composite_score": 0.6315,
       "components": [
         {
           "name": "True Shooting %",
           "column": "TS_PCT",
           "raw_value": 0.6992925925925925,
-          "z_score": 2.3362,
+          "z_score": 2.3345,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.7009
+          "contribution": 0.7004
         },
         {
           "name": "Usage-Adjusted Scoring",
           "column": "USAGE_ADJ_PTS",
-          "raw_value": 12.518084385399003,
-          "z_score": 0.3426,
+          "raw_value": 12.524807063250451,
+          "z_score": 0.3398,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1199
+          "contribution": 0.1189
         },
         {
           "name": "Playmaking (AST%)",
           "column": "AST_PCT",
           "raw_value": 0.12380769230769231,
-          "z_score": -0.4482,
+          "z_score": -0.4491,
           "weight": 0.25,
           "higher_is_better": true,
-          "contribution": -0.1121
+          "contribution": -0.1123
         },
         {
           "name": "Turnover Rate (TOV%)",
           "column": "TM_TOV_PCT",
           "raw_value": 11.565882352941177,
-          "z_score": 0.7578,
+          "z_score": 0.7553,
           "weight": 0.1,
           "higher_is_better": false,
-          "contribution": -0.0758
+          "contribution": -0.0755
         }
       ]
     }
@@ -2168,1700 +2168,1700 @@
     {
       "subject_id": "1641705",
       "subject_name": "Victor Wembanyama",
-      "composite_score": 3.1268,
+      "composite_score": 3.125,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 4.829937930416336,
-          "z_score": 3.8839,
+          "z_score": 3.8782,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 1.3594
+          "contribution": 1.3574
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.285,
-          "z_score": 3.3431,
+          "z_score": 3.3404,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 1.0029
+          "contribution": 1.0021
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 104.96039554775149,
-          "z_score": -2.1844,
+          "z_score": -2.1873,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.7645
+          "contribution": 0.7655
         }
       ]
     },
     {
       "subject_id": "1629680",
       "subject_name": "Matisse Thybulle",
-      "composite_score": 2.5759,
+      "composite_score": 2.5736,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 5.54980445014031,
-          "z_score": 4.8628,
+          "z_score": 4.8561,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 1.702
+          "contribution": 1.6996
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.08743499999999998,
-          "z_score": -0.8265,
+          "z_score": -0.8295,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.2479
+          "contribution": -0.2489
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 100.70284037904453,
-          "z_score": -3.2052,
+          "z_score": -3.2082,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 1.1218
+          "contribution": 1.1229
         }
       ]
     },
     {
       "subject_id": "1629057",
       "subject_name": "Robert Williams III",
-      "composite_score": 2.4045,
+      "composite_score": 2.4029,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 4.357894736842105,
-          "z_score": 3.242,
+          "z_score": 3.237,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 1.1347
+          "contribution": 1.133
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.24237288135593218,
-          "z_score": 2.4435,
+          "z_score": 2.4407,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.733
+          "contribution": 0.7322
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 107.67433628318584,
-          "z_score": -1.5336,
+          "z_score": -1.5365,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.5368
+          "contribution": 0.5378
         }
       ]
     },
     {
       "subject_id": "1631096",
       "subject_name": "Chet Holmgren",
-      "composite_score": 2.0304,
+      "composite_score": 2.0296,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.942050241244098,
-          "z_score": 1.3167,
+          "z_score": 1.3138,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4608
+          "contribution": 0.4598
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.21668905959031656,
-          "z_score": 1.9014,
+          "z_score": 1.8986,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.5704
+          "contribution": 0.5696
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 102.16444008958567,
-          "z_score": -2.8548,
+          "z_score": -2.8577,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.9992
+          "contribution": 1.0002
         }
       ]
     },
     {
       "subject_id": "1628392",
       "subject_name": "Isaiah Hartenstein",
-      "composite_score": 1.8808,
+      "composite_score": 1.8801,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.6394332939787484,
-          "z_score": 0.9052,
+          "z_score": 0.9027,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3168
+          "contribution": 0.3159
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.23558644067796608,
-          "z_score": 2.3002,
+          "z_score": 2.2974,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.6901
+          "contribution": 0.6892
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 103.65663716814159,
-          "z_score": -2.497,
+          "z_score": -2.4999,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.8739
+          "contribution": 0.875
         }
       ]
     },
     {
       "subject_id": "1629011",
       "subject_name": "Mitchell Robinson",
-      "composite_score": 1.7712,
+      "composite_score": 1.7699,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.8020408163265302,
-          "z_score": 2.4861,
+          "z_score": 2.482,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.8701
+          "contribution": 0.8687
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.22007457627118643,
-          "z_score": 1.9729,
+          "z_score": 1.97,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.5919
+          "contribution": 0.591
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 110.3862831858407,
-          "z_score": -0.8833,
+          "z_score": -0.8863,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.3092
+          "contribution": 0.3102
         }
       ]
     },
     {
       "subject_id": "1642928",
       "subject_name": "Dylan Cardwell",
-      "composite_score": 1.6171,
+      "composite_score": 1.6158,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.8446601941747574,
-          "z_score": 2.5441,
+          "z_score": 2.5398,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.8904
+          "contribution": 0.8889
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.202,
-          "z_score": 1.5914,
+          "z_score": 1.5885,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.4774
+          "contribution": 0.4766
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 111.1,
-          "z_score": -0.7122,
+          "z_score": -0.7151,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.2493
+          "contribution": 0.2503
         }
       ]
     },
     {
       "subject_id": "1631119",
       "subject_name": "Jaylin Williams",
-      "composite_score": 1.5036,
+      "composite_score": 1.5033,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 1.9877608820632584,
-          "z_score": 0.019,
+          "z_score": 0.0175,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.0066
+          "contribution": 0.0061
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.22019918283963227,
-          "z_score": 1.9755,
+          "z_score": 1.9727,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.5926
+          "contribution": 0.5918
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 103.2945283018868,
-          "z_score": -2.5838,
+          "z_score": -2.5867,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.9043
+          "contribution": 0.9054
         }
       ]
     },
     {
       "subject_id": "1627936",
       "subject_name": "Alex Caruso",
-      "composite_score": 1.5004,
+      "composite_score": 1.4994,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.065368916797489,
-          "z_score": 1.4844,
+          "z_score": 1.4813,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5195
+          "contribution": 0.5184
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.10918529203360663,
-          "z_score": -0.3674,
+          "z_score": -0.3704,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.1102
+          "contribution": -0.1111
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 101.06950871677478,
-          "z_score": -3.1173,
+          "z_score": -3.1202,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 1.0911
+          "contribution": 1.0921
         }
       ]
     },
     {
       "subject_id": "1641709",
       "subject_name": "Ausar Thompson",
-      "composite_score": 1.4872,
+      "composite_score": 1.4857,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 4.067073614018376,
-          "z_score": 2.8465,
+          "z_score": 2.842,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.9963
+          "contribution": 0.9947
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.13049549238368277,
-          "z_score": 0.0823,
+          "z_score": 0.0793,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0247
+          "contribution": 0.0238
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 108.51537733652383,
-          "z_score": -1.3319,
+          "z_score": -1.3349,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.4662
+          "contribution": 0.4672
         }
       ]
     },
     {
       "subject_id": "203076",
       "subject_name": "Anthony Davis",
-      "composite_score": 1.4524,
+      "composite_score": 1.4514,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.31119865488638,
-          "z_score": 1.8186,
+          "z_score": 1.8152,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6365
+          "contribution": 0.6353
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.23789473684210524,
-          "z_score": 2.3489,
+          "z_score": 2.3461,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.7047
+          "contribution": 0.7038
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 112.74531516183986,
-          "z_score": -0.3177,
+          "z_score": -0.3206,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.1112
+          "contribution": 0.1122
         }
       ]
     },
     {
       "subject_id": "1629674",
       "subject_name": "Neemias Queta",
-      "composite_score": 1.4347,
+      "composite_score": 1.4339,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.846884656845131,
-          "z_score": 1.1873,
+          "z_score": 1.1845,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4155
+          "contribution": 0.4146
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.194,
-          "z_score": 1.4226,
+          "z_score": 1.4197,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.4268
+          "contribution": 0.4259
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 107.01176470588236,
-          "z_score": -1.6925,
+          "z_score": -1.6954,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.5924
+          "contribution": 0.5934
         }
       ]
     },
     {
       "subject_id": "1642270",
       "subject_name": "Donovan Clingan",
-      "composite_score": 1.3387,
+      "composite_score": 1.3379,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.0441176470588234,
-          "z_score": 1.4555,
+          "z_score": 1.4524,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5094
+          "contribution": 0.5083
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.254,
-          "z_score": 2.6888,
+          "z_score": 2.6861,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.8067
+          "contribution": 0.8058
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 113.8,
-          "z_score": -0.0648,
+          "z_score": -0.0677,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.0227
+          "contribution": 0.0237
         }
       ]
     },
     {
       "subject_id": "203497",
       "subject_name": "Rudy Gobert",
-      "composite_score": 1.3275,
+      "composite_score": 1.3268,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.5960748516659065,
-          "z_score": 0.8462,
+          "z_score": 0.8438,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2962
+          "contribution": 0.2953
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.21522137404580152,
-          "z_score": 1.8704,
+          "z_score": 1.8676,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.5611
+          "contribution": 0.5603
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 108.46793760831889,
-          "z_score": -1.3433,
+          "z_score": -1.3462,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.4702
+          "contribution": 0.4712
         }
       ]
     },
     {
       "subject_id": "1642276",
       "subject_name": "Kel'el Ware",
-      "composite_score": 1.2935,
+      "composite_score": 1.2926,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.0950226244343892,
-          "z_score": 1.5247,
+          "z_score": 1.5215,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5336
+          "contribution": 0.5325
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.247,
-          "z_score": 2.5411,
+          "z_score": 2.5383,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.7623
+          "contribution": 0.7615
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 114.1,
-          "z_score": 0.0071,
+          "z_score": 0.0042,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": -0.0025
+          "contribution": -0.0015
         }
       ]
     },
     {
       "subject_id": "1629048",
       "subject_name": "Goga Bitadze",
-      "composite_score": 1.2691,
+      "composite_score": 1.2679,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.6103349282296646,
-          "z_score": 2.2254,
+          "z_score": 2.2215,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.7789
+          "contribution": 0.7775
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.183,
-          "z_score": 1.1904,
+          "z_score": 1.1875,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3571
+          "contribution": 0.3563
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 112.48395721925134,
-          "z_score": -0.3804,
+          "z_score": -0.3833,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.1331
+          "contribution": 0.1341
         }
       ]
     },
     {
       "subject_id": "1641842",
       "subject_name": "Ronald Holland II",
-      "composite_score": 1.2465,
+      "composite_score": 1.2457,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.71356783919598,
-          "z_score": 1.006,
+          "z_score": 1.0034,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3521
+          "contribution": 0.3512
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.141,
-          "z_score": 0.304,
+          "z_score": 0.3011,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0912
+          "contribution": 0.0903
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 104.5,
-          "z_score": -2.2947,
+          "z_score": -2.2977,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.8032
+          "contribution": 0.8042
         }
       ]
     },
     {
       "subject_id": "1631105",
       "subject_name": "Jalen Duren",
-      "composite_score": 1.2422,
+      "composite_score": 1.2418,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.0777696258253853,
-          "z_score": 0.1414,
+          "z_score": 0.1397,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.0495
+          "contribution": 0.0489
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.23447470817120622,
-          "z_score": 2.2768,
+          "z_score": 2.274,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.683
+          "contribution": 0.6822
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 107.9969981238274,
-          "z_score": -1.4562,
+          "z_score": -1.4592,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.5097
+          "contribution": 0.5107
         }
       ]
     },
     {
       "subject_id": "1629723",
       "subject_name": "John Konchar",
-      "composite_score": 1.1577,
+      "composite_score": 1.1563,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.8371679827709984,
-          "z_score": 2.5339,
+          "z_score": 2.5297,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.8869
+          "contribution": 0.8854
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.13527027027027028,
-          "z_score": 0.1831,
+          "z_score": 0.1801,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0549
+          "contribution": 0.054
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 111.49775784753363,
-          "z_score": -0.6168,
+          "z_score": -0.6197,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.2159
+          "contribution": 0.2169
         }
       ]
     },
     {
       "subject_id": "1630549",
       "subject_name": "Day'Ron Sharpe",
-      "composite_score": 1.147,
+      "composite_score": 1.1462,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.7280829509717996,
-          "z_score": 1.0257,
+          "z_score": 1.0231,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.359
+          "contribution": 0.3581
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.2176695530726257,
-          "z_score": 1.9221,
+          "z_score": 1.9193,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.5766
+          "contribution": 0.5758
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 111.5519839492348,
-          "z_score": -0.6038,
+          "z_score": -0.6067,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.2113
+          "contribution": 0.2124
         }
       ]
     },
     {
       "subject_id": "1629675",
       "subject_name": "Naz Reid",
-      "composite_score": 1.083,
+      "composite_score": 1.0822,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.7274498344048315,
-          "z_score": 1.0248,
+          "z_score": 1.0222,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3587
+          "contribution": 0.3578
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.187,
-          "z_score": 1.2748,
+          "z_score": 1.2719,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3824
+          "contribution": 0.3816
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 109.99691358024691,
-          "z_score": -0.9767,
+          "z_score": -0.9796,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.3418
+          "contribution": 0.3429
         }
       ]
     },
     {
       "subject_id": "201572",
       "subject_name": "Brook Lopez",
-      "composite_score": 1.0689,
+      "composite_score": 1.0676,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.70446908914045,
-          "z_score": 2.3534,
+          "z_score": 2.3494,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.8237
+          "contribution": 0.8223
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.12382022471910115,
-          "z_score": -0.0586,
+          "z_score": -0.0616,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.0176
+          "contribution": -0.0185
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 110.9388100358423,
-          "z_score": -0.7508,
+          "z_score": -0.7538,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.2628
+          "contribution": 0.2638
         }
       ]
     },
     {
       "subject_id": "1630643",
       "subject_name": "Jay Huff",
-      "composite_score": 1.0319,
+      "composite_score": 1.0303,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 4.322911051212938,
-          "z_score": 3.1944,
+          "z_score": 3.1895,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 1.118
+          "contribution": 1.1163
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.12302419354838712,
-          "z_score": -0.0754,
+          "z_score": -0.0784,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.0226
+          "contribution": -0.0235
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 114.82675675675675,
-          "z_score": 0.1814,
+          "z_score": 0.1785,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": -0.0635
+          "contribution": -0.0625
         }
       ]
     },
     {
       "subject_id": "1631243",
       "subject_name": "Mouhamed Gueye",
-      "composite_score": 1.0265,
+      "composite_score": 1.0255,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.157404398223378,
-          "z_score": 1.6095,
+          "z_score": 1.6063,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.5633
+          "contribution": 0.5622
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.151,
-          "z_score": 0.5151,
+          "z_score": 0.5121,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1545
+          "contribution": 0.1536
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 110.39230088495574,
-          "z_score": -0.8819,
+          "z_score": -0.8848,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.3087
+          "contribution": 0.3097
         }
       ]
     },
     {
       "subject_id": "1630567",
       "subject_name": "Scottie Barnes",
-      "composite_score": 0.9969,
+      "composite_score": 0.996,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.008899263339952,
-          "z_score": 1.4076,
+          "z_score": 1.4046,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4926
+          "contribution": 0.4916
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.17211578947368425,
-          "z_score": 0.9607,
+          "z_score": 0.9578,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2882
+          "contribution": 0.2873
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 111.49599891496,
-          "z_score": -0.6172,
+          "z_score": -0.6202,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.216
+          "contribution": 0.2171
         }
       ]
     },
     {
       "subject_id": "1629655",
       "subject_name": "Daniel Gafford",
-      "composite_score": 0.9859,
+      "composite_score": 0.9849,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.2411427282395024,
-          "z_score": 1.7234,
+          "z_score": 1.72,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6032
+          "contribution": 0.602
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.1762675580014061,
-          "z_score": 1.0483,
+          "z_score": 1.0454,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3145
+          "contribution": 0.3136
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 113.2572516331409,
-          "z_score": -0.1949,
+          "z_score": -0.1978,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.0682
+          "contribution": 0.0692
         }
       ]
     },
     {
       "subject_id": "1630543",
       "subject_name": "Isaiah Jackson",
-      "composite_score": 0.9681,
+      "composite_score": 0.9671,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.29794916739702,
-          "z_score": 1.8006,
+          "z_score": 1.7972,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6302
+          "contribution": 0.629
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.1862937616387337,
-          "z_score": 1.2599,
+          "z_score": 1.257,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.378
+          "contribution": 0.3771
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 114.54800858529303,
-          "z_score": 0.1146,
+          "z_score": 0.1116,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": -0.0401
+          "contribution": -0.0391
         }
       ]
     },
     {
       "subject_id": "1630591",
       "subject_name": "Jalen Suggs",
-      "composite_score": 0.9672,
+      "composite_score": 0.9661,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.2376815094878153,
-          "z_score": 1.7187,
+          "z_score": 1.7153,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6015
+          "contribution": 0.6004
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.11044444444444444,
-          "z_score": -0.3408,
+          "z_score": -0.3439,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.1023
+          "contribution": -0.1032
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 108.49517120280949,
-          "z_score": -1.3368,
+          "z_score": -1.3397,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.4679
+          "contribution": 0.4689
         }
       ]
     },
     {
       "subject_id": "1641750",
       "subject_name": "Ryan Kalkbrenner",
-      "composite_score": 0.9433,
+      "composite_score": 0.9422,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.3644859813084116,
-          "z_score": 1.8911,
+          "z_score": 1.8876,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6619
+          "contribution": 0.6607
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.133,
-          "z_score": 0.1352,
+          "z_score": 0.1322,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0406
+          "contribution": 0.0397
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 111.2,
-          "z_score": -0.6882,
+          "z_score": -0.6911,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.2409
+          "contribution": 0.2419
         }
       ]
     },
     {
       "subject_id": "1629750",
       "subject_name": "Javonte Green",
-      "composite_score": 0.9286,
+      "composite_score": 0.9277,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.9717532467532464,
-          "z_score": 1.3571,
+          "z_score": 1.3541,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.475
+          "contribution": 0.4739
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.10821905051118534,
-          "z_score": -0.3878,
+          "z_score": -0.3908,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.1163
+          "contribution": -0.1173
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 107.27820965506609,
-          "z_score": -1.6286,
+          "z_score": -1.6315,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.57
+          "contribution": 0.571
         }
       ]
     },
     {
       "subject_id": "1641717",
       "subject_name": "Cason Wallace",
-      "composite_score": 0.9224,
+      "composite_score": 0.9214,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.9743135100564935,
-          "z_score": 1.3605,
+          "z_score": 1.3576,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4762
+          "contribution": 0.4752
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.079,
-          "z_score": -1.0045,
+          "z_score": -1.0075,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.3013
+          "contribution": -0.3023
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 105.16302179398267,
-          "z_score": -2.1358,
+          "z_score": -2.1387,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.7475
+          "contribution": 0.7485
         }
       ]
     },
     {
       "subject_id": "1630596",
       "subject_name": "Evan Mobley",
-      "composite_score": 0.9175,
+      "composite_score": 0.9168,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.6060430441769187,
-          "z_score": 0.8598,
+          "z_score": 0.8573,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3009
+          "contribution": 0.3001
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.20253333333333337,
-          "z_score": 1.6027,
+          "z_score": 1.5998,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.4808
+          "contribution": 0.4799
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 112.45237273511647,
-          "z_score": -0.3879,
+          "z_score": -0.3908,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.1358
+          "contribution": 0.1368
         }
       ]
     },
     {
       "subject_id": "203999",
       "subject_name": "Nikola Joki\u0107",
-      "composite_score": 0.9147,
+      "composite_score": 0.9142,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.3569065757818772,
-          "z_score": 0.521,
+          "z_score": 0.5189,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1823
+          "contribution": 0.1816
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.2682692307692308,
-          "z_score": 2.99,
+          "z_score": 2.9872,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.897
+          "contribution": 0.8962
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 116.03173164097915,
-          "z_score": 0.4703,
+          "z_score": 0.4674,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": -0.1646
+          "contribution": -0.1636
         }
       ]
     },
     {
       "subject_id": "201143",
       "subject_name": "Al Horford",
-      "composite_score": 0.9064,
+      "composite_score": 0.9055,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.0139534883720924,
-          "z_score": 1.4144,
+          "z_score": 1.4114,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4951
+          "contribution": 0.494
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.184,
-          "z_score": 1.2115,
+          "z_score": 1.2086,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3635
+          "contribution": 0.3626
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 113.5,
-          "z_score": -0.1367,
+          "z_score": -0.1396,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.0479
+          "contribution": 0.0489
         }
       ]
     },
     {
       "subject_id": "1642345",
       "subject_name": "Oso Ighodaro",
-      "composite_score": 0.8667,
+      "composite_score": 0.8659,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.606334841628959,
-          "z_score": 0.8602,
+          "z_score": 0.8577,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3011
+          "contribution": 0.3002
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.158,
-          "z_score": 0.6628,
+          "z_score": 0.6599,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1988
+          "contribution": 0.198
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 109.7,
-          "z_score": -1.0479,
+          "z_score": -1.0508,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.3668
+          "contribution": 0.3678
         }
       ]
     },
     {
       "subject_id": "1642867",
       "subject_name": "Collin Murray-Boyles",
-      "composite_score": 0.8505,
+      "composite_score": 0.8496,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.958904109589041,
-          "z_score": 1.3396,
+          "z_score": 1.3366,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4689
+          "contribution": 0.4678
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.121,
-          "z_score": -0.1181,
+          "z_score": -0.1211,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.0354
+          "contribution": -0.0363
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 109.1,
-          "z_score": -1.1918,
+          "z_score": -1.1947,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.4171
+          "contribution": 0.4181
         }
       ]
     },
     {
       "subject_id": "203994",
       "subject_name": "Jusuf Nurki\u0107",
-      "composite_score": 0.8383,
+      "composite_score": 0.8377,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.437329096156588,
-          "z_score": 0.6303,
+          "z_score": 0.6281,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2206
+          "contribution": 0.2198
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.26692262443438913,
-          "z_score": 2.9616,
+          "z_score": 2.9588,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.8885
+          "contribution": 0.8876
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 117.29660940311474,
-          "z_score": 0.7736,
+          "z_score": 0.7707,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": -0.2708
+          "contribution": -0.2697
         }
       ]
     },
     {
       "subject_id": "1628389",
       "subject_name": "Bam Adebayo",
-      "composite_score": 0.8287,
+      "composite_score": 0.8283,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.0473845714693497,
-          "z_score": 0.1001,
+          "z_score": 0.0984,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.035
+          "contribution": 0.0345
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.23377358490566036,
-          "z_score": 2.262,
+          "z_score": 2.2592,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.6786
+          "contribution": 0.6777
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 112.6984698469847,
-          "z_score": -0.3289,
+          "z_score": -0.3318,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.1151
+          "contribution": 0.1161
         }
       ]
     },
     {
       "subject_id": "1631109",
       "subject_name": "Mark Williams",
-      "composite_score": 0.8187,
+      "composite_score": 0.818,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.593990738127423,
-          "z_score": 0.8434,
+          "z_score": 0.8409,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2952
+          "contribution": 0.2943
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.19707918994413406,
-          "z_score": 1.4875,
+          "z_score": 1.4847,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.4463
+          "contribution": 0.4454
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 113.14986375513251,
-          "z_score": -0.2207,
+          "z_score": -0.2236,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.0772
+          "contribution": 0.0783
         }
       ]
     },
     {
       "subject_id": "1642349",
       "subject_name": "Ajay Mitchell",
-      "composite_score": 0.8151,
+      "composite_score": 0.8146,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.0930232558139537,
-          "z_score": 0.1621,
+          "z_score": 0.1604,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.0567
+          "contribution": 0.0562
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.093,
-          "z_score": -0.709,
+          "z_score": -0.7121,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.2127
+          "contribution": -0.2136
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 102.5,
-          "z_score": -2.7743,
+          "z_score": -2.7772,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.971
+          "contribution": 0.972
         }
       ]
     },
     {
       "subject_id": "1628991",
       "subject_name": "Jaren Jackson Jr.",
-      "composite_score": 0.8094,
+      "composite_score": 0.8085,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.9367343514012423,
-          "z_score": 1.3094,
+          "z_score": 1.3065,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.4583
+          "contribution": 0.4573
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.14,
-          "z_score": 0.2829,
+          "z_score": 0.2799,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0849
+          "contribution": 0.084
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 110.89770723104056,
-          "z_score": -0.7607,
+          "z_score": -0.7636,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.2662
+          "contribution": 0.2673
         }
       ]
     },
     {
       "subject_id": "1641737",
       "subject_name": "Adem Bona",
-      "composite_score": 0.8065,
+      "composite_score": 0.8055,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.3103448275862073,
-          "z_score": 1.8175,
+          "z_score": 1.814,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6361
+          "contribution": 0.6349
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.138,
-          "z_score": 0.2407,
+          "z_score": 0.2377,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0722
+          "contribution": 0.0713
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 112.9,
-          "z_score": -0.2806,
+          "z_score": -0.2835,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.0982
+          "contribution": 0.0992
         }
       ]
     },
     {
       "subject_id": "1631217",
       "subject_name": "Moussa Diabat\u00e9",
-      "composite_score": 0.7935,
+      "composite_score": 0.7929,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.354545439223353,
-          "z_score": 0.5178,
+          "z_score": 0.5157,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1812
+          "contribution": 0.1805
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.18727425512104282,
-          "z_score": 1.2806,
+          "z_score": 1.2777,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.3842
+          "contribution": 0.3833
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 111.35224897349758,
-          "z_score": -0.6517,
+          "z_score": -0.6546,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.2281
+          "contribution": 0.2291
         }
       ]
     },
     {
       "subject_id": "204001",
       "subject_name": "Kristaps Porzi\u0146\u0123is",
-      "composite_score": 0.7807,
+      "composite_score": 0.78,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.603169642857142,
-          "z_score": 0.8558,
+          "z_score": 0.8534,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2995
+          "contribution": 0.2987
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.15266216216216216,
-          "z_score": 0.5501,
+          "z_score": 0.5472,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.165
+          "contribution": 0.1642
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 110.3031390134529,
-          "z_score": -0.9033,
+          "z_score": -0.9062,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.3161
+          "contribution": 0.3172
         }
       ]
     },
     {
       "subject_id": "203083",
       "subject_name": "Andre Drummond",
-      "composite_score": 0.7757,
+      "composite_score": 0.7751,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.331964668295433,
-          "z_score": 0.4871,
+          "z_score": 0.485,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1705
+          "contribution": 0.1698
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.2525004094488189,
-          "z_score": 2.6572,
+          "z_score": 2.6544,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.7972
+          "contribution": 0.7963
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 116.35757534910441,
-          "z_score": 0.5485,
+          "z_score": 0.5455,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": -0.192
+          "contribution": -0.1909
         }
       ]
     },
     {
       "subject_id": "1626157",
       "subject_name": "Karl-Anthony Towns",
-      "composite_score": 0.7691,
+      "composite_score": 0.769,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 1.6258064516129027,
-          "z_score": -0.4732,
+          "z_score": -0.4742,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": -0.1656
+          "contribution": -0.166
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.270695652173913,
-          "z_score": 3.0412,
+          "z_score": 3.0384,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.9124
+          "contribution": 0.9115
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 113.80358422939068,
-          "z_score": -0.0639,
+          "z_score": -0.0668,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.0224
+          "contribution": 0.0234
         }
       ]
     },
     {
       "subject_id": "1630168",
       "subject_name": "Onyeka Okongwu",
-      "composite_score": 0.7642,
+      "composite_score": 0.7634,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.6787934243176177,
-          "z_score": 0.9587,
+          "z_score": 0.9561,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.3355
+          "contribution": 0.3347
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.16682488738738738,
-          "z_score": 0.849,
+          "z_score": 0.8461,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.2547
+          "contribution": 0.2538
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 111.99789311915121,
-          "z_score": -0.4969,
+          "z_score": -0.4998,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.1739
+          "contribution": 0.1749
         }
       ]
     },
     {
       "subject_id": "1642346",
       "subject_name": "Ryan Dunn",
-      "composite_score": 0.757,
+      "composite_score": 0.7563,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.412371134020619,
-          "z_score": 0.5964,
+          "z_score": 0.5942,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.2087
+          "contribution": 0.208
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.142,
-          "z_score": 0.3251,
+          "z_score": 0.3222,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.0975
+          "contribution": 0.0966
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 108.7,
-          "z_score": -1.2877,
+          "z_score": -1.2906,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.4507
+          "contribution": 0.4517
         }
       ]
     },
     {
       "subject_id": "1642274",
       "subject_name": "Yves Missi",
-      "composite_score": 0.7528,
+      "composite_score": 0.7518,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 3.289340101522843,
-          "z_score": 1.7889,
+          "z_score": 1.7855,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.6261
+          "contribution": 0.6249
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.147,
-          "z_score": 0.4306,
+          "z_score": 0.4277,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": 0.1292
+          "contribution": 0.1283
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 114.1,
-          "z_score": 0.0071,
+          "z_score": 0.0042,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": -0.0025
+          "contribution": -0.0015
         }
       ]
     },
     {
       "subject_id": "1628983",
       "subject_name": "Shai Gilgeous-Alexander",
-      "composite_score": 0.7188,
+      "composite_score": 0.7182,
       "components": [
         {
           "name": "Steal+Block Rate (per 36 min)",
           "column": "STL_BLK_PER36",
           "raw_value": 2.3383037098890616,
-          "z_score": 0.4957,
+          "z_score": 0.4936,
           "weight": 0.35,
           "higher_is_better": true,
-          "contribution": 0.1735
+          "contribution": 0.1728
         },
         {
           "name": "Defensive Rebound % (DREB%)",
           "column": "DREB_PCT",
           "raw_value": 0.1,
-          "z_score": -0.5613,
+          "z_score": -0.5643,
           "weight": 0.3,
           "higher_is_better": true,
-          "contribution": -0.1684
+          "contribution": -0.1693
         },
         {
           "name": "On-Court Defensive Rating",
           "column": "DEF_RATING",
           "raw_value": 105.56655052264809,
-          "z_score": -2.039,
+          "z_score": -2.0419,
           "weight": 0.35,
           "higher_is_better": false,
-          "contribution": 0.7137
+          "contribution": 0.7147
         }
       ]
     }
