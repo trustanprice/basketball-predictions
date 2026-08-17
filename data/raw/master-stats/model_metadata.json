@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T21:11:41.797670+00:00",
+  "generated_at": "2026-08-17T00:24:06.787718+00:00",
   "validation_method": "Season-grouped walk-forward cross-validation: trained on all seasons <= N, validated on season N+1, rolled forward one season at a time across all available history. No random k-fold CV is used anywhere in this pipeline \u2014 see backend/win_model/validation.py.",
   "target_definition": "Next_W: a team's actual win total in the season following the feature row's season, built with an explicit groupby-shift on W. Not the same as the master_df NWins column, which is same-season W despite its name \u2014 see features.py.",
   "model_comparison": {
@@ -49,6 +49,10 @@
     "recency_weighting": {
       "hypothesis": "Weighting training rows by recency (sample_weight = decay_rate ** seasons_ago, fold-relative so early folds don't leak dataset-size information) so the model favors how the league plays now over how it played a decade ago improves walk-forward MAE. GBM only -- KNeighborsRegressor.fit() has no sample_weight parameter at all, so KNN structurally can't be recency-weighted this way.",
       "result": "Helps in isolation (vs. plain NUMERIC_FEATURES: 6.615 -> 6.525 wins at decay_rate=0.95) but loses once stacked on the real shipped baseline (NUMERIC_FEATURES + Roster_Change: best stacked decay_rate is 1.0 -- i.e. no weighting at all -- at 6.434 wins). Same overlap story as the other three: same isolated-win, stacked-loss pattern. Not wired into FEATURE_COLUMNS or the training Pipeline -- see backend/win_model/recency_weighting.py to re-run the check again after any future change to Roster_Change or the season range in master_df.csv."
+    },
+    "schedule_simulation": {
+      "hypothesis": "Treating a team's predicted win percentage as uniform across all 82 games ignores schedule strength -- some teams play a harder slate than others. Simulating the real schedule game-by-game (log5 win probability per matchup, home-court edge calibrated from this project's own historical Home_W/Home_L split, Monte Carlo averaged over 10,000 simulated seasons) instead of assuming a flat win rate improves win-total accuracy.",
+      "result": "ACCEPTED -- the one hypothesis this session that survived the honest test. Pooled across every backtestable season (2017-18 through 2025-26, 270 team-seasons, real historical schedules fetched live via nba_api's ScheduleLeagueV2), walk-forward MAE improves 6.835 -> 6.768 wins -- real but modest, and it clearly hurts in both pandemic-disrupted seasons (2019-20, 2020-21) while helping in most normal ones. Not a FEATURE_COLUMNS addition -- this is a downstream adjustment applied to Pred_Wins after training, not a model input, so it can't live in train.py's own pipeline (it needs Pred_Wins as its rating input, which train.py is what produces -- see refresh_schedule_simulation.py for why this is a separate pass, run after train.py, not a training-time step). Re-run backend/win_model/schedule_simulation_backtest.py to re-check this after any change to Roster_Change or the walk-forward calibration step."
     }
   },
   "winning_model": {

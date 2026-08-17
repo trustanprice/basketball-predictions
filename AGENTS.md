@@ -25,6 +25,12 @@ transitional, kept alive for its own Streamlit Cloud deployment.
   a one-time fix: **every season that finishes, this dataset needs the real result added**, or
   the same staleness silently recurs. There's no automated job for this yet — check `master_df`'s
   newest `Season` against the real calendar before trusting a forecast looks "off."
+  The forecast row's win total also gets a schedule-simulation adjustment on top of the base
+  model (real schedule, simulated game-by-game rather than assuming a flat win rate) — a
+  validated, honest improvement, the one feature hypothesis out of five tried this project that
+  survived the stacked test. It's a separate pass that must be re-run after every `train.py` run
+  or it silently reverts — see `backend/AGENTS.md`'s "Schedule simulation" section before
+  touching win-total predictions.
 - **Live ratings** (`backend/live_client/` + `backend/ratings/`) — a data client for NBA.com
   (built on `nba_api`, with its own retry/cache/schema-validation layer nba_api itself doesn't
   have), and a computation module producing Player Power Rankings (offense/defense) and

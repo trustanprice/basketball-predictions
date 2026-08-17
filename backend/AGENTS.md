@@ -454,6 +454,47 @@ import convention above, e.g. `uvicorn backend.api.main:app`, not `uvicorn api.m
   touched by this; see "Roster projection" under Ratings/computation conventions above for the
   full pipeline, and `metadata.roster_projection` for which teams actually got a real projection
   vs. fell back to the stale value in a given run.
+- **Schedule simulation (`win_model/schedule_simulation.py`) is a shipped, validated adjustment
+  to the forecast row's `Pred_Wins`/`Pred_Wins_Lower`/`Pred_Wins_Upper`** — the one feature
+  hypothesis this project tried that survived the honest test (see
+  `model_metadata.json`'s `feature_experiments.schedule_simulation`; `age_curve_residual`,
+  `defense_composite`, `coach_quality`, and `recency_weighting` all failed the same test and
+  are documented as rejected right next to it). Instead of treating a team's predicted win
+  percentage as flat across all 82 games, it simulates the real schedule game-by-game — log5
+  win probability per matchup (Bill James' formula, standard for combining two teams' win
+  percentages into a head-to-head probability), a home-court edge calibrated from this
+  project's own historical `Home_W`/`Home_L` split (not hand-picked), Monte Carlo averaged over
+  10,000 simulated seasons. Pooled across every backtestable season (2017-18 through 2025-26,
+  270 team-seasons, real historical schedules fetched live via `live_client/endpoints/stats/
+  schedule.py`'s `LeagueSchedule` → nba_api's `ScheduleLeagueV2`), walk-forward MAE improves
+  6.835 → 6.768 wins — real but modest, and it clearly hurts in both pandemic-disrupted seasons
+  (2019-20, 2020-21) while helping in most normal ones; see `schedule_simulation_backtest.py`.
+  - **Not a `train.py` step, and not a `FEATURE_COLUMNS` addition.** It needs the forecast row's
+    already-calibrated `Pred_Wins` as its rating input, which `train.py` is what produces — so it
+    runs as a separate pass *after* `train.py`, not inside its pipeline (chicken-and-egg
+    otherwise). `refresh_schedule_simulation.py` reads `test_results.csv`'s current forecast
+    row, fetches the live schedule for that season, simulates, and overwrites that row's
+    `Pred_Wins`/`Pred_Wins_Lower`/`Pred_Wins_Upper` in place with the simulated mean and
+    10th/90th percentiles — replacing the point estimate and its interval *together*, not just
+    adding a second number, so they stay self-consistent (same reasoning as the quantile-crossing
+    fix above: a point estimate and interval from two different mechanisms have no guarantee of
+    agreeing).
+  - **Operationally load-bearing, easy to silently undo**: re-running `train.py` regenerates
+    `test_results.csv` from scratch and puts the flat, non-schedule-adjusted `Pred_Wins` straight
+    back for the forecast row. `refresh_schedule_simulation.py` must be re-run after every
+    `train.py` run for the forecast row to reflect the schedule adjustment — same class of "gets
+    silently wiped on regeneration" issue as `recency_weighting`'s `feature_experiments` entry
+    (which is why that one's now hardcoded in `train.py` itself instead of hand-patched into the
+    JSON — this can't get the same fix, since it structurally can't run inside `train.py`, so the
+    ordering just has to be remembered). Run both, in order:
+    `python -m backend.win_model.train && python -m backend.win_model.refresh_schedule_simulation`.
+  - **The live schedule can be short of the full 1,230 games until the NBA Cup knockout bracket
+    resolves** — semifinal/championship slots are `TBD vs TBD` in the raw feed until the group
+    stage completes (confirmed live: 1,200 of 1,230 games resolved for 2026-27 as of this
+    writing), so `Pred_Wins` for the forecast row will sum to whatever number of games are
+    currently known, not exactly 1,230, until re-run once the bracket is set. This is a real,
+    current gap, not a bug — no manual workaround needed, just re-run the refresh once the
+    schedule fills in.
 
 ## Testing
 

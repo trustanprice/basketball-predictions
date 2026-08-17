@@ -550,6 +550,31 @@ def run_pipeline(master_df_path=None, write_output: bool = True):
                            "after any future change to Roster_Change or the season range in "
                            "master_df.csv.",
             },
+            "schedule_simulation": {
+                "hypothesis": (
+                    "Treating a team's predicted win percentage as uniform across all 82 games "
+                    "ignores schedule strength -- some teams play a harder slate than others. "
+                    "Simulating the real schedule game-by-game (log5 win probability per matchup, "
+                    "home-court edge calibrated from this project's own historical Home_W/Home_L "
+                    "split, Monte Carlo averaged over 10,000 simulated seasons) instead of "
+                    "assuming a flat win rate improves win-total accuracy."
+                ),
+                "result": "ACCEPTED -- the one hypothesis this session that survived the honest "
+                           "test. Pooled across every backtestable season (2017-18 through "
+                           "2025-26, 270 team-seasons, real historical schedules fetched live via "
+                           "nba_api's ScheduleLeagueV2), walk-forward MAE improves 6.835 -> 6.768 "
+                           "wins -- real but modest, and it clearly hurts in both "
+                           "pandemic-disrupted seasons (2019-20, 2020-21) while helping in most "
+                           "normal ones. Not a FEATURE_COLUMNS addition -- this is a downstream "
+                           "adjustment applied to Pred_Wins after training, not a model input, so "
+                           "it can't live in train.py's own pipeline (it needs Pred_Wins as its "
+                           "rating input, which train.py is what produces -- see "
+                           "refresh_schedule_simulation.py for why this is a separate pass, run "
+                           "after train.py, not a training-time step). Re-run "
+                           "backend/win_model/schedule_simulation_backtest.py to re-check this "
+                           "after any change to Roster_Change or the walk-forward calibration "
+                           "step.",
+            },
         },
         "winning_model": {
             "type": type(fitted_pipeline.steps[-1][1]).__name__,
