@@ -22,7 +22,12 @@ was produced, not just what it is.
   KNN regressor against a monotonic-constrained gradient-boosted model, and ships every
   prediction with an interval and a plain-language "how this was calculated" explanation
   rather than a bare number. Honest backtested accuracy — not an inflated same-season
-  number — is reported directly in the app.
+  number — is reported directly in the app, including the tradeoffs: calibrating predictions to
+  match real win-total spread doesn't actually sharpen the backtest, and the panel says so rather
+  than hiding it. The forecast row also gets a schedule-aware adjustment (real matchups simulated
+  game-by-game, not a flat win rate) and a season-over-season roster-change feature — both
+  validated the same walk-forward way as everything else here, alongside several tested
+  hypotheses that *didn't* hold up and were left unwired on purpose (see `backend/AGENTS.md`).
 - **Live data client** (`backend/live_client/`) — pulls real NBA.com data (season stats,
   advanced metrics, rosters) through `nba_api`, wrapped in this project's own retry, disk
   cache, and schema-validation layer so a silent upstream column rename fails loudly instead
@@ -51,7 +56,7 @@ links to ([`backend/AGENTS.md`](backend/AGENTS.md), [`data/AGENTS.md`](data/AGEN
 
 ```
 Basketball-Predictions/
-├── data/                  # Static, historical (2016–2025) datasets — see data/AGENTS.md
+├── data/                  # Static, historical (2016–2026) datasets — see data/AGENTS.md
 │   ├── raw/
 │   └── processed/
 │
@@ -79,9 +84,12 @@ Basketball-Predictions/
 ## Data sources
 
 - **Team stats & records** — season results, home/road splits, pre/post All-Star splits, win %
-  (historical, 2016–2025, curated in `data/`).
-- **Payroll** — team salary data, 2016–2025 (curated; current-season payroll isn't available
-  from any free live source, so the app labels it explicitly as last-known, not live).
+  (historical, 2016–2026, curated in `data/`). Extended by one season every time a season
+  finishes — see `data/AGENTS.md`'s `master_df.csv` staleness gotcha before assuming a forecast
+  looks "off."
+- **Payroll** — team salary data, 2016–2029 (curated; known contract years extend a few seasons
+  past the present, but current-season *actual* payroll still isn't available from any free live
+  source, so the app labels it explicitly as last-known, not live).
 - **Coaching data** — tenure, win/loss records, coach counts per season.
 - **Draft data** — picks aligned by season/year.
 - **Strength of Schedule (SOS)** — self-calculated from opponent win%. The app labels this

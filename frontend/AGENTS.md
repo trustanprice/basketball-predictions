@@ -66,6 +66,18 @@ from this subdirectory.
 - **`lib/types.ts` mirrors `backend/api/schemas.py` by hand** — there's no shared schema
   generation between the two projects. When a Pydantic model changes, update the matching
   TypeScript interface in the same change; nothing will catch a drift automatically.
+- **A new field in `model_metadata.json` reaching the site is not automatic** — `train.py` (or a
+  refresh script layered on top of it, e.g. `refresh_schedule_simulation.py`) writing a value to
+  disk only means it exists in the file; it stays invisible to every actual site visitor until
+  it's explicitly added to `backend/api/schemas.py`'s `ModelMetadata`, mirrored in `lib/types.ts`,
+  and rendered somewhere (`MethodologyPanel.tsx` for win-model methodology fields). This actually
+  happened: `feature_experiments` (the full internal engineering log of every tested-and-rejected
+  win-model feature) was written to `model_metadata.json` for several sessions before anyone
+  noticed it never reached `schemas.py` or the frontend at all. The fix wasn't to surface that
+  whole log (dense engineering write-ups, not end-user content) — it was one new, focused,
+  purpose-built field (`schedule_adjustment`) wired through all three layers deliberately. If a
+  future backend metadata field needs to show up in the app, check all three layers explicitly
+  rather than assuming writing it to JSON was the whole job.
 - **`next.config.ts` sets `agentRules: false`** — without it, `next dev`/`next build`
   regenerate a Next.js-authored `AGENTS.md` (and a `CLAUDE.md` stub) in this directory, which
   fights this file. If a future Next.js upgrade reintroduces the same behavior under a

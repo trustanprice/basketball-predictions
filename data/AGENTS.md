@@ -1,6 +1,6 @@
 # data/
 
-Static, historical (2016–2025), manually scraped/curated. This is the only source for payroll,
+Static, historical (2016–2026), manually scraped/curated. This is the only source for payroll,
 draft, and coach-tenure history, and it's the backtest set for `backend/win_model/` and the
 coaching evaluation module.
 
@@ -42,3 +42,11 @@ coaching evaluation module.
   a production outage — but it meant a fresh clone silently had no payroll data at all until this
   was caught. If a future `git status` shows this file as untracked again, it's the same class of
   bug — check the `data/raw/team-stats/*` gitignore block.
+- **`data/raw/team-stats/coach.csv` had this exact same bug too** — a third file (after
+  `master_df.csv` and `team-payroll.csv`) that matched the `data/raw/team-stats/*` pattern with no
+  explicit un-ignore exception, discovered while fixing a real data bug in it (4 teams' most
+  recently completed season had the wrong coach recorded — see root `AGENTS.md`). Same fix, same
+  pattern: add the file to the `.gitignore` un-ignore cascade before assuming `git status` showing
+  it as untracked is expected. `draft.csv`, `team-stats.csv`, and `schedule.csv` under
+  `data/raw/team-stats/` have **not** been checked for this same gap — if a future task needs any
+  of them fresh from a clone, verify they're actually tracked before assuming they are.
