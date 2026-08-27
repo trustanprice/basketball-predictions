@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "generated_at": "2026-08-12T20:38:39.638990+00:00",
+  "generated_at": "2026-08-27T23:41:04.610602+00:00",
   "methodology_note": "Offense score blends true shooting %, usage-adjusted scoring, assist rate, and turnover rate (penalized). Defense score blends steal-and-block rate per 36 minutes, defensive rebound %, and on-court defensive rating (penalized). Two things we'd like to include but can't yet: defended field-goal % and a real on/off defensive rating split, both of which need NBA.com tracking data we don't pull in here. Every score is a weighted composite of z-scores, built only from players who clear a minimum playing-time bar \u2014 see backend/ratings/player_power_rankings.py for the exact weights.",
   "n_qualified_players": 350,
   "offense": [
