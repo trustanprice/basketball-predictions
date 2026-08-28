@@ -382,7 +382,15 @@ as the request handling sidesteps that entirely.
   a different region (Ohio instead of Oregon) — identical failure, ruling out regional
   IP-throttling specifically and pointing at NBA.com blocking cloud/datacenter IP ranges more
   broadly. A GitHub Actions offload (running the refresh on GitHub-hosted runners' network
-  instead) was scoped as a third option but **not what was actually adopted**.
+  instead, `.github/workflows/refresh-nba-data.yml`) **was actually adopted at one point — and
+  confirmed, not assumed, to never have worked**: every single scheduled run since that workflow
+  was created failed identically (64/64, 2026-08-11 through 2026-08-27), hitting the exact same
+  `stats.nba.com` read-timeout `NBAClientError` Render gets. GitHub Actions runners are Azure-
+  hosted cloud IPs too, and NBA.com's block turns out to cover those as well, not just Render's
+  host. The workflow's schedule trigger has since been removed (manual `workflow_dispatch` only
+  now) so it stops silently failing 4x/day for no benefit — see that file's own header comment
+  before re-enabling a cron trigger on it, and confirm one real manual run actually succeeds
+  first if NBA.com's blocking policy ever seems to have changed.
 - **The actual production strategy: manual local refresh + commit, not automation.** Since the
   same client works fine from a local/residential connection (verified repeatedly, real data
   pulled successfully every time), the chosen fix is running the refresh scripts locally

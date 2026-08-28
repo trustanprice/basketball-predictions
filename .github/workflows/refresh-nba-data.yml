@@ -2,28 +2,32 @@
 # ratings: refresh strategy". Render's own network cannot reach stats.nba.com
 # (confirmed with two independent data points: Oregon and Ohio Render regions
 # both hard-fail identically after 4 retries at 40s each — not a regional
-# issue, NBA.com is blocking cloud/datacenter IP ranges broadly). GitHub-hosted
-# runners' network is the workaround: run the three refresh scripts here
-# instead, commit their output as source (see .gitignore's backend/outputs/
-# cascade), and let the API's existing in-process background loop
-# (backend/api/main.py) fall back to being a harmless no-op once its own
-# fetch attempts fail — it still checks/retries hourly, so if Render's network
-# situation ever changes, that loop starts working again on its own with no
-# code change needed.
+# issue, NBA.com is blocking cloud/datacenter IP ranges broadly). The original
+# theory here was that GitHub-hosted runners' network would be a workaround —
+# **confirmed wrong, not just untested**: every single scheduled run since
+# this workflow was created failed the same way (64/64 runs, 2026-08-11
+# through 2026-08-27), with the identical `stats.nba.com` read-timeout
+# NBAClientError Render gets. GitHub Actions runners are Azure-hosted cloud
+# IPs too, and NBA.com blocks those the same way. Left as manual-dispatch-only
+# now (see `on:` below) rather than deleted outright — harmless to keep
+# around in case NBA.com's blocking policy ever changes, but the schedule
+# trigger was pure noise (a guaranteed-failing job 4x/day) for two-plus weeks
+# straight. **The actual, working refresh path is local + commit** — see
+# backend/AGENTS.md's "Player ratings: refresh strategy" — run the refresh_*
+# scripts from a real residential connection (confirmed working repeatedly)
+# and commit backend/outputs/*.json by hand.
 #
 # Does NOT touch refresh_player_ratings.py / refresh_team_style.py /
 # refresh_player_projections.py — those are unchanged, already proven correct
-# against real NBA.com data. This workflow only changes WHERE they run.
+# against real NBA.com data from a reachable network. This workflow only
+# changes WHERE they run.
 name: Scheduled NBA Data Refresh
 
 on:
-  schedule:
-    # Every 6 hours (00:00/06:00/12:00/18:00 UTC). backend/AGENTS.md's own
-    # staleness bound for this data is 24h, and the reasoning there
-    # ("who's playing well this season" doesn't change hour to hour) still
-    # applies — 6h gives 4 chances/day to land a successful fetch, well
-    # inside that 24h bound, without refreshing so often it's wasteful.
-    - cron: "0 */6 * * *"
+  # No schedule trigger — see the comment block above. Manual-only until/
+  # unless there's real evidence NBA.com's cloud-IP block has lifted; don't
+  # re-add a cron trigger without first confirming a manual workflow_dispatch
+  # run actually succeeds.
   workflow_dispatch: {}
 
 permissions:
